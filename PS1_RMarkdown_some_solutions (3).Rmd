@@ -79,17 +79,25 @@ A visual analysis of the QQ-plots show that both empirical distribution could fo
 
 ### 3. Compute a $\chi^2$-goodness-of-fit test against...
 
+The $\chi^2$ test statistic is
+
+$$
+\chi^2=\sum_{j=1}^k \frac{(N_j-Np_j)^2}{Np_j} \sim^a \chi^2_{k-s-1},
+$$
+where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
+
 ```{r}
 vdata = DJ_d$r_Dow_Jones
 vdata = DJ_w$r_close
 vdata = (vdata - mean(vdata))/sd(vdata)
 
-
-ik = 20
-grids = 1:ik/ik
+k = 20
+grids = 1:k/k
 ```
 
 #### a) a normal distribution
+
+$H_0:$ The true distribution is the standard normal distribution.
 ```{r}
 vq = pnorm(vdata); hist(vq)
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
