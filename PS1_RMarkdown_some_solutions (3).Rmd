@@ -24,6 +24,12 @@ library(FE)
 ## Distributional properties of Dow Jones index returns
 Hej fifan nasdnasuidausibduiahsudihasuidhooinionasd
 Geh
+Test
+
+ewrwer
+werwer
+wer
+
 # Question 1
 
 markmarkmarkmark
