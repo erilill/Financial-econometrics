@@ -41,20 +41,30 @@ describe(DJ_w$r_close)
 ```
 Both series have means of zero. Daily returns has standard deviation 0.01 and weekly returns 0.03. Daily returns has a skewness of -0.96 and kurtosis of 36.6.Weekly returns has a skewness of  -1.09 and kurtosis is 15.06. Since a standard normal distribution has a standard deviation of 1, skewness of 0 and kurtosis of 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
 
+
 ### 2. Evaluate the empirical distributions of the index log returns using quantile-quantile plots (QQ-plots). Test the empirical distribution against
 
 #### a) a normal distribution (with same mean and variance)
 
 ```{r ndist}
-ggplot()
+ndistd <- ggplot(DJ_d, aes(sample=r_Dow_Jones))
+ndistd + geom_qq(distribution=stats::qnorm, dparams = list(mean = mean(DJ_d$r_Dow_Jones), sd = sd(DJ_d$r_Dow_Jones))) + 
+  geom_abline(aes(intercept = 0, slope = 1), color = "red") +
+  labs(y = "Daily returns")
+qqnorm(DJ_d$r_Dow_Jones)
 
-
+ndistw <- ggplot(DJ_w, aes(sample=r_close))
+ndistw + geom_qq(distribution=stats::qnorm, dparams = list(mean = mean(DJ_w$r_close), sd = sd(DJ_w$r_close))) + 
+  geom_abline(aes(intercept = 0, slope = 1), color = "red") +
+  labs(y = "Weekly returns")
+qqnorm(DJ_w$r_close)
 ```
+The first thing we observe when studying above plots are that the line intersects the data in the middle quite good. When it comes to the tails (lower left corner and upper right corner), we observe that the normal distribution captures these observations badly. This would indicate on a heavier-tailed data than the normal distribution would show. This finding is in accordance with other findings when studying econometric data as these are often more heavy-tailed.
 
 #### b) alternative tn-distributions with n degrees of freedom.
 
  
-```{r}
+```{r tdist}
 df = 3
 tdistd = ggplot(DJ_d, aes(sample=r_Dow_Jones/sd(r_Dow_Jones)*sqrt(df/(df-2))))
 tdistd + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
@@ -68,14 +78,9 @@ qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
 ```
 
 
-```{r}
-df = 3
-tdistw = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
-tdistw + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
-  labs(y = "Weekly returns")
-qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
-```
-A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. 
+A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. Once again we observe that the t-distribution have a hard time capturing these heavier tails but it captures it much better than the normal could. We still observe some limited discrepancy in the lower left corner where weekly returns show one outlier while daily returns show two outliers. In the upper right corner we observe that the discrepancy between the theoretical distribution and the underlying distribution is bigger. There is especially one outlier that is poorly captured. This outlier and some other extreme observations are closer to the theoretical distribution when studying the daily returns compared to the weekly returns as the distance to the theoretical distribution is smaller in the daily returns. 
+
+
 
 ### 3. Compute a $\chi^2$-goodness-of-fit test against...
 
@@ -169,33 +174,46 @@ data = index_d
 
 ### 1. Generate log returns. Compute the empirical autocorrelations and partial autocorrelations. Do you find evidence for significant autocorrelations in the individual index return series?
 
-```{r}
+```{r lret}
 lret = apply(log(data),2,diff)
 summary(lret)
 ```
 Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series. Below the log returns are plotted:
 
-```{r}
+```{r plotlret}
 matplot(lret,type='l',ylab='log returns',xlab='time horizon')
 ```
 Here the plot shows low volatility with smaller spikes for most time periods. For the time period slightly below 500 we see a larger spike indicating stronger volatility during this period, possibly due to some extreme market event. The log returns are centered around zero over time, suggesting that there is no significant trend.
 
-```{r}
+```{r na}
 sum(is.na(lret[,'FRCAC40']))
 ```
 We see that we have missing values in the series `FRCAC40`, 393 missing values. Because there is missing values we can not calculate the autocorrelations without first handling these. The simplest way is to omit the missing values, however it is important to note that since there are quite many missing values this could lead to biased estimates or loss of power in the analysis. We proceed by performing listwise deletion. Assuming that we are not supposed to calculate cross-correlations, we proceed as follows:
 
-```{r}
+```{r acfplot}
 lret_clean <- lret[complete.cases(lret),]
 par(mfrow=c(2,4))
 for (i in 1:ncol(lret_clean)) {
   acf(lret_clean[, i], main = paste("ACF for series", i))
 }
+par(mfrow=c(1,1))
 ```
+Above, you see the ACF-plots for the individual series. We see spikes outside of the confidence interval for series 3, 4, 5, 6 and 7, indicating that we have significant autocorrelations. Similairly, we can calculate and plot the individual partial autocorrelations:
+
+```{r pacfplot}
+par(mfrow=c(2,4))
+for (i in 1:ncol(lret_clean)) {
+  acf(lret_clean[, i], type = "partial", main = paste("ACF for series", i))
+}
+par(mfrow=c(1,1))
+```
+In the plots above we see the individual partial autocorrelations for the individual series. In these plots we see that there are significant spikes for all series, indicating that there is a significant autocorrelation structure in all seven series.
 
 ### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
-```{r}
+In this question, we are asked to perform Ljung-Box tests on the individual series. 
+
+```{r LB, echo=F}
 LB <- function(vx,lag,ip){
   tmp = acf(vx,lag.max=lag,plot=F)$acf
   tmp = tmp[2:(lag+1)]**2
@@ -203,9 +221,42 @@ LB <- function(vx,lag,ip){
   return(list(test=test, pval=1-pchisq(test,df=lag-ip)))
 }
 
-tmp = 6
-LB(vx=lret[!is.na(lret[,tmp]),tmp],lag=100,ip=0)
+gridsearch <- function(tmp, lag){
+  results <- matrix(NA, nrow=length(tmp), ncol = length(lag)*2)
+  for (i in 1:length(tmp)){
+    tmpi = tmp[i]
+    for (j in 1:length(lag)){
+      lagj <- lag[j]
+      results[i,2*j-1]<-LB(vx=lret[!is.na(lret[,tmpi]),tmpi],lag=lagj,ip=0)$test
+      results[i,2*j]<-LB(vx=lret[!is.na(lret[,tmpi]),tmpi],lag=lagj,ip=0)$pval
+    }
+  }
+  return(results)
+}
+tmp = c(1,2,3,4,5,6,7)
+lag = c(10,50,100)
+gridsearch(tmp, lag)
 ```
+\begin{table}[h!]
+\centering
+\begin{tabular}{l c c c c c c}
+\hline
+           & \multicolumn{2}{c}{Lag=10} & \multicolumn{2}{c}{Lag=50} & \multicolumn{2}{c}{Lag=100} \\
+\cline{2-7}
+           & Test & p-value & Test & p-value & Test & p-value \\
+\hline
+DAXINDX    & 15.983  & 0.100  & 68.803  & 0.040  & 118.784 & 0.097 \\
+FRCAC40    & 13.224  & 0.211  & 54.640  & 0.303  & 96.416  & 0.583 \\
+FTSE100    & 40.943  & 0.000  & 109.873 & 0.000  & 150.905 & 0.001 \\
+HNGKNGI    & 64.499  & 0.000  & 133.265 & 0.000  & 179.218 & 0.000 \\
+NIKKEI     & 40.195  & 0.000  & 121.768 & 0.000  & 164.491 & 0.000 \\
+SNGALLS    & 91.484  & 0.000  & 159.532 & 0.000  & 202.302 & 0.000 \\
+SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
+\hline
+\end{tabular}
+\caption{Results of the LB Test for Different Lags and Indices (rounded to 3 decimal places)}
+\end{table}
+
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
 
