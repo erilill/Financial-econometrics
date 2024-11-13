@@ -34,12 +34,18 @@ ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
 
 ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
   labs(x='time horizon',y='weekly log return')
+
+ggplot(DJ_d, aes(r_Dow_Jones)) + geom_density()
+ggplot(DJ_w, aes(r_close)) + geom_density()
 ```
+
+We can see that the densities look more skewed than the standard normal distribution, and more density close to the means.
 
 ```{r PLOT1, echo=F}
 describe(DJ_d$r_Dow_Jones)
 describe(DJ_w$r_close)
 ```
+The mean of both series are 0. For the daily returns, there seems to be some skewness, as the absolute value of the minimum is a bit larger than the maximum. This is also the case for the weekly returns.
 
 ```{r PLOT2, echo=F}
 ggplot(DJ_d, aes(r_Dow_Jones)) + geom_density()
