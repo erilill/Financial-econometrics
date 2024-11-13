@@ -18,16 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(FE)
 ```
-dsada
+
 #  Statistical Properties of Asset Returns
-mark1
-Jag jobbar utanför ettorna dsa
-11111111111111111111
-jag jobbar innanför
-
-11111111111111111111
-
-vilim1
 
 ## Distributional properties of Dow Jones index returns
 Sista committen
