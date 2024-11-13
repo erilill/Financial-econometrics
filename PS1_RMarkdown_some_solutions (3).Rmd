@@ -1,7 +1,7 @@
 ---
 title: "Report for PS 1"
 author:
-- Yukai Yang
+- Mark Becker, Erik Lillrank & Vilim Nedic
 - Another Author
 date: ""
 output:
