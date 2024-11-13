@@ -18,25 +18,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(FE)
 ```
-nynynyextranydsa
+
 #  Statistical Properties of Asset Returns
-Chamika
-CHamika2
-CHamika3
+
 ## Distributional properties of Dow Jones index returns
 
-VIlimny
-
-tommy perlinger
-måns3
-Måns magnusson
-Måns2
-markoberoende
-hejhejhje
-
-LILLRANKÄNDRINGds
-
-erikoberoende
 
 Plot the Dow Jones daily by using R built-in functions:
 ```{r PLOT1, echo=F}
