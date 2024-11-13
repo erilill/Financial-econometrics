@@ -152,10 +152,18 @@ data = index_d
 ```{r}
 lret = apply(log(data),2,diff)
 summary(lret)
-matplot(lret,type='l',ylab='log returns',xlab='time horizon')
+```
+Above we generate the log returns, `lret`. Here we also see some summary statistics. Below the log returns are plotted:
 
+```{r}
+matplot(lret,type='l',ylab='log returns',xlab='time horizon')
+```
+
+```{r}
 sum(is.na(lret[,'FRCAC40']))
 ```
+We see that we have missing values in the series `FRCAC40`, namely the first 40 observations. 
+
 
 ## 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the χ2-distribution with suitable degrees of freedom, interpret your results.
 
