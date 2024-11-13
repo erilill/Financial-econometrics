@@ -54,6 +54,7 @@ describe(DJ_w$r_close)
 ```
 For daily return data we see that we have 18839 observations. The time series are centered around mean 0 with standard deviation 0.01. It is slightly skewed with a statistic of -0.96 and kurtosis of 36.6. This indicates that the time series is distributed with a t distribution of XX degrees of freedom. 
 
+For weekly returns we have 4686 observations instead with mean 0 and standard deviation 0.03. This time series is slightly more skewed with -1.09 but kurtosis is 15.06, also indicating t distributed returns with XX degrees of freedom. 
 ```{r tdist}
 df = 3
 tmp = ggplot(DJ_d, aes(sample=r_Dow_Jones/sd(r_Dow_Jones)*sqrt(df/(df-2))))
