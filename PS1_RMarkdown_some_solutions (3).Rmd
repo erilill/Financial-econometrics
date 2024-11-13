@@ -35,16 +35,9 @@ ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
 ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
   labs(x='time horizon',y='weekly log return')
 
-ggplot(DJ_d, aes(r_Dow_Jones)) + geom_density()
-ggplot(DJ_w, aes(r_close)) + geom_density()
-```
-
-
-We can see that the densities look more skewed than the standard normal distribution, and more density close to the means. We can look at descriptive statistics to find out exactly.
-
-```{r PLOT1, echo=F}
 describe(DJ_d$r_Dow_Jones)
 describe(DJ_w$r_close)
+
 ```
 Both series have means of zero. Daily returns has standard deviation 0.01 and weekly returns 0.03. Daily returns has a skewness of -0.96 and kurtosis of 36.6.Weekly returns has a skewness of  -1.09 and kurtosis is 15.06. Since a standard normal distribution has a standard deviation of 1, skewness of 0 and kurtosis of 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
 
@@ -71,29 +64,32 @@ qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
 ```
 A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. 
 
-```{r good, include=F}
+### 3.
+
+```{r}
 vdata = DJ_d$r_Dow_Jones
-#vdata = DJ_d$r_close
+vdata = DJ_w$r_close
 vdata = (vdata - mean(vdata))/sd(vdata)
+
+
 ik = 20
 grids = 1:ik/ik
 ```
 
-
-```{r gooda}
-vq = pnorm(vdata)
-hist(vq)
-ggplot(data=tibble(vq),aes(vq))+geom_histogram()
+#### a)
+```{r}
+vq = pnorm(vdata); hist(vq)
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
-
-```{r goodb}
+#### b)
+```{r}
 df = 3
 ndata = vdata*sqrt(df/(df-2))
+
 vq = pt(ndata,df=5); hist(vq)
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -101,24 +97,25 @@ test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
+#### c)
 ```{r}
 alpha = 0.1514736
 sigma = 4.0013995
-ndata = vdata * sqrt((1-alpha) + alpha*sigma**2)
+alpha = 0.33
+sigma = 2.73
+ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
+
 vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma); hist(vq)
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
-```
 
-Write a function for minimization to choose the optimal pair for $\alpha$ and $\sigma$.
-```{r}
 func <- function(vx){
   alpha = vx[1]
   sigma = vx[2]
   ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
-
+  
   vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
   vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
   vn = c(vn[1],diff(vn))
@@ -126,34 +123,18 @@ func <- function(vx){
 }
 
 func(c(0.15,4))
+
+optim(par=c(0.1,4),fn=func,method="BFGS")
 ```
 
 
-```{r}
-optim(par=c(0.15,4),fn=func,method="BFGS")
-optim(par=c(0.15,4),fn=func,method="L-BFGS-B",lower=c(0,0),upper=c(1,10)) 
-```
-
-```{r, cache=T}
-atmp = seq(from=0.05, to=.95, length.out=40)
-stmp = seq(from=1, to=10, length.out=50)
-tmp = expand.grid(atmp,stmp)
-res = apply(tmp,1,func)
-res = t(matrix(res, nrow=length(atmp)))
-
-library(plotly)
-ret = plot_ly(x=atmp, y=stmp, z=res) %>% add_surface() %>%
-  layout(scene=list(xaxis=list(title='alpha'), yaxis=list(title='sigma'), zaxis=list(title='function')))
-ret
-```
-
-## B Dynamical properties of financial return series
+## B. Dynamical properties of financial return series
 
 ```{r setupb, include=F}
 data = index_d
 ```
 
-## 1. Generate log returns. Compute the empirical autocorrelations and partial autocorrelations. Do you find evidence for significant autocorrelations in the individual index return series?
+### 1. Generate log returns. Compute the empirical autocorrelations and partial autocorrelations. Do you find evidence for significant autocorrelations in the individual index return series?
 
 ```{r}
 lret = apply(log(data),2,diff)
@@ -175,7 +156,7 @@ We see that we have missing values in the series `FRCAC40`, 393 missing values. 
 lret_clean <- lret[complete.cases(lret),]
 ```
 
-## 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the χ2-distribution with suitable degrees of freedom, interpret your results.
+### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the χ2-distribution with suitable degrees of freedom, interpret your results.
 
 ```{r}
 LB <- function(vx,lag,ip){
@@ -189,3 +170,6 @@ tmp = 6
 LB(vx=lret[!is.na(lret[,tmp]),tmp],lag=100,ip=0)
 ```
 
+### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
+
+### 4. Generate squared log returns. Analyze their dynamical properties. What do you find?
