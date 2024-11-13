@@ -22,7 +22,8 @@ library(FE)
 #  Statistical Properties of Asset Returns
 
 ## Distributional properties of Dow Jones index returns
-
+Hej fifan nasdnasuidausibduiahsudihasuidhooinionasd
+Geh
 # Question 1
 
 markmarkmarkmark
