@@ -45,20 +45,33 @@ Both series have means of zero. Daily returns has standard deviation 0.01 and we
 
 #### a) a normal distribution (with same mean and variance)
 
+```{r ndist}
+ggplot()
+
+
+```
+
+#### b) alternative tn-distributions with n degrees of freedom.
+
  
 ```{r}
 df = 3
-tmp = ggplot(DJ_d, aes(sample=r_Dow_Jones/sd(r_Dow_Jones)*sqrt(df/(df-2))))
-tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
+tdistd = ggplot(DJ_d, aes(sample=r_Dow_Jones/sd(r_Dow_Jones)*sqrt(df/(df-2))))
+tdistd + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
   labs(y = "Daily returns")
 qqplot(rt(length(DJ_d$r_Dow_Jones),df=3),DJ_d$r_Dow_Jones)
+
+tdistw = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
+tdistw + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
+  labs(y = "Weekly returns")
+qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
 ```
 
 
 ```{r}
 df = 3
-tmp = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
-tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
+tdistw = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
+tdistw + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
   labs(y = "Weekly returns")
 qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
 ```
