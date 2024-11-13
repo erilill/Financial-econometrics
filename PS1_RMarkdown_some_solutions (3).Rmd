@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(FE)
 ```
-
+nynynyny
 #  Statistical Properties of Asset Returns
 
 ## Distributional properties of Dow Jones index returns
