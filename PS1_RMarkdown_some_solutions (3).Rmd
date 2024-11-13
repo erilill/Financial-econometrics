@@ -37,6 +37,8 @@ markmarkmarkmark
 dsa
 markmarkmarkmark
 
+dlpsa
+
 Plot the Dow Jones daily by using R built-in functions:
 ```{r PLOT1, echo=F}
 plot(DJ_d$r_Dow_Jones,type='l', main='log returns of the daily Dow Jones index',
