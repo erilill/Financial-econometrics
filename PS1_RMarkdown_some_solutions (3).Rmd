@@ -23,7 +23,7 @@ library(FE)
 
 ## Distributional properties of Dow Jones index returns
 
-eriknytest
+marknytest
 
 Plot the Dow Jones daily by using R built-in functions:
 ```{r PLOT1, echo=F}
