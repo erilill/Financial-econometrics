@@ -39,12 +39,17 @@ ggplot(DJ_d, aes(r_Dow_Jones)) + geom_density()
 ggplot(DJ_w, aes(r_close)) + geom_density()
 ```
 
-We can see that the densities look more skewed than the standard normal distribution, and more density close to the means.
+
+We can see that the densities look more skewed than the standard normal distribution, and more density close to the means. We can look at descriptive statistics to find out exactly.
 
 ```{r PLOT1, echo=F}
 describe(DJ_d$r_Dow_Jones)
 describe(DJ_w$r_close)
 ```
+Both series have means of zero. Daily returns has standard deviation 0.01 and weekly returns 0.03. Daily returns has a skewness of -0.96 and kurtosis of 36.6. 
+
+Weekly returns is slightly more skewed with -1.09 but kurtosis is 15.06.
+
 The mean of both series are 0. For the daily returns, there seems to be some skewness, as the absolute value of the minimum is a bit larger than the maximum. This is also the case for the weekly returns.
 
 ```{r PLOT2, echo=F}
@@ -56,13 +61,7 @@ ggplot(DJ_d) + geom_qq(aes(sample=r_Dow_Jones/sd(r_Dow_Jones))) +
 
 # Question 2
 ## A)
-```{r descr, echo=F}
-describe(DJ_d$r_Dow_Jones)
-describe(DJ_w$r_close)
-```
-For daily return data we see that we have 18839 observations. The time series are centered around mean 0 with standard deviation 0.01. It is slightly skewed with a statistic of -0.96 and kurtosis of 36.6. This indicates that the time series is distributed with a t distribution of XX degrees of freedom. 
-
-For weekly returns we have 4686 observations instead with mean 0 and standard deviation 0.03. This time series is slightly more skewed with -1.09 but kurtosis is 15.06, also indicating t distributed returns with XX degrees of freedom. 
+ 
 ```{r tdist}
 df = 3
 tmp = ggplot(DJ_d, aes(sample=r_Dow_Jones/sd(r_Dow_Jones)*sqrt(df/(df-2))))
