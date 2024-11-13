@@ -21,6 +21,9 @@ library(FE)
 
 #  Statistical Properties of Asset Returns
 
+
+testtesttest
+
 ## Distributional properties of Dow Jones index returns
 Sista committen
 hejhejhje
