@@ -41,15 +41,25 @@ describe(DJ_w$r_close)
 ```
 Both series have means of zero. Daily returns has standard deviation 0.01 and weekly returns 0.03. Daily returns has a skewness of -0.96 and kurtosis of 36.6.Weekly returns has a skewness of  -1.09 and kurtosis is 15.06. Since a standard normal distribution has a standard deviation of 1, skewness of 0 and kurtosis of 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
 
+
 ### 2. Evaluate the empirical distributions of the index log returns using quantile-quantile plots (QQ-plots). Test the empirical distribution against
 
 #### a) a normal distribution (with same mean and variance)
 
 ```{r ndist}
-ggplot()
+ndistd <- ggplot(DJ_d, aes(sample=r_Dow_Jones))
+ndistd + geom_qq(distribution=stats::qnorm, dparams = list(mean = mean(DJ_d$r_Dow_Jones), sd = sd(DJ_d$r_Dow_Jones))) + 
+  geom_abline(aes(intercept = 0, slope = 1), color = "red") +
+  labs(y = "Daily returns")
+qqnorm(DJ_d$r_Dow_Jones)
 
-
+ndistw <- ggplot(DJ_w, aes(sample=r_close))
+ndistw + geom_qq(distribution=stats::qnorm, dparams = list(mean = mean(DJ_w$r_close), sd = sd(DJ_w$r_close))) + 
+  geom_abline(aes(intercept = 0, slope = 1), color = "red") +
+  labs(y = "Weekly returns")
+qqnorm(DJ_w$r_close)
 ```
+The first thing we observe when studying above plots are that the line intersects the data in the middle quite good. When it comes to the tails (lower left corner and upper right corner), we observe that the normal distribution captures these observations badly. This would indicate on a heavier-tailed data than the normal distribution would show. This finding is in accordance with other findings when studying econometric data as these are often more heavy-tailed.
 
 #### b) alternative tn-distributions with n degrees of freedom.
 
@@ -68,14 +78,9 @@ qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
 ```
 
 
-```{r}
-df = 3
-tdistw = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
-tdistw + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
-  labs(y = "Weekly returns")
-qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
-```
-A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. 
+A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. Once again we observe that the t-distribution have a hard time capturing these heavier tails but it captures it much better than the normal could. We still observe some limited discrepancy in the lower left corner where weekly returns show one outlier while daily returns show two outliers. In the upper right corner we observe that the discrepancy between the theoretical distribution and the underlying distribution is bigger. There is especially one outlier that is poorly captured. This outlier and some other extreme observations are closer to the theoretical distribution when studying the daily returns compared to the weekly returns as the distance to the theoretical distribution is smaller in the daily returns. 
+
+
 
 ### 3. Compute a $\chi^2$-goodness-of-fit test against...
 
