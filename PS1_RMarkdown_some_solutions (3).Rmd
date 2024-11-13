@@ -28,7 +28,7 @@ VIlimny
 tommy perlinger
 
 Måns magnusson
-
+Måns2
 
 hejhejhje
 Plot the Dow Jones daily by using R built-in functions:
