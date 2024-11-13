@@ -149,29 +149,40 @@ data = index_d
 
 ### 1. Generate log returns. Compute the empirical autocorrelations and partial autocorrelations. Do you find evidence for significant autocorrelations in the individual index return series?
 
-```{r}
+```{r lret}
 lret = apply(log(data),2,diff)
 summary(lret)
 ```
 Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series. Below the log returns are plotted:
 
-```{r}
+```{r plotlret}
 matplot(lret,type='l',ylab='log returns',xlab='time horizon')
 ```
 Here the plot shows low volatility with smaller spikes for most time periods. For the time period slightly below 500 we see a larger spike indicating stronger volatility during this period, possibly due to some extreme market event. The log returns are centered around zero over time, suggesting that there is no significant trend.
 
-```{r}
+```{r na}
 sum(is.na(lret[,'FRCAC40']))
 ```
 We see that we have missing values in the series `FRCAC40`, 393 missing values. Because there is missing values we can not calculate the autocorrelations without first handling these. The simplest way is to omit the missing values, however it is important to note that since there are quite many missing values this could lead to biased estimates or loss of power in the analysis. We proceed by performing listwise deletion. Assuming that we are not supposed to calculate cross-correlations, we proceed as follows:
 
-```{r}
+```{r acfplot}
 lret_clean <- lret[complete.cases(lret),]
 par(mfrow=c(2,4))
 for (i in 1:ncol(lret_clean)) {
   acf(lret_clean[, i], main = paste("ACF for series", i))
 }
+par(mfrow=c(1,1))
 ```
+Above, you see the ACF-plots for the individual series. We see spikes outside of the confidence interval for series 3, 4, 5, 6 and 7, indicating that we have significant autocorrelations. Similairly, we can calculate and plot the individual partial autocorrelations:
+
+```{r pacfplot}
+par(mfrow=c(2,4))
+for (i in 1:ncol(lret_clean)) {
+  acf(lret_clean[, i], type = "partial", main = paste("ACF for series", i))
+}
+par(mfrow=c(1,1))
+```
+In the plots above we see the individual partial autocorrelations for the individual series. In these plots we see that there are significant spikes for all series, indicating that there is a significant autocorrelation structure in all seven series.
 
 ### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
