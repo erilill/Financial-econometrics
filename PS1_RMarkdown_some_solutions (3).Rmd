@@ -169,10 +169,14 @@ Here the plot shows low volatility with smaller spikes for most time periods. Fo
 ```{r}
 sum(is.na(lret[,'FRCAC40']))
 ```
-We see that we have missing values in the series `FRCAC40`, 393 missing values. Because there is missing values we can not calculate the autocorrelations without first handeling these. The simplest way is to omit the missing values, however it is important to note that since there are quite a few missing values this could lead to biased estimates or loss of power in the analysis. We proceed by performing listwise deletion.
+We see that we have missing values in the series `FRCAC40`, 393 missing values. Because there is missing values we can not calculate the autocorrelations without first handling these. The simplest way is to omit the missing values, however it is important to note that since there are quite many missing values this could lead to biased estimates or loss of power in the analysis. We proceed by performing listwise deletion. Assuming that we are not supposed to calculate cross-correlations, we proceed as follows:
 
 ```{r}
 lret_clean <- lret[complete.cases(lret),]
+par(mfrow=c(2,4))
+for (i in 1:ncol(lret_clean)) {
+  acf(lret_clean[, i], main = paste("ACF for series", i))
+}
 ```
 
 ## 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the χ2-distribution with suitable degrees of freedom, interpret your results.
