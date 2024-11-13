@@ -46,7 +46,7 @@ Both series have means of zero. Daily returns has standard deviation 0.01 and we
 #### a) a normal distribution (with same mean and variance)
 
  
-```{r tdist}
+```{r}
 df = 3
 tmp = ggplot(DJ_d, aes(sample=r_Dow_Jones/sd(r_Dow_Jones)*sqrt(df/(df-2))))
 tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
@@ -55,7 +55,7 @@ qqplot(rt(length(DJ_d$r_Dow_Jones),df=3),DJ_d$r_Dow_Jones)
 ```
 
 
-```{r tdist}
+```{r}
 df = 3
 tmp = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
 tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
@@ -64,7 +64,7 @@ qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
 ```
 A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. 
 
-### 3.
+### 3. Compute a $\chi^2$-goodness-of-fit test against...
 
 ```{r}
 vdata = DJ_d$r_Dow_Jones
@@ -76,7 +76,7 @@ ik = 20
 grids = 1:ik/ik
 ```
 
-#### a)
+#### a) a normal distribution
 ```{r}
 vq = pnorm(vdata); hist(vq)
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
@@ -85,7 +85,7 @@ test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
-#### b)
+#### b) a $t_n$-distribution with n degrees of freedom
 ```{r}
 df = 3
 ndata = vdata*sqrt(df/(df-2))
@@ -97,7 +97,7 @@ test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
-#### c)
+#### c) a mixture of normal distributions with mixture probability $\alpha$ and variance $\sigma_2^2$
 ```{r}
 alpha = 0.1514736
 sigma = 4.0013995
@@ -156,7 +156,7 @@ We see that we have missing values in the series `FRCAC40`, 393 missing values. 
 lret_clean <- lret[complete.cases(lret),]
 ```
 
-### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the χ2-distribution with suitable degrees of freedom, interpret your results.
+### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
 ```{r}
 LB <- function(vx,lag,ip){
