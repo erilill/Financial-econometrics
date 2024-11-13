@@ -20,7 +20,7 @@ library(FE)
 ```
 nynynyextranydsa
 #  Statistical Properties of Asset Returns
-
+Chamika
 ## Distributional properties of Dow Jones index returns
 
 VIlimny
