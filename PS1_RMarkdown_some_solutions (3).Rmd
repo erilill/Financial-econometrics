@@ -21,10 +21,10 @@ library(FE)
 
 #  Statistical Properties of Asset Returns
 
-## Distributional properties of Dow Jones index returns
+## A. Distributional properties of Dow Jones index returns
 
+### Plot the series of log returns and compute descriptive statistics. Which distributional properties do you find? Do you find differences between daily and weekly data?
 
-Plot the Dow Jones daily by using R built-in functions:
 ```{r PLOT1, echo=F}
 plot(DJ_d$r_Dow_Jones,type='l', main='log returns of the daily Dow Jones index',
      ylab='log return',xlab='time horizon')
