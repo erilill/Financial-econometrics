@@ -137,11 +137,13 @@ ret = plot_ly(x=atmp, y=stmp, z=res) %>% add_surface() %>%
 ret
 ```
 
-##  Dynamical properties of financial return series
+## B Dynamical properties of financial return series
 
 ```{r setupb, include=F}
 data = index_d
 ```
+
+## 1. Generate log returns. Compute the empirical autocorrelations and partial autocorrelations. Do you find evidence for significant autocorrelations in the individual index return series?
 
 ```{r}
 lret = apply(log(data),2,diff)
@@ -150,6 +152,8 @@ matplot(lret,type='l',ylab='log returns',xlab='time horizon')
 
 sum(is.na(lret[,'FRCAC40']))
 ```
+
+## 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the χ2-distribution with suitable degrees of freedom, interpret your results.
 
 ```{r}
 LB <- function(vx,lag,ip){
