@@ -20,7 +20,7 @@ library(FE)
 ```
 
 #  Statistical Properties of Asset Returns
-
+Jag jobbar utanför ettorna 
 11111111111111111111
 
 
