@@ -22,22 +22,7 @@ library(FE)
 #  Statistical Properties of Asset Returns
 
 ## Distributional properties of Dow Jones index returns
-Hej fifan nasdnasuidausibduiahsudihasuidhooinionasd
-Geh
-Test
-
-ewrwer
-werwer
-wer
-Comita
-# Question 1
-
-markmarkmarkmark
-markmarkmarkmark
-dsa
-markmarkmarkmark
-
-dlpsa
+Sista committen
 
 Plot the Dow Jones daily by using R built-in functions:
 ```{r PLOT1, echo=F}
