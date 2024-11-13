@@ -25,6 +25,9 @@ library(FE)
 
 # Question 1
 
+markmarkmarkmark
+markmarkmarkmark
+markmarkmarkmark
 
 Plot the Dow Jones daily by using R built-in functions:
 ```{r PLOT1, echo=F}
