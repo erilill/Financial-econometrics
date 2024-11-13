@@ -149,7 +149,7 @@ data = index_d
 lret = apply(log(data),2,diff)
 summary(lret)
 ```
-Above we generate the log returns, `lret`. Here we also see some summary statistics. Below the log returns are plotted:
+Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series. Below the log returns are plotted:
 
 ```{r}
 matplot(lret,type='l',ylab='log returns',xlab='time horizon')
