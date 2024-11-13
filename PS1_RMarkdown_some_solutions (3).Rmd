@@ -22,6 +22,7 @@ nynynyextranydsa
 #  Statistical Properties of Asset Returns
 Chamika
 CHamika2
+CHamika3
 ## Distributional properties of Dow Jones index returns
 
 VIlimny
