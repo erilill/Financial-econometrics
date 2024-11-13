@@ -21,12 +21,10 @@ library(FE)
 
 #  Statistical Properties of Asset Returns
 
-vilimjobbarlite
-testtesttest
+11111111111111111111
 
-jagjobbarlite
 
-markjobbarlite
+11111111111111111111
 
 ## Distributional properties of Dow Jones index returns
 Sista committen
