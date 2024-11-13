@@ -84,27 +84,39 @@ The $\chi^2$ test statistic is
 $$
 \chi^2=\sum_{j=1}^k \frac{(N_j-Np_j)^2}{Np_j} \sim^a \chi^2_{k-s-1},
 $$
+
 where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
 
 ```{r}
-vdata = DJ_d$r_Dow_Jones
-vdata = DJ_w$r_close
-vdata = (vdata - mean(vdata))/sd(vdata)
+r_it = DJ_d$r_Dow_Jones
+r_it = DJ_w$r_close
+r_it_stand = (r_it - mean(r_it))/sd(r_it)
 
 k = 20
-grids = 1:k/k
+category = 1:k/k
 ```
 
 #### a) a normal distribution
 
 $H_0:$ The true distribution is the standard normal distribution.
 ```{r}
-vq = pnorm(vdata); hist(vq)
-vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
-vn = c(vn[1],diff(vn))
-test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
-cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+r = DJ_w$r_close
+rstd = (r - mean(r))/sd(r)
+k = 20
+categories = 1:k/k
+
+N <- length(r)
+pj = 1/k
+
+cum_probs = pnorm(rstd)
+cum_N = NULL; for(val in categories) cum_N = c(cum_N,sum(cum_probs <= val))
+Nj = c(cum_N[1],diff(cum_N))
+
+test = sum((Nj-N*pj)^2/(N*pj))
+cat("test =",test," df =",k-3," p-value =",1-pchisq(test,df=k-3))
+
 ```
+We reject that the data follows $N(0,1)$ on a 1% significance level.
 
 #### b) a $t_n$-distribution with n degrees of freedom
 ```{r}
