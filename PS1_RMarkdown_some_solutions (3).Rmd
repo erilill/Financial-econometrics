@@ -164,7 +164,8 @@ Above we generate the log returns, `lret`. Here we also see some summary statist
 ```{r}
 matplot(lret,type='l',ylab='log returns',xlab='time horizon')
 ```
-Here we see that there are a few larger spikes showing periods of higher volatility, but generally the plot shows low volatility with smaller spikes for most time periods.
+Here the plot shows low volatility with smaller spikes for most time periods. For the time period slightly below 500 we see a larger spike indicating stronger volatility during this period, possibly due to some extreme market event. The log returns are centered around zero over time, suggesting that there is no significant trend.
+
 ```{r}
 sum(is.na(lret[,'FRCAC40']))
 ```
