@@ -22,7 +22,7 @@ library(FE)
 #  Statistical Properties of Asset Returns
 Jag jobbar utanför ettorna 
 11111111111111111111
-
+jag jobbar innanför
 
 11111111111111111111
 
