@@ -24,14 +24,6 @@ library(FE)
 ## Distributional properties of Dow Jones index returns
 
 # Question 1
-Adding 
-2.0
-
-markmarkmark
-vilim
-
-
-adding3.,0
 
 
 Plot the Dow Jones daily by using R built-in functions:
