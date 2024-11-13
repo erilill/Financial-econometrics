@@ -5,11 +5,11 @@ author:
 - Another Author
 date: ""
 output:
-  html_document:
-    df_print: paged
-  df_print: kable
   pdf_document:
     keep_tex: yes
+  df_print: kable
+  html_document:
+    df_print: paged
 toc: no
 ---
 
@@ -46,12 +46,13 @@ ggplot(DJ_d) + geom_qq(aes(sample=r_Dow_Jones/sd(r_Dow_Jones))) +
   geom_abline(aes(intercept=0,slope=1),color="red")
 ```
 
+# Question 2
+## A)
 ```{r descr, echo=F}
-library(psych)
 describe(DJ_d$r_Dow_Jones)
 describe(DJ_w$r_close)
 ```
-
+For daily return data we see that we have 18839 observations. The time series are centered around mean 0 with standard deviation 0.01. It is slightly skewed with a statistic of -0.96 and kurtosis of 36.6. This indicates that the time series is distributed with a t distribution of XX degrees of freedom. 
 
 ```{r tdist}
 df = 3
