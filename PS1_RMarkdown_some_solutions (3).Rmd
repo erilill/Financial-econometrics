@@ -21,7 +21,7 @@ library(FE)
 
 #  Statistical Properties of Asset Returns
 
-
+vilimjobbarlite
 testtesttest
 
 jagjobbarlite
