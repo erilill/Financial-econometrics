@@ -17,6 +17,9 @@ toc: no
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(FE)
+library(psych)
+data("DJ_w")
+data("DJ_d")
 ```
 
 #  Statistical Properties of Asset Returns
@@ -26,10 +29,14 @@ library(FE)
 ### Plot the series of log returns and compute descriptive statistics. Which distributional properties do you find? Do you find differences between daily and weekly data?
 
 ```{r PLOT1, echo=F}
-plot(DJ_d$r_Dow_Jones,type='l', main='log returns of the daily Dow Jones index',
-     ylab='log return',xlab='time horizon')
 ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
   labs(x='time horizon',y='daily log return')
+
+ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
+  labs(x='time horizon',y='weekly log return')
+
+describe(DJ_d$r_Dow_Jones)
+describe(DJ_w$r_close)
 ```
 
 ```{r PLOT2, echo=F}
