@@ -199,12 +199,18 @@ In the plots above we see the individual partial autocorrelations for the indivi
 
 ### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
+In this question, we are asked to perform Ljung-Box tests on the individual series. 
+
 ```{r}
 LB <- function(vx,lag,ip){
   tmp = acf(vx,lag.max=lag,plot=F)$acf
   tmp = tmp[2:(lag+1)]**2
   test = sum(tmp/(length(vx)-1:lag))*length(vx)*(length(vx)+2)
   return(list(test=test, pval=1-pchisq(test,df=lag-ip)))
+}
+
+gridsearch <- function(tmp, lag){
+  for (i in )
 }
 
 tmp = 6
