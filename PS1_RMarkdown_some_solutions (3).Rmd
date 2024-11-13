@@ -25,7 +25,7 @@ library(FE)
 
 # Question 1
 Adding 
-
+2.0
 
 markmarkmark
 vilim
