@@ -201,7 +201,7 @@ In the plots above we see the individual partial autocorrelations for the indivi
 
 In this question, we are asked to perform Ljung-Box tests on the individual series. 
 
-```{r}
+```{r LB, echo=F}
 LB <- function(vx,lag,ip){
   tmp = acf(vx,lag.max=lag,plot=F)$acf
   tmp = tmp[2:(lag+1)]**2
@@ -210,12 +210,41 @@ LB <- function(vx,lag,ip){
 }
 
 gridsearch <- function(tmp, lag){
-  for (i in )
+  results <- matrix(NA, nrow=length(tmp), ncol = length(lag)*2)
+  for (i in 1:length(tmp)){
+    tmpi = tmp[i]
+    for (j in 1:length(lag)){
+      lagj <- lag[j]
+      results[i,2*j-1]<-LB(vx=lret[!is.na(lret[,tmpi]),tmpi],lag=lagj,ip=0)$test
+      results[i,2*j]<-LB(vx=lret[!is.na(lret[,tmpi]),tmpi],lag=lagj,ip=0)$pval
+    }
+  }
+  return(results)
 }
-
-tmp = 6
-LB(vx=lret[!is.na(lret[,tmp]),tmp],lag=100,ip=0)
+tmp = c(1,2,3,4,5,6,7)
+lag = c(10,50,100)
+gridsearch(tmp, lag)
 ```
+\begin{table}[h!]
+\centering
+\begin{tabular}{l c c c c c c}
+\hline
+           & \multicolumn{2}{c}{Lag=10} & \multicolumn{2}{c}{Lag=50} & \multicolumn{2}{c}{Lag=100} \\
+\cline{2-7}
+           & Test & p-value & Test & p-value & Test & p-value \\
+\hline
+DAXINDX    & 15.983  & 0.100  & 68.803  & 0.040  & 118.784 & 0.097 \\
+FRCAC40    & 13.224  & 0.211  & 54.640  & 0.303  & 96.416  & 0.583 \\
+FTSE100    & 40.943  & 0.000  & 109.873 & 0.000  & 150.905 & 0.001 \\
+HNGKNGI    & 64.499  & 0.000  & 133.265 & 0.000  & 179.218 & 0.000 \\
+NIKKEI     & 40.195  & 0.000  & 121.768 & 0.000  & 164.491 & 0.000 \\
+SNGALLS    & 91.484  & 0.000  & 159.532 & 0.000  & 202.302 & 0.000 \\
+SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
+\hline
+\end{tabular}
+\caption{Results of the LB Test for Different Lags and Indices (rounded to 3 decimal places)}
+\end{table}
+
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
 
