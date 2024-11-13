@@ -23,7 +23,8 @@ library(FE)
 
 ## Distributional properties of Dow Jones index returns
 
-
+# Question 1
+Adding 
 
 
 markmarkmark
