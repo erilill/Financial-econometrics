@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(FE)
 library(psych)
+library(forecast)
 data("DJ_w")
 data("DJ_d")
 ```
@@ -182,11 +183,11 @@ We see that we have missing values in the series `FRCAC40`, 393 missing values. 
 lret_clean <- lret[complete.cases(lret),]
 par(mfrow=c(2,4))
 for (i in 1:ncol(lret_clean)) {
-  acf(lret_clean[, i], main = paste("ACF for series", i))
+  Acf(lret_clean[, i], main = paste("ACF for series", i))
 }
 par(mfrow=c(1,1))
 ```
-Above, you see the ACF-plots for the individual series. We see spikes outside of the confidence interval for series 3, 4, 5, 6 and 7, indicating that we have significant autocorrelations. Similairly, we can calculate and plot the individual partial autocorrelations:
+Above, you see the ACF-plots for the individual series. We see spikes outside of the confidence interval for all series, indicating that we have significant autocorrelations. Similairly, we can calculate and plot the individual partial autocorrelations:
 
 ```{r pacfplot}
 par(mfrow=c(2,4))
@@ -199,9 +200,14 @@ In the plots above we see the individual partial autocorrelations for the indivi
 
 ### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
-In this question, we are asked to perform Ljung-Box tests on the individual series. 
+In this question, we are asked to perform the Ljung-Box test. It is not entirely clear from the question whether this refers to individual tests for each series, or a multivariate Ljung-Box test. Starting with the univariate case. The test statistic is given by:
 
-```{r LB, echo=F}
+$$
+Q_{LB}(k)=T(T+2)\sum_{j=1}^k \frac{\hat{\rho}_j^2}{T-j} \overset a\sim \chi^2(k-p)
+$$
+Where $k$ is the number of lags, $T$ is the number of time-points, $\hat{\rho}_j$ is the estimated autocorrelation for the given lag, and $j$ is the specific lag between $1-k$. $p$ is the number of parameters which in this case is 0. This is implemented as an R-function `LB` below. In order to test for different lags for all series, we implemented the function `gridsearch` in order to loop over the different series and lag-values.
+
+```{r LB, message=F}
 LB <- function(vx,lag,ip){
   tmp = acf(vx,lag.max=lag,plot=F)$acf
   tmp = tmp[2:(lag+1)]**2
