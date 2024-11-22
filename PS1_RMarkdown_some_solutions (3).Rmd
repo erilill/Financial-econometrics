@@ -3,14 +3,16 @@ title: "Report for PS 1"
 author:
 - Mark Becker, Erik Lillrank & Vilim Nedic
 - Another Author
-date: ""
+date: ''
 output:
   pdf_document:
-    keep_tex: yes
+    keep_tex: true
   df_print: kable
   html_document:
     df_print: paged
-toc: no
+  word_document: default
+header-includes: \usepackage{float}
+toc: false
 ---
 
 ```{r setup, include=FALSE}
@@ -85,25 +87,19 @@ A visual analysis of the QQ-plots show that both empirical distribution could fo
 
 
 
-### 3. Compute a $\chi^2$-goodness-of-fit test against a standard normal, $t_df$ and mixture of normals.
+### 3. Compute a $\chi^2$-goodness-of-fit test against a standard normal, $t_{df}$ and mixture of normals.
 
-The $\chi^2$ test statistic is
-
-$$
-\chi^2=\sum_{j=1}^k \frac{(N_j-Np_j)^2}{Np_j} \sim^a \chi^2_{k-s-1},
-$$
-
-where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
+We test the null of three different distributions. First a standard normal, then a $t_3$, and then a mixture of normals, where the first normal is standard normal, and the second is $N(0,\sigma_2^2)$, and the mixture is decided by the mixing probability $\alpha$.
 
 ```{r,include=FALSE}
 vdata = DJ_d$r_Dow_Jones
 #vdata = DJ_w$r_close
+vdata = (vdata - mean(vdata))/sd(vdata)
 ik = 20
 grids = 1:ik/ik
 ```
 
 ```{r,include=FALSE}
-vdata = (vdata - mean(vdata))/sd(vdata)
 vq = pnorm(vdata)
 
 p1 <- ggplot(data.frame(vq), aes(x = vq)) +
@@ -124,7 +120,7 @@ vq = pt(ndata,df=3)
 
 p2 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("t_4")
+  ggtitle("t_3")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -157,7 +153,7 @@ vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
 
 p3 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("A mixture of Normals")
+  ggtitle("A mixture of Normals",subtitle="alpha=0.15, sigma_2=4.0")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -189,7 +185,7 @@ vq = pt(ndata,df=3)
 
 p6 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("t_4")
+  ggtitle("t_3")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -220,7 +216,7 @@ vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
 
 p7 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("A mixture of Normals")
+  ggtitle("A mixture of Normals", subtitle="alpha=0.33, sigma_2=2.73")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -228,34 +224,40 @@ test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
-```{r}
+```{r,include=FALSE}
 unifs <- runif(length(vdata),0,1)
 p4 <- ggplot(data.frame(unifs), aes(x = unifs)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
   ggtitle("Uniform(0,1)")
-
-pd <- (p1+p2+p3+p4)
-pw <- (p5+p6+p7+p4)
-
-pd + plot_annotation(
-  title = 'Dow jones daily log returns')
-
-pw + plot_annotation(
-  title = 'Dow jones weekly log returns')
-
 ```
 
-\begin{table}[]
+```{r}
+pd <- (p1+p2+p3+p4)
+pd + plot_annotation(
+  title = 'Dow jones daily log returns')
+```
+
+So we have the daily log returns. We know from Rosenblatt that if the null is true, we should see that the bins resemble the bins of the $U(0,1)$ in the bottom right. So essentially, which plot looks the most like it? It is clear that the standard normal null seems unlikely. ALthough the $t_3$ and mixture of normals look more reasonable, but it is still not perfect. But their nulls seem at least more reasonable than the standard normal.
+
+```{r}
+pw <- (p5+p6+p7+p4)
+pw + plot_annotation(
+  title = 'Dow jones weekly log returns')
+```
+
+What about weekly log returns? Again, the standard normal null seems unlikely. But now, the $t_3$ null also seems unlikely, and the mixture of normal null looks like the most reasonable. We can look at the computed test statistics in the table below. As we can see, for both daily and weekly log returns, the standard normal had the highest test statistics. For daily log returns, the $t_3$ null had the best test statistic, although we do reject it. For the weekly log returns, we can see as indicated from the plot, that the mixture of normals had the best test statistic, although we still reject the null.
+
+\begin{table}[H]
 \begin{tabular}{|c|cc|}
            & \multicolumn{2}{c|}{Test statistic (crit. 1\% = 6.41)}      \\ \hline
 $H_0$       & \multicolumn{1}{c|}{daily log returns} & weekly log returns \\ \hline
 N(0,1)     & \multicolumn{1}{c|}{3406}              & 431                \\
-$t_4$       & \multicolumn{1}{c|}{147}               & 114                \\
+$t_3$       & \multicolumn{1}{c|}{147}               & 114                \\
 Mix of N() & \multicolumn{1}{c|}{212}               & 88                
 \end{tabular}
 \end{table}
 
-
+So we can not for either the daily or weekly log returns accept the null of either distributions, but going by the obtained test statistics, for the daily log returns the $t_3$ is the best approximation and for the weekly log returns the mixture of normals is the best approximation.
 
 ## B. Dynamical properties of financial return series
 
