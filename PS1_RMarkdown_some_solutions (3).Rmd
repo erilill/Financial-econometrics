@@ -85,7 +85,7 @@ A visual analysis of the QQ-plots show that both empirical distribution could fo
 
 
 
-### 3. Compute a $\chi^2$-goodness-of-fit test against...
+### 3. Compute a $\chi^2$-goodness-of-fit test against a standard normal, $t_df$ and mixture of normals.
 
 The $\chi^2$ test statistic is
 
@@ -95,51 +95,102 @@ $$
 
 where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
 
-```{r}
+```{r,include=FALSE}
 vdata = DJ_d$r_Dow_Jones
-vdata = DJ_w$r_close
+#vdata = DJ_w$r_close
 ik = 20
 grids = 1:ik/ik
 ```
 
-#### a) a normal distribution
-
-$H_0:$ The true distribution is the standard normal distribution.
-```{r}
+```{r,include=FALSE}
 vdata = (vdata - mean(vdata))/sd(vdata)
 vq = pnorm(vdata)
-hist(vq, breaks=c(0,grids))
+
+p1 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("N(0,1)")
+
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 
 ```
-We reject that the data follows $N(0,1)$ on a 1% significance level.
 
-#### b) a $t_n$-distribution with n degrees of freedom
-```{r}
+```{r,include=FALSE}
 df = 3
 ndata = vdata*sqrt(df/(df-2))
-
 vq = pt(ndata,df=3)
-hist(vq, breaks=c(0,grids))
+
+p2 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("t_4")
+
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
-#### c) a mixture of normal distributions with mixture probability $\alpha$ and variance $\sigma_2^2$
-```{r}
-alpha = 0.1514736
-sigma = 4.0013995
-alpha = 0.33
-sigma = 2.73
+```{r,include=FALSE}
+func <- function(vx){
+  alpha = vx[1]
+  sigma = vx[2]
+  ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
+  
+  vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
+  vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+  vn = c(vn[1],diff(vn))
+  return(sum((vn-length(vdata)/ik)**2/(length(vdata)/ik)))
+}
+
+func(c(0.15,4))
+
+optim(par=c(0.1,4),fn=func,method="BFGS")
+alpha = 0.1514736 #daily
+sigma = 4.0013995 #daily
+#alpha = 0.33 #weekly
+#sigma = 2.73 #weekly
 ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
 
 vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
-hist(vq)
+
+p3 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("A mixture of Normals")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+
+```{r, include=FALSE}
+#vdata = DJ_d$r_Dow_Jones
+vdata = DJ_w$r_close
+ik = 20
+grids = 1:ik/ik
+
+vdata = (vdata - mean(vdata))/sd(vdata)
+vq = pnorm(vdata)
+
+p5 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("N(0,1)")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+
+df = 3
+ndata = vdata*sqrt(df/(df-2))
+vq = pt(ndata,df=3)
+
+p6 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("t_4")
+
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
@@ -159,7 +210,51 @@ func <- function(vx){
 func(c(0.15,4))
 
 optim(par=c(0.1,4),fn=func,method="BFGS")
+#alpha = 0.1514736 #daily
+#sigma = 4.0013995 #daily
+alpha = 0.33 #weekly
+sigma = 2.73 #weekly
+ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
+
+vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
+
+p7 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("A mixture of Normals")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
+
+```{r}
+unifs <- runif(length(vdata),0,1)
+p4 <- ggplot(data.frame(unifs), aes(x = unifs)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("Uniform(0,1)")
+
+pd <- (p1+p2+p3+p4)
+pw <- (p5+p6+p7+p4)
+
+pd + plot_annotation(
+  title = 'Dow jones daily log returns')
+
+pw + plot_annotation(
+  title = 'Dow jones weekly log returns')
+
+```
+
+\begin{table}[]
+\begin{tabular}{|c|cc|}
+           & \multicolumn{2}{c|}{Test statistic (crit. 1\% = 6.41)}      \\ \hline
+$H_0$       & \multicolumn{1}{c|}{daily log returns} & weekly log returns \\ \hline
+N(0,1)     & \multicolumn{1}{c|}{3406}              & 431                \\
+$t_4$       & \multicolumn{1}{c|}{147}               & 114                \\
+Mix of N() & \multicolumn{1}{c|}{212}               & 88                
+\end{tabular}
+\end{table}
+
 
 
 ## B. Dynamical properties of financial return series
@@ -188,18 +283,20 @@ We see that we have missing values in the series `FRCAC40`, 393 missing values. 
 
 ```{r acfplot}
 lret_clean <- lret[complete.cases(lret),]
-par(mfrow=c(2,4))
+par(mfrow=c(2,4),  cex = 0.5)
 for (i in 1:ncol(lret_clean)) {
-  Acf(lret_clean[, i], main = paste("ACF for series", i))
+  serie_i <- colnames(lret_clean)[i]
+  Acf(lret_clean[, i], main = paste("ACF for series", serie_i))
 }
 par(mfrow=c(1,1))
 ```
 Above, you see the ACF-plots for the individual series. We see spikes outside of the confidence interval for all series, indicating that we have significant autocorrelations. Similairly, we can calculate and plot the individual partial autocorrelations:
 
 ```{r pacfplot}
-par(mfrow=c(2,4))
+par(mfrow=c(2,4), cex=0.5)
 for (i in 1:ncol(lret_clean)) {
-  acf(lret_clean[, i], type = "partial", main = paste("ACF for series", i))
+  serie_i <- colnames(lret_clean)[i]
+  acf(lret_clean[, i], type = "partial", main = paste("PACF for series", serie_i))
 }
 par(mfrow=c(1,1))
 ```
@@ -260,6 +357,29 @@ SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
 
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
+
+```{r CCF}
+# Set up plotting grid
+par(mfrow = c(2, 4), cex=0.5)  # Adjust grid size as needed
+
+# Loop through all unique pairs of columns
+for (i in 1:(ncol(lret_clean) - 1)) {
+  for (j in (i + 1):ncol(lret_clean)) {
+    # Get the column names for the pair
+    series_i <- colnames(lret_clean)[i]
+    series_j <- colnames(lret_clean)[j]
+    
+    # Compute and plot the cross-correlation function
+    ccf(lret_clean[, i], lret_clean[, j], plot = TRUE, 
+        main = paste("CCF for", series_i, "vs", series_j))
+  }
+}
+
+# Reset plotting layout
+par(mfrow = c(1, 1))
+
+```
+
 
 ### 4. Generate squared log returns. Analyze their dynamical properties. What do you find?
 By squaring the log returns, we achieve second moments of the time series which are relevant for discussion regarding volatility and understanding the behaviour of volatility. We will mainly examine three properties, namely volatility dynamics, stationarity of variance, and persistence in volatility. 
