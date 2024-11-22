@@ -2,7 +2,6 @@
 title: "Report for PS 1"
 author:
 - Mark Becker, Erik Lillrank & Vilim Nedic
-- Another Author
 date: ''
 output:
   pdf_document:
