@@ -307,7 +307,7 @@ In the plots above we see the individual partial autocorrelations for the indivi
 
 ### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
-In this question, we are asked to perform the Ljung-Box test. It is not entirely clear from the question whether this refers to individual tests for each series, or a multivariate Ljung-Box test. Starting with the univariate case. The test statistic is given by:
+In this question, we are asked to perform the Ljung-Box test. The test statistic is given by:
 
 $$
 Q_{LB}(k)=T(T+2)\sum_{j=1}^k \frac{\hat{\rho}_j^2}{T-j} \overset a\sim \chi^2(k-p)
@@ -356,8 +356,14 @@ SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
 \hline
 \end{tabular}
 \caption{Results of the LB Test for Different Lags and Indices (rounded to 3 decimal places)}
+\label{LB}
 \end{table}
 
+In table \ref{LB} we see the results from the Ljung-Box test. We see clearly that FTSE100, HNGKNGI, NIKKEI, SNGALLS, and SPCOMP are significantly auto correlated for $lags = \{10, 50, 100\}$ for 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution, as the p-values are below 0.01. 
+
+For DAXINDX we see that $\hat{p}=0.1$ for $lag=10$, indicating no significant autocorrelation at the 95% confidence level (but significant at the 90% level). For $\lag=100$, $\hat{p}_{DAXINDX}=0.04$ indicating that we have autocorrelation with $95\%$ significance, but not $99\%$. For $lag = 100$, the p-value of 0.097 suggests that significant autocorrelation is observed at the 90% confidence level.
+
+For FRCAC40, there is no significant autocorrelation for $lags = \{10, 50, 100\}$, as all the p-values are above 0.10, indicating no evidence of autocorrelation at the 90%, 95%, or 99% significance levels. However, it is important to note that there are missing values in FRCAC40 which likely impacts the reliability of the test-results. As the effective sample size is reduced, it is probable that the test results are inaccurate and could be biased, because of this we are cautios when drawing conclusions about the presence of autocorrelation in FRCAC40.
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
 
@@ -377,8 +383,8 @@ compute_cross_autocorrelation <- function(data, lags) {
     gamma <- matrix(NA, nrow = num_portfolios, ncol = num_portfolios)
     
     # Set row and column names corresponding to series names at different lags
-    colnames(gamma) <- paste0(series_names, "_t")
-    rownames(gamma) <- paste0(series_names, "_t-", lag)
+    colnames(gamma) <- paste0(series_names, "$_t$")
+    rownames(gamma) <- paste0(series_names, "$_{t-", lag, "}$")
     
     # Loop through each pair of portfolios (time series)
     for (i in 1:num_portfolios) {
@@ -412,11 +418,11 @@ lags <- 0:4
 gamma_matrices <- compute_cross_autocorrelation(lret_clean, lags)
 
 # Print the results for each lag
-round(gamma_matrices$gamma_0, 3)
-round(gamma_matrices$gamma_1, 3)
-round(gamma_matrices$gamma_2, 3)
-round(gamma_matrices$gamma_3, 3)
-round(gamma_matrices$gamma_4, 3)
+kable(round(gamma_matrices$gamma_0, 3), caption = "$\\gamma_0$", label = "gamma0")
+kable(round(gamma_matrices$gamma_1, 3), caption = "$\\gamma_1$", label = "gamma1")
+kable(round(gamma_matrices$gamma_2, 3), caption = "$\\gamma_2$", label = "gamma2")
+kable(round(gamma_matrices$gamma_3, 3), caption = "$\\gamma_3$", label = "gamma3")
+kable(round(gamma_matrices$gamma_4, 3), caption = "$\\gamma_4$", label = "gamma4")
 
 ```
 
