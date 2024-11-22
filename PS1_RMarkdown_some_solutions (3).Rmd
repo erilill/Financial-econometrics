@@ -19,6 +19,8 @@ library(tidyverse)
 library(FE)
 library(psych)
 library(forecast)
+library(ggplot2)
+library(patchwork)
 data("DJ_w")
 data("DJ_d")
 ```
@@ -94,38 +96,27 @@ $$
 where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
 
 ```{r}
-r_it = DJ_d$r_Dow_Jones
-r_it = DJ_w$r_close
-r_it_stand = (r_it - mean(r_it))/sd(r_it)
-
-k = 20
-category = 1:k/k
+#vdata = DJ_d$r_Dow_Jones
+vdata = DJ_w$r_close
+ik = 20
+grids = 1:ik/ik
 ```
 
 #### a) a normal distribution
 
 $H_0:$ The true distribution is the standard normal distribution.
 ```{r}
-r = DJ_w$r_close
-rstd = (r - mean(r))/sd(r)
-k = 20
-categories = 1:k/k
-
-N <- length(r)
-pj = 1/k
-
-cum_probs = pnorm(rstd)
-cum_N = NULL; for(val in categories) cum_N = c(cum_N,sum(cum_probs <= val))
-Nj = c(cum_N[1],diff(cum_N))
-
-test = sum((Nj-N*pj)^2/(N*pj))
-cat("test =",test," df =",k-3," p-value =",1-pchisq(test,df=k-3))
-
-vdata = DJ_d$r_Dow_Jones
-vdata = DJ_w$r_close
 vdata = (vdata - mean(vdata))/sd(vdata)
-ik = 20
-grids = 1:ik/ik
+vq = pnorm(vdata)
+
+p1 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("N(0,1)")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 
 ```
 We reject that the data follows $N(0,1)$ on a 1% significance level.
@@ -134,8 +125,12 @@ We reject that the data follows $N(0,1)$ on a 1% significance level.
 ```{r}
 df = 3
 ndata = vdata*sqrt(df/(df-2))
+vq = pt(ndata,df=3)
 
-vq = pt(ndata,df=5); hist(vq)
+p2 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("t_4")
+
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
@@ -144,18 +139,6 @@ cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 
 #### c) a mixture of normal distributions with mixture probability $\alpha$ and variance $\sigma_2^2$
 ```{r}
-alpha = 0.1514736
-sigma = 4.0013995
-alpha = 0.33
-sigma = 2.73
-ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
-
-vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma); hist(vq)
-vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
-vn = c(vn[1],diff(vn))
-test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
-cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
-
 func <- function(vx){
   alpha = vx[1]
   sigma = vx[2]
@@ -169,9 +152,41 @@ func <- function(vx){
 
 func(c(0.15,4))
 
-optim(par=c(0.1,4),fn=func,method="BFGS")
-```
+optim(par=c(0.15,4),fn=func,method="BFGS")
+alpha = 0.06889586
+sigma = 3.87332309
+#alpha = 0.33
+#sigma = 2.73
+ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
 
+vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
+
+p3 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("A mixture of Normals")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+```{r}
+unifs <- runif(10000,0,1)
+p4 <- ggplot(data.frame(unifs), aes(x = unifs)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("Uniform(0,1)")
+
+(p1+p2+p3)/p4
+```
+\begin{table}[]
+\begin{tabular}{|c|cc|}
+                                             & \multicolumn{2}{c|}{Test statistic (crit. 1\% = 6.41)}      \\ \hline
+H\_0                                         & \multicolumn{1}{c|}{daily log returns} & weekly log returns \\ \hline
+N(0,1)                                       & \multicolumn{1}{c|}{3406}              & 431                \\
+t\_4                                         & \multicolumn{1}{c|}{147}               & 114                \\
+Mix of N(), $\alpha=0.07$, $\sigma^2_2=3.86$ & \multicolumn{1}{c|}{729}               & 84                
+\end{tabular}
+\end{table}
 
 ## B. Dynamical properties of financial return series
 
@@ -298,3 +313,97 @@ par(mfrow = c(1, 1))
 
 
 ### 4. Generate squared log returns. Analyze their dynamical properties. What do you find?
+```{r}
+sqlret <- apply(lret_clean, 2, function(x) x^2 )
+```
+```{r ACF and PACF for each time series}
+acf_plt <- pacf_plt <- list()
+for (i in 1:ncol(sqlret)) {
+   acf_obj <- acf(sqlret[!is.na(sqlret[,i]),i], main = paste("ACF for series", colnames(sqlret)[i]), plot = FALSE)
+  acf_plt[[i]] <- acf_obj
+}
+for (i in 1:ncol(sqlret)) {
+   pacf_obj <- pacf(sqlret[!is.na(sqlret[,i]),i], main = paste("PACF for series", colnames(sqlret)[i]), plot = FALSE)
+  pacf_plt[[i]] <- pacf_obj
+}
+
+names(acf_plt) <- names(pacf_plt) <- colnames(sqlret)
+for (i in 1:length(names(acf_plt))) {
+  plot(acf_plt[[i]], main = paste("ACF for series", names(acf_plt)[i]))
+}
+
+
+names(pacf_plt) <- colnames(sqlret)
+for (i in 1:length(names(pacf_plt))) {
+  plot(pacf_plt[[i]], main = paste("PACF for series", names(pacf_plt)[i]))
+}
+```
+```{r plots DAXINDX}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 1
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for FRCAC40}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 2
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for FTSE100}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 3
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for HNGKNGI}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 4
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for NIKKEI}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 5
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for SNGALLS}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 6
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for SPCOMP}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 7
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+
+
+
+
+
+
