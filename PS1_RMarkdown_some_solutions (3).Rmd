@@ -273,3 +273,97 @@ SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
 
 ### 4. Generate squared log returns. Analyze their dynamical properties. What do you find?
+```{r}
+sqlret <- apply(lret_clean, 2, function(x) x^2 )
+```
+```{r ACF and PACF for each time series}
+acf_plt <- pacf_plt <- list()
+for (i in 1:ncol(sqlret)) {
+   acf_obj <- acf(sqlret[!is.na(sqlret[,i]),i], main = paste("ACF for series", colnames(sqlret)[i]), plot = FALSE)
+  acf_plt[[i]] <- acf_obj
+}
+for (i in 1:ncol(sqlret)) {
+   pacf_obj <- pacf(sqlret[!is.na(sqlret[,i]),i], main = paste("PACF for series", colnames(sqlret)[i]), plot = FALSE)
+  pacf_plt[[i]] <- pacf_obj
+}
+
+names(acf_plt) <- names(pacf_plt) <- colnames(sqlret)
+for (i in 1:length(names(acf_plt))) {
+  plot(acf_plt[[i]], main = paste("ACF for series", names(acf_plt)[i]))
+}
+
+
+names(pacf_plt) <- colnames(sqlret)
+for (i in 1:length(names(pacf_plt))) {
+  plot(pacf_plt[[i]], main = paste("PACF for series", names(pacf_plt)[i]))
+}
+```
+```{r plots DAXINDX}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 1
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for FRCAC40}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 2
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for FTSE100}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 3
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for HNGKNGI}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 4
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for NIKKEI}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 5
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for SNGALLS}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 6
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+```{r plots for SPCOMP}
+par(mfrow = c(1, 2))
+
+# Plot ACF for the first series
+tmp <- 7
+plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
+plot(pacf_plt[[tmp]], main = paste("PACF for series", names(pacf_plt)[tmp]))
+```
+
+
+
+
+
+
+
