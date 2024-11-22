@@ -96,7 +96,7 @@ $$
 where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
 
 ```{r}
-vdata = DJ_d$r_Dow_Jones
+#vdata = DJ_d$r_Dow_Jones
 vdata = DJ_w$r_close
 ik = 20
 grids = 1:ik/ik
@@ -108,7 +108,11 @@ $H_0:$ The true distribution is the standard normal distribution.
 ```{r}
 vdata = (vdata - mean(vdata))/sd(vdata)
 vq = pnorm(vdata)
-hist(vq, breaks=c(0,grids))
+
+p1 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("N(0,1)")
+
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
@@ -121,9 +125,12 @@ We reject that the data follows $N(0,1)$ on a 1% significance level.
 ```{r}
 df = 3
 ndata = vdata*sqrt(df/(df-2))
-
 vq = pt(ndata,df=3)
-hist(vq, breaks=c(0,grids))
+
+p2 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("t_4")
+
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
@@ -132,19 +139,6 @@ cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 
 #### c) a mixture of normal distributions with mixture probability $\alpha$ and variance $\sigma_2^2$
 ```{r}
-alpha = 0.1514736
-sigma = 4.0013995
-alpha = 0.33
-sigma = 2.73
-ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
-
-vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
-hist(vq)
-vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
-vn = c(vn[1],diff(vn))
-test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
-cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
-
 func <- function(vx){
   alpha = vx[1]
   sigma = vx[2]
@@ -158,9 +152,41 @@ func <- function(vx){
 
 func(c(0.15,4))
 
-optim(par=c(0.1,4),fn=func,method="BFGS")
-```
+optim(par=c(0.15,4),fn=func,method="BFGS")
+alpha = 0.06889586
+sigma = 3.87332309
+#alpha = 0.33
+#sigma = 2.73
+ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
 
+vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
+
+p3 <- ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("A mixture of Normals")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+```{r}
+unifs <- runif(10000,0,1)
+p4 <- ggplot(data.frame(unifs), aes(x = unifs)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("Uniform(0,1)")
+
+(p1+p2+p3)/p4
+```
+\begin{table}[]
+\begin{tabular}{|c|cc|}
+                                             & \multicolumn{2}{c|}{Test statistic (crit. 1\% = 6.41)}      \\ \hline
+H\_0                                         & \multicolumn{1}{c|}{daily log returns} & weekly log returns \\ \hline
+N(0,1)                                       & \multicolumn{1}{c|}{3406}              & 431                \\
+t\_4                                         & \multicolumn{1}{c|}{147}               & 114                \\
+Mix of N(), $\alpha=0.07$, $\sigma^2_2=3.86$ & \multicolumn{1}{c|}{729}               & 84                
+\end{tabular}
+\end{table}
 
 ## B. Dynamical properties of financial return series
 
