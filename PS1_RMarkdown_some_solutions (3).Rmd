@@ -289,25 +289,62 @@ SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
 
-```{r CCF}
-# Set up plotting grid
-par(mfrow = c(2, 4), cex=0.5)  # Adjust grid size as needed
-
-# Loop through all unique pairs of columns
-for (i in 1:(ncol(lret_clean) - 1)) {
-  for (j in (i + 1):ncol(lret_clean)) {
-    # Get the column names for the pair
-    series_i <- colnames(lret_clean)[i]
-    series_j <- colnames(lret_clean)[j]
+```{r CCF, echo=F}
+# Function to compute cross-autocorrelation matrices for multiple lags
+compute_cross_autocorrelation <- function(data, lags) {
+  # Get the names of the portfolios (columns)
+  series_names <- colnames(data)
+  num_portfolios <- length(series_names)
+  
+  # Initialize a list to store the cross-correlation matrices for each lag
+  gamma_matrices <- list()
+  
+  # Loop through each specified lag
+  for (lag in lags) {
+    # Initialize an empty matrix to store results for the current lag
+    gamma <- matrix(NA, nrow = num_portfolios, ncol = num_portfolios)
     
-    # Compute and plot the cross-correlation function
-    ccf(lret_clean[, i], lret_clean[, j], plot = TRUE, 
-        main = paste("CCF for", series_i, "vs", series_j))
+    # Set row and column names corresponding to series names at different lags
+    colnames(gamma) <- paste0(series_names, "_t")
+    rownames(gamma) <- paste0(series_names, "_t-", lag)
+    
+    # Loop through each pair of portfolios (time series)
+    for (i in 1:num_portfolios) {
+      for (j in 1:num_portfolios) {
+        # Compute the cross-correlation function for the pair of time series
+        ccf_values <- ccf(data[, i], data[, j], plot = FALSE, lag.max = max(lags))
+        
+        # Find the cross-correlation at the specific lag
+        lag_index <- which(ccf_values$lag == lag)
+        
+        # If the lag exists in the cross-correlation result, store it
+        if (length(lag_index) > 0) {
+          gamma[i, j] <- ccf_values$acf[lag_index]
+        } else {
+          gamma[i, j] <- NA  # Store NA if no cross-correlation at this lag
+        }
+      }
+    }
+    
+    # Store the current gamma matrix for the given lag in the list
+    gamma_matrices[[paste0("gamma_", lag)]] <- gamma
   }
+  
+  return(gamma_matrices)
 }
 
-# Reset plotting layout
-par(mfrow = c(1, 1))
+# Define the lags you want to compute (0 to 4)
+lags <- 0:4
+
+# Compute the cross-autocorrelation matrices for lags 0 to 4
+gamma_matrices <- compute_cross_autocorrelation(lret_clean, lags)
+
+# Print the results for each lag
+round(gamma_matrices$gamma_0, 3)
+round(gamma_matrices$gamma_1, 3)
+round(gamma_matrices$gamma_2, 3)
+round(gamma_matrices$gamma_3, 3)
+round(gamma_matrices$gamma_4, 3)
 
 ```
 
