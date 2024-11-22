@@ -201,7 +201,8 @@ We see that we have missing values in the series `FRCAC40`, 393 missing values. 
 lret_clean <- lret[complete.cases(lret),]
 par(mfrow=c(2,4))
 for (i in 1:ncol(lret_clean)) {
-  Acf(lret_clean[, i], main = paste("ACF for series", i))
+  serie_i <- colnames(lret_clean)[i]
+  Acf(lret_clean[, i], main = paste("ACF for series", serie_i))
 }
 par(mfrow=c(1,1))
 ```
@@ -210,7 +211,8 @@ Above, you see the ACF-plots for the individual series. We see spikes outside of
 ```{r pacfplot}
 par(mfrow=c(2,4))
 for (i in 1:ncol(lret_clean)) {
-  acf(lret_clean[, i], type = "partial", main = paste("ACF for series", i))
+  serie_i <- colnames(lret_clean)[i]
+  acf(lret_clean[, i], type = "partial", main = paste("PACF for series", serie_i))
 }
 par(mfrow=c(1,1))
 ```
@@ -271,5 +273,28 @@ SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
 
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
+
+```{r CCF}
+# Set up plotting grid
+par(mfrow = c(2, 4))  # Adjust grid size as needed
+
+# Loop through all unique pairs of columns
+for (i in 1:(ncol(lret_clean) - 1)) {
+  for (j in (i + 1):ncol(lret_clean)) {
+    # Get the column names for the pair
+    series_i <- colnames(lret_clean)[i]
+    series_j <- colnames(lret_clean)[j]
+    
+    # Compute and plot the cross-correlation function
+    ccf(lret_clean[, i], lret_clean[, j], plot = TRUE, 
+        main = paste("CCF for", series_i, "vs", series_j))
+  }
+}
+
+# Reset plotting layout
+par(mfrow = c(1, 1))
+
+```
+
 
 ### 4. Generate squared log returns. Analyze their dynamical properties. What do you find?
