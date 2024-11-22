@@ -2,7 +2,6 @@
 title: "Report for PS 1"
 author:
 - Mark Becker, Erik Lillrank & Vilim Nedic
-- Another Author
 date: ''
 output:
   pdf_document:
@@ -34,18 +33,22 @@ data("DJ_d")
 
 ### 1. Plot the series of log returns and compute descriptive statistics. Which distributional properties do you find? Do you find differences between daily and weekly data?
 
-```{r PLOT1, echo=F}
-ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
+```{r, fig.height=4, fig.width=6, fig.align='center', fig.cap= "An example Figure.",echo=F}
+p1 <- ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
   labs(x='time horizon',y='daily log return')
 
-ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
+p2 <- ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
   labs(x='time horizon',y='weekly log return')
 
-describe(DJ_d$r_Dow_Jones)
-describe(DJ_w$r_close)
-
+p1/p2
 ```
-Both series have means of zero. Daily returns has standard deviation 0.01 and weekly returns 0.03. Daily returns has a skewness of -0.96 and kurtosis of 36.6.Weekly returns has a skewness of  -1.09 and kurtosis is 15.06. Since a standard normal distribution has a standard deviation of 1, skewness of 0 and kurtosis of 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
+
+Let us look at some descriptive statistics.
+```{r}
+rbind(describe(DJ_d$r_Dow_Jones),describe(DJ_w$r_close))
+```
+
+Both series have means of zero. Daily (log) returns has standard deviation 0.01 and weekly (log) returns 0.03. Daily returns has a skewness of -0.96 and Weekly returns has a skewness of  -1.09. So both are skewed, although the weekly returns are a bit more skewed (which we can also see by looking at the differences of absolute values of the min and max for both series). Daily returns have a kurtosis of 36.6 and weekly a kurtosis of 15.06. So the largest difference between the daily and the weekly data is that the daily returns have much fatter tails than the weekly returns, as it has more than double the kurtosis. If we compare both distributions to a baseline, say a normal distribution, we know all normal distributions have skewness of 0 and kurtosis of 3. Since we have for both series skewness values quite far from 0 and kurtosis values which are much larger than 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
 
 
 ### 2. Evaluate the empirical distributions of the index log returns using quantile-quantile plots (QQ-plots). Test the empirical distribution against
@@ -272,12 +275,7 @@ data = index_d
 lret = apply(log(data),2,diff)
 summary(lret)
 ```
-Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series. Below the log returns are plotted:
-
-```{r plotlret}
-matplot(lret,type='l',ylab='log returns',xlab='time horizon')
-```
-Here the plot shows low volatility with smaller spikes for most time periods. For the time period slightly below 500 we see a larger spike indicating stronger volatility during this period, possibly due to some extreme market event. The log returns are centered around zero over time, suggesting that there is no significant trend.
+Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series.
 
 ```{r na}
 sum(is.na(lret[,'FRCAC40']))
