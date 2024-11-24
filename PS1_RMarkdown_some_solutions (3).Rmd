@@ -67,7 +67,16 @@ ndistw + geom_qq(distribution=stats::qnorm, dparams = list(mean = mean(DJ_w$r_cl
   geom_abline(aes(intercept = 0, slope = 1), color = "red") +
   labs(y = "Weekly returns")
 qqnorm(DJ_w$r_close)
+
+tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones-mean(r_Dow_Jones))/sd(r_Dow_Jones)))
+norm_plot1 <- tmp + geom_qq(distribution=stats::qnorm, dparams=list(mean=0, sd=1)) + geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns")
+
+tmp = ggplot(DJ_w, aes(sample=(r_close-mean(r_close))/sd(r_close)))
+norm_plot2 <- tmp + geom_qq(distribution=stats::qnorm, dparams=list(mean=0, sd=1)) + geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns")
+
+norm_plot1/norm_plot2
 ```
+
 The first thing we observe when studying above plots are that the line intersects the data in the middle quite good. When it comes to the tails (lower left corner and upper right corner), we observe that the normal distribution captures these observations badly. This would indicate on a heavier-tailed data than the normal distribution would show. This finding is in accordance with other findings when studying econometric data as these are often more heavy-tailed.
 
 #### b) alternative tn-distributions with n degrees of freedom.
@@ -84,6 +93,23 @@ tdistw = ggplot(DJ_w, aes(sample=r_close/sd(r_close)*sqrt(df/(df-2))))
 tdistw + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red") + 
   labs(y = "Weekly returns")
 qqplot(rt(length(DJ_w$r_close),df=3),DJ_w$r_close)
+
+library(extraDistr)
+df=3
+tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
+t_plot_1_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
+                                                                        mu=mean(DJ_d$r_Dow_Jones),
+                                                                        sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns")
+
+tmp = ggplot(DJ_w, aes(sample=(r_close)))
+t_plot_2_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
+                                                                        mu=mean(DJ_w$r_close),
+                                                                        sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns")
+
+t_plot_1_df3/t_plot_2_df3
+
 ```
 
 
