@@ -2,15 +2,16 @@
 title: "Report for PS 1"
 author:
 - Mark Becker, Erik Lillrank & Vilim Nedic
-- Another Author
-date: ""
+date: ''
 output:
   pdf_document:
-    keep_tex: yes
+    keep_tex: true
   df_print: kable
   html_document:
     df_print: paged
-toc: no
+  word_document: default
+header-includes: \usepackage{float}
+toc: false
 ---
 
 ```{r setup, include=FALSE}
@@ -21,6 +22,7 @@ library(psych)
 library(forecast)
 library(ggplot2)
 library(patchwork)
+library(knitr)
 data("DJ_w")
 data("DJ_d")
 ```
@@ -31,18 +33,22 @@ data("DJ_d")
 
 ### 1. Plot the series of log returns and compute descriptive statistics. Which distributional properties do you find? Do you find differences between daily and weekly data?
 
-```{r PLOT1, echo=F}
-ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
+```{r, fig.height=4, fig.width=6, fig.align='center', fig.cap= "An example Figure.",echo=F}
+p1 <- ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
   labs(x='time horizon',y='daily log return')
 
-ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
+p2 <- ggplot(DJ_w, aes(y=r_close,x=1:nrow(DJ_w))) + geom_line() +
   labs(x='time horizon',y='weekly log return')
 
-describe(DJ_d$r_Dow_Jones)
-describe(DJ_w$r_close)
-
+p1/p2
 ```
-Both series have means of zero. Daily returns has standard deviation 0.01 and weekly returns 0.03. Daily returns has a skewness of -0.96 and kurtosis of 36.6.Weekly returns has a skewness of  -1.09 and kurtosis is 15.06. Since a standard normal distribution has a standard deviation of 1, skewness of 0 and kurtosis of 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
+
+Let us look at some descriptive statistics.
+```{r}
+rbind(describe(DJ_d$r_Dow_Jones),describe(DJ_w$r_close))
+```
+
+Both series have means of zero. Daily (log) returns has standard deviation 0.01 and weekly (log) returns 0.03. Daily returns has a skewness of -0.96 and Weekly returns has a skewness of  -1.09. So both are skewed, although the weekly returns are a bit more skewed (which we can also see by looking at the differences of absolute values of the min and max for both series). Daily returns have a kurtosis of 36.6 and weekly a kurtosis of 15.06. So the largest difference between the daily and the weekly data is that the daily returns have much fatter tails than the weekly returns, as it has more than double the kurtosis. If we compare both distributions to a baseline, say a normal distribution, we know all normal distributions have skewness of 0 and kurtosis of 3. Since we have for both series skewness values quite far from 0 and kurtosis values which are much larger than 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
 
 
 ### 2. Evaluate the empirical distributions of the index log returns using quantile-quantile plots (QQ-plots). Test the empirical distribution against
@@ -85,25 +91,19 @@ A visual analysis of the QQ-plots show that both empirical distribution could fo
 
 
 
-### 3. Compute a $\chi^2$-goodness-of-fit test against a standard normal, $t_df$ and mixture of normals.
+### 3. Compute a $\chi^2$-goodness-of-fit test against a standard normal, $t_{df}$ and mixture of normals.
 
-The $\chi^2$ test statistic is
-
-$$
-\chi^2=\sum_{j=1}^k \frac{(N_j-Np_j)^2}{Np_j} \sim^a \chi^2_{k-s-1},
-$$
-
-where $k$ is the number of categories, $N_j$ is the number of observations in the $j$th category, $p_j$ is the estimated probability for an observation in category $j$ and $s$ is the number of parameters to be estimated.
+We test the null of three different distributions. First a standard normal, then a $t_3$, and then a mixture of normals, where the first normal is standard normal, and the second is $N(0,\sigma_2^2)$, and the mixture is decided by the mixing probability $\alpha$.
 
 ```{r,include=FALSE}
 vdata = DJ_d$r_Dow_Jones
 #vdata = DJ_w$r_close
+vdata = (vdata - mean(vdata))/sd(vdata)
 ik = 20
 grids = 1:ik/ik
 ```
 
 ```{r,include=FALSE}
-vdata = (vdata - mean(vdata))/sd(vdata)
 vq = pnorm(vdata)
 
 p1 <- ggplot(data.frame(vq), aes(x = vq)) +
@@ -124,7 +124,7 @@ vq = pt(ndata,df=3)
 
 p2 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("t_4")
+  ggtitle("t_3")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -157,7 +157,7 @@ vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
 
 p3 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("A mixture of Normals")
+  ggtitle("A mixture of Normals",subtitle="alpha=0.15, sigma_2=4.0")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -189,7 +189,7 @@ vq = pt(ndata,df=3)
 
 p6 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("t_4")
+  ggtitle("t_3")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -220,7 +220,7 @@ vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
 
 p7 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("A mixture of Normals")
+  ggtitle("A mixture of Normals", subtitle="alpha=0.33, sigma_2=2.73")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -228,34 +228,40 @@ test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
 
-```{r}
+```{r,include=FALSE}
 unifs <- runif(length(vdata),0,1)
 p4 <- ggplot(data.frame(unifs), aes(x = unifs)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
   ggtitle("Uniform(0,1)")
-
-pd <- (p1+p2+p3+p4)
-pw <- (p5+p6+p7+p4)
-
-pd + plot_annotation(
-  title = 'Dow jones daily log returns')
-
-pw + plot_annotation(
-  title = 'Dow jones weekly log returns')
-
 ```
 
-\begin{table}[]
+```{r}
+pd <- (p1+p2+p3+p4)
+pd + plot_annotation(
+  title = 'Dow jones daily log returns')
+```
+
+So we have the daily log returns. We know from Rosenblatt that if the null is true, we should see that the bins resemble the bins of the $U(0,1)$ in the bottom right. So essentially, which plot looks the most like it? It is clear that the standard normal null seems unlikely. ALthough the $t_3$ and mixture of normals look more reasonable, but it is still not perfect. But their nulls seem at least more reasonable than the standard normal.
+
+```{r}
+pw <- (p5+p6+p7+p4)
+pw + plot_annotation(
+  title = 'Dow jones weekly log returns')
+```
+
+What about weekly log returns? Again, the standard normal null seems unlikely. But now, the $t_3$ null also seems unlikely, and the mixture of normal null looks like the most reasonable. We can look at the computed test statistics in the table below. As we can see, for both daily and weekly log returns, the standard normal had the highest test statistics. For daily log returns, the $t_3$ null had the best test statistic, although we do reject it. For the weekly log returns, we can see as indicated from the plot, that the mixture of normals had the best test statistic, although we still reject the null.
+
+\begin{table}[H]
 \begin{tabular}{|c|cc|}
            & \multicolumn{2}{c|}{Test statistic (crit. 1\% = 6.41)}      \\ \hline
 $H_0$       & \multicolumn{1}{c|}{daily log returns} & weekly log returns \\ \hline
 N(0,1)     & \multicolumn{1}{c|}{3406}              & 431                \\
-$t_4$       & \multicolumn{1}{c|}{147}               & 114                \\
+$t_3$       & \multicolumn{1}{c|}{147}               & 114                \\
 Mix of N() & \multicolumn{1}{c|}{212}               & 88                
 \end{tabular}
 \end{table}
 
-
+So we can not for either the daily or weekly log returns accept the null of either distributions, but going by the obtained test statistics, for the daily log returns the $t_3$ is the best approximation and for the weekly log returns the mixture of normals is the best approximation.
 
 ## B. Dynamical properties of financial return series
 
@@ -269,19 +275,14 @@ data = index_d
 lret = apply(log(data),2,diff)
 summary(lret)
 ```
-Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series. Below the log returns are plotted:
-
-```{r plotlret}
-matplot(lret,type='l',ylab='log returns',xlab='time horizon')
-```
-Here the plot shows low volatility with smaller spikes for most time periods. For the time period slightly below 500 we see a larger spike indicating stronger volatility during this period, possibly due to some extreme market event. The log returns are centered around zero over time, suggesting that there is no significant trend.
+Above we generate the log returns, `lret`. Here we also see some summary statistics. From the summary, it is evident that mean and median for all series of the log returns are close to zero. Looking at the minimum and maximum values it seems that there could be skewness in some of the series.
 
 ```{r na}
 sum(is.na(lret[,'FRCAC40']))
 ```
 We see that we have missing values in the series `FRCAC40`, 393 missing values. Because there is missing values we can not calculate the autocorrelations without first handling these. The simplest way is to omit the missing values, however it is important to note that since there are quite many missing values this could lead to biased estimates or loss of power in the analysis. We proceed by performing listwise deletion. Assuming that we are not supposed to calculate cross-correlations, we proceed as follows:
 
-```{r acfplot}
+```{r acfplot, echo=F}
 lret_clean <- lret[complete.cases(lret),]
 par(mfrow=c(2,4),  cex = 0.5)
 for (i in 1:ncol(lret_clean)) {
@@ -292,7 +293,7 @@ par(mfrow=c(1,1))
 ```
 Above, you see the ACF-plots for the individual series. We see spikes outside of the confidence interval for all series, indicating that we have significant autocorrelations. Similairly, we can calculate and plot the individual partial autocorrelations:
 
-```{r pacfplot}
+```{r pacfplot, echo=F}
 par(mfrow=c(2,4), cex=0.5)
 for (i in 1:ncol(lret_clean)) {
   serie_i <- colnames(lret_clean)[i]
@@ -304,14 +305,14 @@ In the plots above we see the individual partial autocorrelations for the indivi
 
 ### 2. Compute the Ljung-Box test with respect to 10, 50 and 100 lags. By using the 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution with suitable degrees of freedom, interpret your results.
 
-In this question, we are asked to perform the Ljung-Box test. It is not entirely clear from the question whether this refers to individual tests for each series, or a multivariate Ljung-Box test. Starting with the univariate case. The test statistic is given by:
+In this question, we are asked to perform the Ljung-Box test. The test statistic is given by:
 
 $$
 Q_{LB}(k)=T(T+2)\sum_{j=1}^k \frac{\hat{\rho}_j^2}{T-j} \overset a\sim \chi^2(k-p)
 $$
 Where $k$ is the number of lags, $T$ is the number of time-points, $\hat{\rho}_j$ is the estimated autocorrelation for the given lag, and $j$ is the specific lag between $1-k$. $p$ is the number of parameters which in this case is 0. This is implemented as an R-function `LB` below. In order to test for different lags for all series, we implemented the function `gridsearch` in order to loop over the different series and lag-values.
 
-```{r LB, message=F}
+```{r LB, include=F}
 LB <- function(vx,lag,ip){
   tmp = acf(vx,lag.max=lag,plot=F)$acf
   tmp = tmp[2:(lag+1)]**2
@@ -353,33 +354,81 @@ SPCOMP     & 30.332  & 0.001  & 119.543 & 0.000  & 192.720 & 0.000 \\
 \hline
 \end{tabular}
 \caption{Results of the LB Test for Different Lags and Indices (rounded to 3 decimal places)}
+\label{LB}
 \end{table}
 
+In table \ref{LB} we see the results from the Ljung-Box test. We see clearly that FTSE100, HNGKNGI, NIKKEI, SNGALLS, and SPCOMP are significantly auto correlated for $lags = \{10, 50, 100\}$ for 0.01, 0.05 and 0.1 quantile of the $\chi^2$-distribution, as the p-values are below 0.01. 
+
+For DAXINDX we see that $\hat{p}=0.1$ for $lag=10$, indicating no significant autocorrelation at the $95\%$ confidence level (but significant at the $90\%$ level). For $lag=100$, $\hat{p}_{DAXINDX}=0.04$ indicating that we have autocorrelation with $95\%$ significance, but not $99\%$. For $lag = 100$, the p-value of 0.097 suggests that significant autocorrelation is observed at the 90% confidence level.
+
+For FRCAC40, there is no significant autocorrelation for $lags = \{10, 50, 100\}$, as all the p-values are above 0.10, indicating no evidence of autocorrelation at the $90\%$, $95\%$, or $99\%$ significance levels. However, it is important to note that there are missing values in FRCAC40 which likely impacts the reliability of the test-results. As the effective sample size is reduced, it is probable that the test results are inaccurate and could be biased, because of this we are cautios when drawing conclusions about the presence of autocorrelation in FRCAC40.
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
 
-```{r CCF}
-# Set up plotting grid
-par(mfrow = c(2, 4), cex=0.5)  # Adjust grid size as needed
-
-# Loop through all unique pairs of columns
-for (i in 1:(ncol(lret_clean) - 1)) {
-  for (j in (i + 1):ncol(lret_clean)) {
-    # Get the column names for the pair
-    series_i <- colnames(lret_clean)[i]
-    series_j <- colnames(lret_clean)[j]
+```{r CCF, echo=F}
+# Function to compute cross-autocorrelation matrices for multiple lags
+compute_cross_autocorrelation <- function(data, lags) {
+  # Get the names of the portfolios (columns)
+  series_names <- colnames(data)
+  num_portfolios <- length(series_names)
+  
+  # Initialize a list to store the cross-correlation matrices for each lag
+  gamma_matrices <- list()
+  
+  # Loop through each specified lag
+  for (lag in lags) {
+    # Initialize an empty matrix to store results for the current lag
+    gamma <- matrix(NA, nrow = num_portfolios, ncol = num_portfolios)
     
-    # Compute and plot the cross-correlation function
-    ccf(lret_clean[, i], lret_clean[, j], plot = TRUE, 
-        main = paste("CCF for", series_i, "vs", series_j))
+    # Set row and column names corresponding to series names at different lags
+    colnames(gamma) <- paste0(series_names, "$_t$")
+    rownames(gamma) <- paste0(series_names, "$_{t-", lag, "}$")
+    
+    # Loop through each pair of portfolios (time series)
+    for (i in 1:num_portfolios) {
+      for (j in 1:num_portfolios) {
+        # Compute the cross-correlation function for the pair of time series
+        ccf_values <- ccf(data[, i], data[, j], plot = FALSE, lag.max = max(lags))
+        
+        # Find the cross-correlation at the specific lag
+        lag_index <- which(ccf_values$lag == lag)
+        
+        # If the lag exists in the cross-correlation result, store it
+        if (length(lag_index) > 0) {
+          gamma[i, j] <- ccf_values$acf[lag_index]
+        } else {
+          gamma[i, j] <- NA  # Store NA if no cross-correlation at this lag
+        }
+      }
+    }
+    
+    # Store the current gamma matrix for the given lag in the list
+    gamma_matrices[[paste0("gamma_", lag)]] <- gamma
   }
+  
+  return(gamma_matrices)
 }
 
-# Reset plotting layout
-par(mfrow = c(1, 1))
+# Define the lags you want to compute (0 to 4)
+lags <- 0:4
+
+# Compute the cross-autocorrelation matrices for lags 0 to 4
+gamma_matrices <- compute_cross_autocorrelation(lret_clean, lags)
+
+#Print tables
+kable(gamma_matrices$gamma_0, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_0$")
+kable(gamma_matrices$gamma_1, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_1$")
+kable(gamma_matrices$gamma_2, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_2$")
+kable(gamma_matrices$gamma_3, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_3$")
+kable(gamma_matrices$gamma_4, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_4$")
 
 ```
-
+```{r gamma2, echo=F}
+gamma_matrices$gamma_1-t(gamma_matrices$gamma_1)
+gamma_matrices$gamma_2-t(gamma_matrices$gamma_2)
+gamma_matrices$gamma_3-t(gamma_matrices$gamma_3)
+gamma_matrices$gamma_4-t(gamma_matrices$gamma_4)
+```
 
 ### 4. Generate squared log returns. Analyze their dynamical properties. What do you find?
 By squaring the log returns, we achieve second moments of the time series which are relevant for discussion regarding volatility and understanding the behaviour of volatility. We will mainly examine three properties, namely volatility dynamics, stationarity of variance, and persistence in volatility. 
