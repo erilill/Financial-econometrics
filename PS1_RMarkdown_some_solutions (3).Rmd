@@ -418,8 +418,8 @@ compute_cross_autocorrelation <- function(data, lags) {
   # Loop through lags
   for (lag in lags) {
     gamma <- matrix(NA, nrow = num_portfolios, ncol = num_portfolios)
-    colnames(gamma) <- paste0(series_names, "_t")
-    rownames(gamma) <- paste0(series_names, "_{t-", lag, "}")
+    colnames(gamma) <- paste0("$", series_names, "_t$")
+    rownames(gamma) <- paste0("$", series_names, "_{t-", lag, "}$")
     
     for (i in 1:num_portfolios) {
       for (j in 1:num_portfolios) {
