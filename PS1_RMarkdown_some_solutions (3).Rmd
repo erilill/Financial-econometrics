@@ -446,7 +446,6 @@ kable(gamma_matrices$gamma_1, digits = 3, format = "latex", escape = FALSE, capt
 kable(gamma_matrices$gamma_2, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_2$")
 kable(gamma_matrices$gamma_3, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_3$")
 kable(gamma_matrices$gamma_4, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_4$")
-gamma_matrices$gamma_1
 ```
 The tables above show cross-autocorrelations between the financial indices for $k=\{0,1,3,4\}$. With these tables we aim to analyze whether there are any lead-lag relationships.
 
