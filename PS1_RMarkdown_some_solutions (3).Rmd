@@ -10,7 +10,12 @@ output:
   html_document:
     df_print: paged
   word_document: default
-header-includes: \usepackage{float}
+header-includes:
+  - \usepackage{float}
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
+  - \usepackage{adjustbox}
 toc: false
 ---
 
@@ -369,7 +374,7 @@ tmp = c(1,2,3,4,5,6,7)
 lag = c(10,50,100)
 gridsearch(tmp, lag)
 ```
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \begin{tabular}{l c c c c c c}
 \hline
@@ -397,6 +402,8 @@ For DAXINDX we see that $\hat{p}=0.1$ for $lag=10$, indicating no significant au
 For FRCAC40, there is no significant autocorrelation for $lags = \{10, 50, 100\}$, as all the p-values are above 0.10, indicating no evidence of autocorrelation at the $90\%$, $95\%$, or $99\%$ significance levels. However, it is important to note that there are missing values in FRCAC40 which likely impacts the reliability of the test-results. As the effective sample size is reduced, it is probable that the test results are inaccurate and could be biased, because of this we are cautios when drawing conclusions about the presence of autocorrelation in FRCAC40.
 
 ### 3. Compute the (pairwise) cross-autocorrelations between the individual return series. Do you find evidence for lead-lag relationships?
+
+In order to answer this question, we have computed cross-autocorrelations for the indices for lags $k=\{0,1,2,3,4\}$.
 
 ```{r CCF, echo=F}
 # Function to compute cross-autocorrelation matrices for multiple lags
@@ -445,16 +452,123 @@ lags <- 0:4
 
 # Compute cross-autocorrelation matrices
 gamma_matrices <- compute_cross_autocorrelation(lret_clean, lags)
-
-
-#Print tables
-kable(gamma_matrices$gamma_0, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_0$")
-kable(gamma_matrices$gamma_1, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_1$")
-kable(gamma_matrices$gamma_2, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_2$")
-kable(gamma_matrices$gamma_3, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_3$")
-kable(gamma_matrices$gamma_4, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_4$")
 ```
-The tables above show cross-autocorrelations between the financial indices for $k=\{0,1,3,4\}$. With these tables we aim to analyze whether there are any lead-lag relationships.
+\begin{table}[H]
+\centering
+\caption{Cross-Autocorrelation Matrices for Different Lags}
+\label{table:gamma_matrices}
+
+\begin{subtable}[t]{\textwidth}
+\caption{$\hat{\gamma}_0$}
+\label{ccf}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\toprule
+  & DAXINDX$_t$ & FRCAC40$_t$ & FTSE100$_t$ & HNGKNGI$_t$ & NIKKEI$_t$ & SNGALLS$_t$ & SPCOMP$_t$ \\
+\midrule
+DAXINDX$_{t-0}$ & 1.000 & 0.611 & 0.482 & 0.394 & 0.294 & 0.377 & 0.288 \\
+FRCAC40$_{t-0}$ & 0.611 & 1.000 & 0.566 & 0.302 & 0.242 & 0.297 & 0.343 \\
+FTSE100$_{t-0}$ & 0.482 & 0.566 & 1.000 & 0.284 & 0.305 & 0.252 & 0.423 \\
+HNGKNGI$_{t-0}$ & 0.394 & 0.302 & 0.284 & 1.000 & 0.263 & 0.456 & 0.192 \\
+NIKKEI$_{t-0}$  & 0.294 & 0.242 & 0.305 & 0.263 & 1.000 & 0.298 & 0.115 \\
+SNGALLS$_{t-0}$ & 0.377 & 0.297 & 0.252 & 0.456 & 0.298 & 1.000 & 0.183 \\
+SPCOMP$_{t-0}$  & 0.288 & 0.343 & 0.423 & 0.192 & 0.115 & 0.183 & 1.000 \\
+\bottomrule
+\end{tabular}%
+}
+\end{subtable}
+
+
+
+\begin{subtable}[t]{\textwidth}
+\caption{$\hat{\gamma}_1$}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\toprule
+  & DAXINDX$_t$ & FRCAC40$_t$ & FTSE100$_t$ & HNGKNGI$_t$ & NIKKEI$_t$ & SNGALLS$_t$ & SPCOMP$_t$ \\
+\midrule
+DAXINDX$_{t-1}$ & -0.021 & -0.010 & 0.012 & 0.045 & 0.149 & 0.119 & -0.054 \\
+FRCAC40$_{t-1}$ & 0.118  & 0.021  & 0.014 & 0.121 & 0.189 & 0.165 & -0.033 \\
+FTSE100$_{t-1}$ & 0.114  & 0.034  & 0.071 & 0.191 & 0.167 & 0.201 & -0.068 \\
+HNGKNGI$_{t-1}$ & -0.068 & -0.053 & -0.001 & -0.017 & 0.019 & 0.106 & -0.075 \\
+NIKKEI$_{t-1}$  & -0.101 & -0.058 & -0.103 & 0.015  & -0.014 & 0.024 & -0.073 \\
+SNGALLS$_{t-1}$ & 0.029  & 0.013  & 0.091  & 0.088  & 0.095  & 0.164 & 0.025 \\
+SPCOMP$_{t-1}$  & 0.340  & 0.223  & 0.331  & 0.261  & 0.319  & 0.299 & 0.019 \\
+\bottomrule
+\end{tabular}%
+}
+\end{subtable}
+
+
+
+\begin{subtable}[t]{\textwidth}
+\caption{$\hat{\gamma}_2$}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\toprule
+  & DAXINDX$_t$ & FRCAC40$_t$ & FTSE100$_t$ & HNGKNGI$_t$ & NIKKEI$_t$ & SNGALLS$_t$ & SPCOMP$_t$ \\
+\midrule
+DAXINDX$_{t-2}$ & -0.029 & -0.002 & -0.044 & 0.035 & -0.051 & 0.041 & -0.012 \\
+FRCAC40$_{t-2}$ & -0.022 & 0.022  & -0.057 & 0.019 & -0.053 & 0.037 & 0.012  \\
+FTSE100$_{t-2}$ & -0.001 & 0.033  & 0.001  & 0.069 & -0.044 & 0.081 & -0.008 \\
+HNGKNGI$_{t-2}$ & 0.012  & 0.040  & 0.019  & -0.009 & -0.029 & 0.058 & -0.013 \\
+NIKKEI$_{t-2}$  & -0.027 & -0.034 & -0.027 & -0.042 & -0.089 & 0.013 & -0.021 \\
+SNGALLS$_{t-2}$ & -0.011 & -0.002 & -0.016 & 0.062  & -0.022 & 0.049 & -0.028 \\
+SPCOMP$_{t-2}$  & -0.103 & -0.009 & -0.066 & 0.022  & -0.009 & 0.016 & -0.067 \\
+\bottomrule
+\end{tabular}%
+}
+\end{subtable}
+
+
+\begin{subtable}[t]{\textwidth}
+\caption{$\hat{\gamma}_3$}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\toprule
+  & DAXINDX$_t$ & FRCAC40$_t$ & FTSE100$_t$ & HNGKNGI$_t$ & NIKKEI$_t$ & SNGALLS$_t$ & SPCOMP$_t$\\
+\midrule
+DAXINDX$_{t-3}$ & 0.015 & -0.025 & 0.017 & -0.031 & -0.037 & 0.034 & -0.072\\
+FRCAC40$_{t-3}$ & 0.027 & -0.023 & 0.054 & 0.010 & 0.006 & 0.043 & -0.018\\
+FTSE100$_{t-3}$ & -0.017 & -0.052 & 0.021 & -0.058 & 0.000 & 0.111 & -0.056\\
+HNGKNGI$_{t-3}$ & 0.103 & 0.007 & 0.059 & 0.118 & 0.003 & 0.080 & -0.041\\
+NIKKEI$_{t-3}$ & 0.003 & -0.007 & 0.019 & -0.073 & 0.010 & 0.013 & -0.013\\
+SNGALLS$_{t-3}$ & 0.032 & 0.017 & 0.041 & -0.009 & -0.010 & 0.033 & -0.039\\
+SPCOMP$_{t-3}$ & 0.027 & -0.035 & 0.023 & -0.059 & -0.050 & 0.076 & -0.042\\
+\bottomrule
+\end{tabular}%
+}
+\end{subtable}
+
+
+
+
+\begin{subtable}[t]{\textwidth}
+\caption{$\hat{\gamma}_4$}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|r|r|r|r|r|r|r}
+\toprule
+  & DAXINDX$_t$ & FRCAC40$_t$ & FTSE100$_t$ & HNGKNGI$_t$ & NIKKEI$_t$ & SNGALLS$_t$ & SPCOMP$_t$\\
+\midrule
+DAXINDX$_{t-4}$ & -0.013 & -0.001 & 0.053 & -0.013 & 0.038 & 0.020 & 0.025\\
+FRCAC40$_{t-4}$ & -0.009 & 0.002 & 0.052 & -0.029 & 0.022 & 0.014 & -0.002\\
+FTSE100$_{t-4}$ & 0.063 & 0.053 & 0.063 & 0.111 & 0.021 & 0.047 & 0.032\\
+HNGKNGI$_{t-4}$ & -0.047 & -0.024 & -0.020 & -0.026 & -0.002 & 0.002 & -0.010\\
+NIKKEI$_{t-4}$ & 0.041 & 0.009 & 0.032 & 0.112 & 0.040 & 0.034 & 0.046\\
+SNGALLS$_{t-4}$ & 0.042 & -0.006 & 0.029 & 0.001 & 0.045 & 0.043 & -0.030\\
+SPCOMP$_{t-4}$ & -0.023 & -0.021 & 0.029 & -0.045 & 0.010 & 0.078 & -0.042\\
+\bottomrule
+\end{tabular}%
+}
+\end{subtable}
+\end{table}
+
+Table \ref{table:gamma_matrices} show cross-autocorrelations between the financial indices for $k=\{0,1,3,4\}$. With these tables we aim to analyze whether there are any lead-lag relationships.
 
 For lag 0, $\hat{\gamma}_0$, we are not able to deduce whether there are any lead-lag relationships since the indices are measured at the same time. However, what we can see is that some indices show strong correlations, such as FRCAC40 and DAXINDX_t ($\gamma=0.611$) as well as FRCAC40 and FTSE100 ($\gamma=0.566$). This indicates that these series likely share market drivers.
 
