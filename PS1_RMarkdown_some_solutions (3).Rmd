@@ -74,58 +74,60 @@ The first thing we observe when studying above plots are that the line intersect
 
 #### b) alternative tn-distributions with n degrees of freedom.
 
+Since we know t distribution has fatter tails, we test against the location-scale t distribution $lst(\mu,\tau^2,\nu)$, with same mean $\mu$ and same variance $\tau^2 \frac{\nu}{\nu-2}$ (for $\nu>2$). Since location-scale t distribution is not in base R, we use extraDistr:qlst" to produce the qq-plots. We try with $\nu=5,4,3$.
+
  
-```{r tdist, message=FALSE}
+```{r tdist, message=FALSE, include=FALSE}
 library(extraDistr)
-df=3
+df=5
 tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
-t_plot_1_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
+t_plot_1_df5<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
                                                                         mu=mean(DJ_d$r_Dow_Jones),
                                                                         sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns")
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns, df=5")
 
 tmp = ggplot(DJ_w, aes(sample=(r_close)))
-t_plot_2_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
+t_plot_2_df5<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
                                                                         mu=mean(DJ_w$r_close),
                                                                         sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns")
-
-t_plot_1_df3/t_plot_2_df3
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns, df=5")
 
 df=4
 tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
 t_plot_1_df4<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
                                                                         mu=mean(DJ_d$r_Dow_Jones),
                                                                         sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns")
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns, df=4")
 
 tmp = ggplot(DJ_w, aes(sample=(r_close)))
 t_plot_2_df4<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
                                                                         mu=mean(DJ_w$r_close),
                                                                         sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns")
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns,df=4")
 
-t_plot_1_df4/t_plot_2_df4
 
-df=5
+df=3
 tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
-t_plot_1_df5<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
+t_plot_1_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
                                                                         mu=mean(DJ_d$r_Dow_Jones),
                                                                         sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns")
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns, df=3")
 
 tmp = ggplot(DJ_w, aes(sample=(r_close)))
-t_plot_2_df5<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
+t_plot_2_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
                                                                         mu=mean(DJ_w$r_close),
                                                                         sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns")
-
-t_plot_1_df5/t_plot_2_df5
-
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns, df=3")
 ```
 
+```{r}
+t_plot_1_df5/t_plot_2_df5
+t_plot_1_df4/t_plot_2_df4
+t_plot_1_df3/t_plot_2_df3
+```
+A visual analysis of the QQ-plots show that both empirical distribution can be decently approximated by a t-distribution with 3 degrees of freedom. The ones with $\nu=5$ and $\nu=4$ are better than the normal, but $\nu=3$ is the best. It makes sense since it is also the most fat tailed one. Once again we observe that the t-distribution have a hard time capturing these heavier tails perfectly but it captures it much better than the normal could. 
 
-A visual analysis of the QQ-plots show that both empirical distribution could follow a t-distribution with 3 degrees of freedom. Once again we observe that the t-distribution have a hard time capturing these heavier tails but it captures it much better than the normal could. We still observe some limited discrepancy in the lower left corner where weekly returns show one outlier while daily returns show two outliers. In the upper right corner we observe that the discrepancy between the theoretical distribution and the underlying distribution is bigger. There is especially one outlier that is poorly captured. This outlier and some other extreme observations are closer to the theoretical distribution when studying the daily returns compared to the weekly returns as the distance to the theoretical distribution is smaller in the daily returns. 
+We still observe some limited discrepancy in the lower left corner where weekly returns show one outlier while daily returns show two outliers. In the upper right corner we observe that the discrepancy between the theoretical distribution and the underlying distribution is bigger. There is especially one outlier that is poorly captured. This outlier and some other extreme observations are closer to the theoretical distribution when studying the daily returns compared to the weekly returns as the distance to the theoretical distribution is smaller in the daily returns. 
 
 
 
