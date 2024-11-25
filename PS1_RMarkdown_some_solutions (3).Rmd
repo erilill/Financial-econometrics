@@ -420,8 +420,8 @@ compute_cross_autocorrelation <- function(data, lags) {
   # Loop through lags
   for (lag in lags) {
     gamma <- matrix(NA, nrow = num_portfolios, ncol = num_portfolios)
-    colnames(gamma) <- paste0(series_names, "_t")
-    rownames(gamma) <- paste0(series_names, "_{t-", lag, "}")
+    colnames(gamma) <- paste0("$", series_names, "_t$")
+    rownames(gamma) <- paste0("$", series_names, "_{t-", lag, "}$")
     
     for (i in 1:num_portfolios) {
       for (j in 1:num_portfolios) {
@@ -455,13 +455,12 @@ kable(gamma_matrices$gamma_1, digits = 3, format = "latex", escape = FALSE, capt
 kable(gamma_matrices$gamma_2, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_2$")
 kable(gamma_matrices$gamma_3, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_3$")
 kable(gamma_matrices$gamma_4, digits = 3, format = "latex", escape = FALSE, caption = "$\\hat{\\gamma}_4$")
-gamma_matrices$gamma_1
 ```
 The tables above show cross-autocorrelations between the financial indices for $k=\{0,1,3,4\}$. With these tables we aim to analyze whether there are any lead-lag relationships.
 
-For lag 0, $\hat{\gamma}_0}$, we are not able to deduce whether there are any lead-lag relationships since the indices are measured at the same time. However, what we can see is that some indices show strong correlations, such as FRCAC40 and DAXINDX_t ($\gamma=0.611$) as well as FRCAC40 and FTSE100 ($\gamma=0.566$). This indicates that these series likely share market drivers.
+For lag 0, $\hat{\gamma}_0$, we are not able to deduce whether there are any lead-lag relationships since the indices are measured at the same time. However, what we can see is that some indices show strong correlations, such as FRCAC40 and DAXINDX_t ($\gamma=0.611$) as well as FRCAC40 and FTSE100 ($\gamma=0.566$). This indicates that these series likely share market drivers.
 
-For lag 1, $\hat{\gamma}_1}$, we see indications that there is a lead-lag relationship between SPCOMP and the other indices. We see that there is relatively large positive correlations between SPCOMP$_{t-1}$ and the other indices at time $t$, with the strongest correlations being between SPCOMP$_{t-1}$: And DAXINDX$_t$ ($\gamma=0.340)$, and FTSE100$_t$. This is the expected lead-lag relationship, as S&P 500 (SPCOMP) is the largest capitalization index in the data. From theory and historical results we know that the larger capitalization stocks lead the lag of smaller capitalization stocks. With S&P being the largest capitalization index, we would expect it to lead the smaller capitalization indices lag. Besides the cross-autocorrelations between SPCOMP$_{t-1}$ and the other indices, we do not see any large cross-autocorrelations.
+For lag 1, $\hat{\gamma}_1$, we see indications that there is a lead-lag relationship between SPCOMP and the other indices. We see that there is relatively large positive correlations between SPCOMP$_{t-1}$ and the other indices at time $t$, with the strongest correlations being between SPCOMP$_{t-1}$: And DAXINDX$_t$ ($\gamma=0.340)$, and FTSE100$_t$. This is the expected lead-lag relationship, as S&P 500 (SPCOMP) is the largest capitalization index in the data. From theory and historical results we know that the larger capitalization stocks lead the lag of smaller capitalization stocks. With S&P being the largest capitalization index, we would expect it to lead the smaller capitalization indices lag. Besides the cross-autocorrelations between SPCOMP$_{t-1}$ and the other indices, we do not see any large cross-autocorrelations.
 
 For lag 2, $\hat{\gamma}_2$, we do not see the same relationship. Here, all cross-autocorrelations are small, and many are close to zero. This could be an indication that the indices follow independent market movements. If there are any lead-lag effects, they seem to be short-lived. We see similar results for $\hat{\gamma}_3$ and $\hat{\gamma}_4$. The cross-autocorrelations are small and we see no clear indication of lead-lag relationships between the indices. 
 
