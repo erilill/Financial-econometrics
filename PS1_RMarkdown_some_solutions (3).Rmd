@@ -613,7 +613,7 @@ We first start by examining the ACF and PACF.
 sqlret <- apply(lret_clean, 2, function(x) x^2 )
 ```
 
-```{r create all the ACF and PACF necessary, fig.show = "hide"}
+```{r create all the ACF and PACF necessary, fig.show = "hide", echo=F}
 acf_plt <- pacf_plt <- list()
 for (i in 1:ncol(sqlret)) {
    acf_obj <- acf(sqlret[!is.na(sqlret[,i]),i], main = paste("ACF for series", colnames(sqlret)[i]), plot = FALSE)
@@ -637,7 +637,7 @@ for (i in 1:length(names(pacf_plt))) {
 ```
 
 
-```{r plots DAXINDX}
+```{r plots DAXINDX, echo=F}
 par(mfrow = c(1,3))
 
 # Plot ACF for the first series
@@ -648,7 +648,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 ```
 For DAXINDX we can observe that the ACF plot is slowly decaying with significant autocorrelations over multiple lags. This would indicate volatility clustering and time-varying variance. This finding is according to theory where a period of high volatility is followed by high volatility and a period of low volatility is followed by low volatility. This finding is also evident in the plot of squared returns. The PACF has quite sharp cut indicating a short-term dependency in volatility while the ACF plot indicates a long-term dependency. The fact that we observe both a short-term and long-term dependency indicates that the variance is not constant over time but rather depends on past values which we interpret as that the time series exhibits conditional heteroskedasticity. 
 
-```{r plots for FRCAC40}
+```{r plots for FRCAC40, echo=F}
 par(mfrow = c(1, 3))
 tmp <- 2
 plot(acf_plt[[tmp]], main = paste("ACF for series", names(acf_plt)[tmp]))
@@ -658,7 +658,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 These findings are very similar to the findings observed when analyzing the German index (DAXINDX). We observe the same slowly decaying ACF, the PACF observe quite sharp cut off after the first few lags which leads us to interpret it that this time series also exhibit both short-term and long-term dependency, once again indicating on conditional heteroskedasticity. Further on, all plots indicate on clustered volatility. 
 
 
-```{r plots for FTSE100}
+```{r plots for FTSE100, echo=F}
 par(mfrow = c(1, 3))
 
 # Plot ACF for the first series
@@ -670,7 +670,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 For the UK-based Financial Time Stock Exchange we find that the main difference is in the PACF-plot which is cut off within the first couple of lags. The second lag already is quite small in relation to the first. This would indicate a weaker short-term memory but since the ACF is slowly decaying and we can observe some clusters in the right-most plot, the time series still exhibits some properties that it is reactive to recent shocks. The slowly decaying property of the ACF-plot can be some evidence towards the mean-reverting property in addition to the theory regarding volatility clustering. 
 
 
-```{r plots for HNGKNGI}
+```{r plots for HNGKNGI, echo=FALSE}
 par(mfrow = c(1, 3))
 
 # Plot ACF for the first series
@@ -682,7 +682,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 
 For the Hong-kong based index we observe a sharp cut off in the ACF plot. We still observe three significant lags which would be lag 1, 3, and 5. The PACF confirms this finding which indicates that there is some short-term dependency. Since the volatility is influenced by previous recent lags this would still indicate some clustering and responsiveness to recent shocks but no long-term dependency. This could indicate on a stationary variance, however, the plotted squared returns show some spikes and we still have the fact the time series shows short-term dependency. All in all, the clustering phenomena seems quite week which can also be observed if we compare the plotted square logarithmic returns with for example the graph of FRCAC40. 
 
-```{r plots for NIKKEI}
+```{r plots for NIKKEI, echo=FALSE}
 par(mfrow = c(1, 3))
 
 # Plot ACF for the first series
@@ -694,7 +694,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 For the Japanese index we observe a quite sharp cut-off in the ACF plot but the values are all significant. Even further, we observe some significant spikes between lags 15 and 20 and around 28. This indicates that the volatility is predominantly influenced by short-term memory. The observations around lag 15-20 and 28 could indicate that there is some seasonality or other external factor which makes the underlying patterns in volatility appear at regular time intervals. For the plot of squared returns we observe some high spikes, followed by decaying spikes. This could indicate on some conditional heteroskedasticity. 
 
 
-```{r plots for SNGALLS}
+```{r plots for SNGALLS, echo=FALSE}
 par(mfrow = c(1, 3))
 
 # Plot ACF for the first series
@@ -707,7 +707,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 In the ACF plot we observe that the first four lags are significant and relatively stable, interrupted by lag number three which is also significant but much smaller. After lag 5 we observe quite many significant lags but that are barely significant. In the PACF plot we observe that lag 2 is not significant but 1, 3, and 4 is significant. Also 8, 9 and 12 are significant. For this reason it seems that the short-term dependency is stronger than the long-term according to the ACF-plot. The significance of lags 8, 9, and 12 could indicate on some periodic effect. In the plotted squared returns we can observe some very meaningful clustering. 
 
 
-```{r plots for SPCOMP}
+```{r plots for SPCOMP, echo=FALSE}
 par(mfrow = c(1, 3))
 
 # Plot ACF for the first series
@@ -719,7 +719,7 @@ plot(sqlret[, tmp], type = "l", main = "Plot of squared returns", ylab = colname
 
 This time series shows some short-term dependencies but nothing significant in the long run. Both the ACF and PACF plots indicates on this observations. Up to around lag 5 is significant for both with lag 8 being barely significant in the ACF plot. This means that the volatility is mainly being driven by recent shocks. Also the plot of squared returns show weaker signs of clustering but of course, there are some clustering which can be confirmed by the ACF and PACF plots since almost all lags up to 5 are significant in both plots. 
 
-```{r corr(y_t^2, y_t-1)}
+```{r corr(y_t^2, y_t-1), echo=FALSE}
 # Calculate lagged returns (y_{t-1})
 i <- 2
 correlation <- numeric(ncol(sqlret))
