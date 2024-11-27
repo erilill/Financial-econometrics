@@ -38,7 +38,7 @@ data("DJ_d")
 
 ### 1. Plot the series of log returns and compute descriptive statistics. Which distributional properties do you find? Do you find differences between daily and weekly data?
 
-```{r, fig.height=4, fig.width=6, fig.align='center', fig.cap= "An example Figure.",echo=F}
+```{r, fig.height=4, fig.width=6, fig.align='center',echo=F}
 p1 <- ggplot(DJ_d, aes(y=r_Dow_Jones,x=1:nrow(DJ_d))) + geom_line() +
   labs(x='time horizon',y='daily log return')
 
@@ -53,71 +53,89 @@ Let us look at some descriptive statistics.
 rbind(describe(DJ_d$r_Dow_Jones),describe(DJ_w$r_close))
 ```
 
-Both series have means of zero. Daily (log) returns has standard deviation 0.01 and weekly (log) returns 0.03. Daily returns has a skewness of -0.96 and Weekly returns has a skewness of  -1.09. So both are skewed, although the weekly returns are a bit more skewed (which we can also see by looking at the differences of absolute values of the min and max for both series). Daily returns have a kurtosis of 36.6 and weekly a kurtosis of 15.06. So the largest difference between the daily and the weekly data is that the daily returns have much fatter tails than the weekly returns, as it has more than double the kurtosis. If we compare both distributions to a baseline, say a normal distribution, we know all normal distributions have skewness of 0 and kurtosis of 3. Since we have for both series skewness values quite far from 0 and kurtosis values which are much larger than 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
+Both series have means of zero. Daily (log) returns has standard deviation 0.01 and weekly (log) returns 0.03. Daily returns has a skewness of -0.96 and Weekly returns has a skewness of  -1.09. So both are skewed, although the weekly returns are a bit more skewed (which we can also see by looking at the differences of absolute values of the min and max for both series). They are also both left-skewed, which implies large returns are often negative. This in consistent with the stylized facts about asset returns that we know from beforehand.Daily returns have a kurtosis of 36.6 and weekly a kurtosis of 15.06. So the largest difference between the daily and the weekly data is that the daily returns have much fatter tails than the weekly returns, as it has more than double the kurtosis. From stylized facts about asset returns, we know that they often have overkurtosis, i.e. over 3, so this is also consistent with what we know/expect. If we compare both distributions to a baseline, say a normal distribution, we know all normal distributions have skewness of 0 and kurtosis of 3. Since we have for both series skewness values quite far from 0 and kurtosis values which are much larger than 3, this is strong evidence that the returns are not normally distributed. We can further investigate which distribution seems most likely by producing QQ plots.
 
 
 ### 2. Evaluate the empirical distributions of the index log returns using quantile-quantile plots (QQ-plots). Test the empirical distribution against
 
 #### a) a normal distribution (with same mean and variance)
 
-```{r ndist}
-tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones-mean(r_Dow_Jones))/sd(r_Dow_Jones)))
-norm_plot1 <- tmp + geom_qq(distribution=stats::qnorm, dparams=list(mean=0, sd=1)) + geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns")
+We produce qq plots for both returns with a normal distribution that has the same mean and variance.
 
-tmp = ggplot(DJ_w, aes(sample=(r_close-mean(r_close))/sd(r_close)))
-norm_plot2 <- tmp + geom_qq(distribution=stats::qnorm, dparams=list(mean=0, sd=1)) + geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns")
+```{r, include=FALSE}
+tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
+norm_plot1 <- tmp + geom_qq(distribution=stats::qnorm,
+                            dparams=list(mean=mean(DJ_d$r_Dow_Jones), sd=sd(DJ_d$r_Dow_Jones))) +
+                    geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Daily Log Returns")
 
-norm_plot1/norm_plot2
+tmp = ggplot(DJ_w, aes(sample=(r_close)))
+norm_plot2 <- tmp + geom_qq(distribution=stats::qnorm,
+                            dparams=list(mean=mean(DJ_w$r_close), sd=sd(DJ_w$r_close))) +
+                    geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Weekly Log Returns")
+
 ```
 
-The first thing we observe when studying above plots are that the line intersects the data in the middle quite good. When it comes to the tails, we observe that the normal distribution captures these observations badly. This would indicate on a heavier-tailed data than the normal distribution would show. This finding is in accordance with the stylized fact about asset returns that the empirical distribution of asset returns show fat tails compared to the normal distribution.
+```{r}
+norm_plot1/norm_plot2
+```
+So we know that if the points lie on the red qq line, the data can be deemed to follow the distribution theoreticized. If we see deviations from the line, this indicates that it does not follow the theoretical distribution well.
 
-#### b) alternative tn-distributions with n degrees of freedom.
+The first thing we observe when studying above plots are that the data lies on the line in the middle. When it comes to the tails, we observe that the normal distribution captures these observations badly. This would indicate on a heavier-tailed data than the normal distribution would show. This finding is in accordance with the stylized fact about asset returns that the empirical distribution of asset returns show fat tails compared to the normal distribution. So the QQ plots clearly show that both the daily and weekly log returns are highly unlikely to follow the normal distribution.
 
-Since we know t distribution has fatter tails, we test against the location-scale t distribution $lst(\mu,\tau^2,\nu)$, with same mean $\mu$ and same variance $\tau^2 \frac{\nu}{\nu-2}$ (for $\nu>2$). Since location-scale t distribution is not in base R, we use extraDistr:qlst" to produce the qq-plots. We try with $\nu=5,4,3$.
+#### b) alternative tn-distributions with $\nu$ degrees of freedom.
+
+
+Since we know t distribution has fatter tails, we test against the location-scale t distribution $lst(\mu,\tau^2,\nu)$, with same mean $\mu$ and same variance $\tau^2 \frac{\nu}{\nu-2}$ (for $\nu>2$). Of course we could also standardize the log returns, by subtracting $\mu$ and dividing by $\tau$ to compare against student's t distribution. Since location-scale t distribution is not in base R, we use "extraDistr:qlst" to produce the qq-plots. We try with $\nu=5,4,3$, i.e. we start start with the most thin tails, and df=3 having the fattest tails.
 
  
-```{r tdist, message=FALSE, include=FALSE}
+```{r tdist, message=FALSE,warning=FALSE, include=FALSE}
 library(extraDistr)
 df=5
 tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
-t_plot_1_df5<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
-                                                                        mu=mean(DJ_d$r_Dow_Jones),
-                                                                        sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns, df=5")
+t_plot_1_df5<- tmp + geom_qq(distribution=extraDistr::qlst,
+                             dparams=list(df=df,
+                                          mu=mean(DJ_d$r_Dow_Jones),
+                                          sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Daily Log Returns, df=5")
 
 tmp = ggplot(DJ_w, aes(sample=(r_close)))
-t_plot_2_df5<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
-                                                                        mu=mean(DJ_w$r_close),
-                                                                        sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns, df=5")
+t_plot_2_df5<- tmp + geom_qq(distribution=extraDistr::qlst,
+                             dparams=list(df=df,
+                                          mu=mean(DJ_w$r_close),
+                                          sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle(" Weekly Log Returns, df=5")
 
 df=4
 tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
-t_plot_1_df4<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
-                                                                        mu=mean(DJ_d$r_Dow_Jones),
-                                                                        sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns, df=4")
+t_plot_1_df4<- tmp + geom_qq(distribution=extraDistr::qlst,
+                             dparams=list(df=df,
+                                          mu=mean(DJ_d$r_Dow_Jones),
+                                          sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Daily Log Returns, df=4")
 
 tmp = ggplot(DJ_w, aes(sample=(r_close)))
-t_plot_2_df4<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
-                                                                        mu=mean(DJ_w$r_close),
-                                                                        sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns,df=4")
+t_plot_2_df4<- tmp + geom_qq(distribution=extraDistr::qlst,
+                             dparams=list(df=df,
+                                          mu=mean(DJ_w$r_close),
+                                          sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Weekly Log Returns,df=4")
 
 
 df=3
 tmp = ggplot(DJ_d, aes(sample=(r_Dow_Jones)))
-t_plot_1_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
-                                                                        mu=mean(DJ_d$r_Dow_Jones),
-                                                                        sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Daily Log Returns, df=3")
+t_plot_1_df3<- tmp + geom_qq(distribution=extraDistr::qlst,
+                             dparams=list(df=df,
+                                          mu=mean(DJ_d$r_Dow_Jones),
+                                          sigma=sqrt(var(DJ_d$r_Dow_Jones)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Daily Log Returns, df=3")
 
 tmp = ggplot(DJ_w, aes(sample=(r_close)))
-t_plot_2_df3<- tmp + geom_qq(distribution=extraDistr::qlst, dparams=list(df=df,
-                                                                        mu=mean(DJ_w$r_close),
-                                                                        sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
-  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Standardized Weekly Log Returns, df=3")
+t_plot_2_df3<- tmp + geom_qq(distribution=extraDistr::qlst,
+                             dparams=list(df=df,
+                                          mu=mean(DJ_w$r_close),
+                                          sigma=sqrt(var(DJ_w$r_close)*(df-2)/df))) +
+  geom_abline(aes(intercept=0,slope=1),color="red")+ggtitle("Weekly Log Returns, df=3")
+
 ```
 
 ```{r}
@@ -125,15 +143,17 @@ t_plot_1_df5/t_plot_2_df5
 t_plot_1_df4/t_plot_2_df4
 t_plot_1_df3/t_plot_2_df3
 ```
-A visual analysis of the QQ-plots show that both empirical distribution can be decently approximated by a t-distribution with 3 degrees of freedom. The ones with $\nu=5$ and $\nu=4$ are better than the normal, but $\nu=3$ is the best. It makes sense since it is also the most fat tailed one. Once again we observe that the t-distribution have a hard time capturing these heavier tails perfectly but it captures it much better than the normal could. 
-
-We still observe some limited discrepancy in the lower left corner where weekly returns show one outlier while daily returns show two outliers. In the upper right corner we observe that the discrepancy between the theoretical distribution and the underlying distribution is bigger. There is especially one outlier that is poorly captured. This outlier and some other extreme observations are closer to the theoretical distribution when studying the daily returns compared to the weekly returns as the distance to the theoretical distribution is smaller in the daily returns. 
-
+A visual analysis of the QQ-plots show that both empirical distributions can be decently approximated by a non standardized t-distribution with 3 degrees of freedom and same means and variances. The ones with $\nu=5$ and $\nu=4$ are better than the normal, since the points in the tails are more close to the lines, but $\nu=3$ is the best. It makes sense since it is also the most fat tailed one. But even for $\nu=3$ it is not perfect. Also, the daily log returns seem to follow the non-standardized t with $\nu=3$ better than the weekly, since the weekly has some points that are quite big outliers. The conclusion is that the empirical distributions can be quite well approximated by a non-standardized t distribution with same mean and variance and 3 degrees of freedom.
 
 
 ### 3. Compute a $\chi^2$-goodness-of-fit test against a standard normal, $t_{df}$ and mixture of normals.
 
-We test the null of three different distributions. First a standard normal, then a $t_3$, and then a mixture of normals, where the first normal is standard normal, and the second is $N(0,\sigma_2^2)$, and the mixture is decided by the mixing probability $\alpha$.
+We test the null that the standardized variables follow three different distributions, or more formally:
+
+$H_0:$ The true distribution of the standardized returns $r_{it}$ is $F(r_{it},\theta)$, where $\theta$ is a vector of distribution parameters.
+
+
+So we first test against a standard normal, then a $t_3$, and then a mixture of normals. Regarding the mixture of normals, what mixture? We can deduce from the code that we should try the mixture with $\sigma_1^2=1$ and some $\sigma_2^2$. Also $\mu_1=\mu_2=0$. So the first normal is standard normal, and the second is $N(0,\sigma_2^2)$, and the mixture is decided by the mixing probability $\alpha$, such that the null is that the standardized returns $r_{it} \sim (1-\alpha)N(0,1)+\alpha N(0,\sigma_2^2)$. We use optimization to find the best $\alpha$ and $\sigma_2$, i.e. the pair that produces the lowest test statistic. Let us look at some plots. First define $q_{it}=F(r_{it},\theta)$, i.e. the CDF of $F(\cdot)$ evaluated at $r_{it}$. The distribution of $q_{it}$ under the null is uniform, i.e. $q_{it} \sim U(0,1)$. So we can plot our $q_{it}$ under each null, and if the null distribution is a very good approximation of the empirical distributions, we should see that they are uniform. So we generate a histogram with $N_{r_{it}}$ simulated values from the $U(0,1)$ distribution, along with the $q_{it}$ histograms.
 
 ```{r,include=FALSE}
 vdata = DJ_d$r_Dow_Jones
@@ -184,7 +204,7 @@ func <- function(vx){
   return(sum((vn-length(vdata)/ik)**2/(length(vdata)/ik)))
 }
 
-func(c(0.15,4))
+#func(c(0.15,4))
 
 optim(par=c(0.1,4),fn=func,method="BFGS")
 alpha = 0.1514736 #daily
@@ -197,7 +217,7 @@ vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
 
 p3 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("A mixture of Normals",subtitle="alpha=0.15, sigma_2=4.0")
+  ggtitle("(1-alpha)N(0,1)+alphaN(0,sigma_2^2)",subtitle="alpha=0.15, sigma_2=4.0")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -252,15 +272,15 @@ func(c(0.15,4))
 optim(par=c(0.1,4),fn=func,method="BFGS")
 #alpha = 0.1514736 #daily
 #sigma = 4.0013995 #daily
-alpha = 0.33 #weekly
-sigma = 2.73 #weekly
+alpha = 0.3371279 #weekly
+sigma = 2.7310371 #weekly
 ndata = vdata*sqrt((1-alpha) + alpha*sigma**2)
 
 vq = (1-alpha)*pnorm(ndata) + alpha*pnorm(ndata,sd=sigma)
 
 p7 <- ggplot(data.frame(vq), aes(x = vq)) +
   geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("A mixture of Normals", subtitle="alpha=0.33, sigma_2=2.73")
+  ggtitle("(1-alpha)N(0,1)+alphaN(0,sigma_2^2)", subtitle="alpha=0.33, sigma_2=2.73")
 
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
@@ -278,30 +298,32 @@ p4 <- ggplot(data.frame(unifs), aes(x = unifs)) +
 ```{r}
 pd <- (p1+p2+p3+p4)
 pd + plot_annotation(
-  title = 'Dow jones daily log returns')
+  title = 'Standardized Dow jones daily log returns')
 ```
 
-So we have the daily log returns. We know from Rosenblatt that if the null is true, we should see that the bins resemble the bins of the $U(0,1)$ in the bottom right. So essentially, which plot looks the most like it? It is clear that the standard normal null seems unlikely. ALthough the $t_3$ and mixture of normals look more reasonable, but it is still not perfect. But their nulls seem at least more reasonable than the standard normal.
+So we have the (standardized) daily log returns. We know from above (Rosenblatt) that if the null is true, we should see that the bins resemble the bins of the $U(0,1)$ in the bottom right. So essentially, which plot looks the most like it? It is clear that the standard normal null seems unlikely. Although the $t_3$ and mixture of normals look more reasonable, but it is still not perfect. But their nulls seem at least more reasonable than the standard normal.
 
 ```{r}
 pw <- (p5+p6+p7+p4)
 pw + plot_annotation(
-  title = 'Dow jones weekly log returns')
+  title = 'Standardized Dow jones weekly log returns')
 ```
 
-What about weekly log returns? Again, the standard normal null seems unlikely. But now, the $t_3$ null also seems unlikely, and the mixture of normal null looks like the most reasonable. We can look at the computed test statistics in the table below. As we can see, for both daily and weekly log returns, the standard normal had the highest test statistics. For daily log returns, the $t_3$ null had the best test statistic, although we do reject it. For the weekly log returns, we can see as indicated from the plot, that the mixture of normals had the best test statistic, although we still reject the null.
+What about standardized weekly log returns? Again, the standard normal null seems unlikely. But now, the $t_3$ null also seems unlikely, and the mixture of normal null looks like the most reasonable. But now let us look at the computed test statistics in the table below.
 
 \begin{table}[H]
+\centering
 \begin{tabular}{|c|cc|}
-           & \multicolumn{2}{c|}{Test statistic (crit. 1\% = 6.41)}      \\ \hline
+           & \multicolumn{2}{c|}{Test statistic (crit. 5\% =  8.67)}      \\ \hline
 $H_0$       & \multicolumn{1}{c|}{daily log returns} & weekly log returns \\ \hline
 N(0,1)     & \multicolumn{1}{c|}{3406}              & 431                \\
 $t_3$       & \multicolumn{1}{c|}{147}               & 114                \\
-Mix of N() & \multicolumn{1}{c|}{212}               & 88                
+$(1-\alpha)N(0,1)+\alpha N(0,\sigma_2^2)$ & \multicolumn{1}{c|}{212}               & 88                
 \end{tabular}
 \end{table}
 
-So we can not for either the daily or weekly log returns accept the null of either distributions, but going by the obtained test statistics, for the daily log returns the $t_3$ is the best approximation and for the weekly log returns the mixture of normals is the best approximation.
+
+We can see that we can not accept any null hypothesis whatsoever, since all the test statistics are much larger than the critical value at the 5\% level. So for neither the daily or weekly standardized log returns, we can not accept the null hypothesis of any of the three distributions. But we can still look at which of these distributions provide the best fit for the data. As we can see, for both daily and weekly log returns, the standard normal had the highest test statistics, i.e. the worst fit for the data. For daily log returns, the $t_3$ had the best fit for the data. For the weekly log returns, that the mixture of normals had the best fit. Now regarding the difference between daily and monthly data, for all three distributions/nulls we obtained higher test statistics for the daily than for the weekly returns, i.e. all null distributions provided a better fit for the weekly data than for the daily data.
 
 ## B. Dynamical properties of financial return series
 
