@@ -1,0 +1,51 @@
+---
+title: "Report for PS 2"
+author:
+- Mark Becker, Erik Lillrank & Vilim Nedic
+date: ''
+output:
+  pdf_document:
+    keep_tex: true
+  df_print: kable
+  html_document:
+    df_print: paged
+  word_document: default
+header-includes:
+  - \usepackage{float}
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
+  - \usepackage{adjustbox}
+toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(FE)
+library(knitr)
+data("DJ_w")
+data("DJ_d")
+data("portcap_m")
+```
+
+# A. Testing for asset return predicatability.
+
+## 1. Do you find significant evidence for asset return predictability on the daily and weekly level?
+
+## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
+
+## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
+
+## Draw overall conclusions regarding asset return predictability based on this analysis.
+
+
+# B. Testing for Return Predictability in Size Portfolios
+
+## 1. Is there a relationship between market capitalization and asset return predictability and does it also hold for higher aggregated returns?
+
+## 2. Is this relationship stable over time?
+
+## 3. Are there significant cross-autocorrelations between different size portfolios?
+
+## 4. Can you confirm the results of Campbell/Lo/MacKinlay (1997) that high-cap stocks lead small-cap stocks? How stable is this result over time?
