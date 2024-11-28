@@ -24,6 +24,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(FE)
 library(knitr)
+library(forecast)
+library(patchwork)
 data("DJ_w")
 data("DJ_d")
 data("portcap_m")
@@ -32,6 +34,73 @@ data("portcap_m")
 # A. Testing for asset return predicatability.
 
 ## 1. Do you find significant evidence for asset return predictability on the daily and weekly level?
+
+ACF: 
+```{r A1_ACF, echo=F}
+par(mfrow=c(1,2))
+p1 <- Acf(DJ_d$r_Dow_Jones, lag.max = 20, main = "Dow Jones daily")
+p2 <- Acf(DJ_w$r_close, lag.max = 20, main = "Dow Jones weekly")
+par(mfrow=c(1,1))
+```
+
+Ljung-Box test:
+
+```{r A1_LB, echo=F}
+LB <- function(vx,lag,ip){
+  tmp = acf(vx,lag.max=lag,plot=F)$acf
+  tmp = tmp[2:(lag+1)]**2
+  test = sum(tmp/(length(vx)-1:lag))*length(vx)*(length(vx)+2)
+  return(list(test=test, pval=1-pchisq(test,df=lag-ip)))
+}
+
+gridsearch <- function(data, lag){
+  results <- matrix(NA, nrow=length(lag), ncol = 2)
+  for (j in 1:length(lag)){
+      lagj <- lag[j]
+      results[j,1]<-LB(vx=data,lag=lagj,ip=0)$test
+      results[j,2]<-LB(vx=data,lag=lagj,ip=0)$pval
+    }
+  return(results)
+}
+lag = c(1:20)
+gridsearch(DJ_d$r_Dow_Jones, lag)
+gridsearch(DJ_w$r_close, lag)
+
+```
+Variance ratio test:
+
+```{r A1_VR, echo=F}
+VDR <- function(vr,iq){
+  iTT = length(vr)
+  im = floor(iTT/iq)
+  iT = im*iq
+  
+  rr = vr[1:iT]
+  mu = mean(rr)
+  sa2 = var(rr)
+  
+  arr = NULL
+  for(iter in 1:(iT-iq+1))
+    arr = c(arr,sum(rr[iter:(iter+iq-1)]))
+  
+  sc2 = sum((arr-mu*iq)**2)/iq/(iT-iq+1)/(1-(1/im))
+  
+  VD = sc2 - sa2
+  VR = sc2/sa2
+  tmp = sqrt(2*(2*iq-1)*(iq-1)/3/iq)
+  
+  VD = VD*sqrt(iT)/sa2/tmp
+  VR = (VR-1)*sqrt(iT)/tmp
+  
+  RW1_p_VD <- 2*(1-pnorm(abs(VD)))
+  RW1_p_VR <- 2*(1-pnorm(abs(VR)))
+  
+  return(list(VD=VD, VR=VR, RW1_p_VD=RW1_p_VD, RW1_p_VR=RW1_p_VR))
+}
+
+res_d <- VDR(vr=DJ_d$r_Dow_Jones,iq=5)
+res_w <- VDR(vr=DJ_w$r_close,iq=5)
+```
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
