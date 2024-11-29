@@ -165,9 +165,11 @@ For the daily series, the variance distance (VR) and ratio (VD) are above 1, ind
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
+We create the annualized two-day and two-week returns like below.
+
 ```{r, echo=F}
 oneday <- DJ_d$r_Dow_Jones
-oneday <- oneday[-1]
+oneday <- oneday[-1] # remove first obs, otherwise below doesn't work
 oneweek <- DJ_w$r_close
 
 twoday <- oneday[seq(1, length(oneday), by = 2)] + oneday[seq(2, length(oneday), by = 2)]
@@ -176,7 +178,10 @@ twoday_ann <- twoday/2
 
 twoweek <- oneweek[seq(1, length(oneweek), by = 2)] + oneweek[seq(2, length(oneweek), by = 2)]
 twoweek_ann <- twoweek/2
+```
 
+
+```{r, echo=F}
 par(mfrow=c(1,2))
 ts.plot(twoday_ann)
 ts.plot(twoweek_ann)
