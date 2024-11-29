@@ -348,6 +348,7 @@ For 2-week data and period 1 we only observe period 7 to be significant. For per
 
 
 # B. Testing for Return Predictability in Size Portfolios
+Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
 
 ## 1. Is there a relationship between market capitalization and asset return predictability and does it also hold for higher aggregated returns?
 ```{r}
