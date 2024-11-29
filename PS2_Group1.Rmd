@@ -94,7 +94,7 @@ cbind(t1,t2)
 \end{tabular}
 \end{table}
 
-We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictions. 
+We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictability. 
 
 Variance ratio test:
 
@@ -161,9 +161,11 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \end{tabular}
 \end{table}
 
+For the daily series, the variance distance (VR) and ratio (VD) are above 1, indicating that we have positive auto-correlation. The p-values are zero for all $q$, indicating that we have significant evidence for asset return predictability. For the weekly series, VR and VD are below 1, indicating negative auto-covariance. However, looking at the p-values we see that the results are not statistically significant and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the weekly data.
+
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
-```{r A1_VR, echo=F}
+```{r, echo=F}
 oneday <- DJ_d$r_Dow_Jones
 oneday <- oneday[-1]
 oneweek <- DJ_w$r_close
@@ -202,20 +204,94 @@ LB(twoday_ann, lag=10, ip=0)
 ```
 So the result tells us that for the two-day returns, that we strongly reject $(\alpha=0.01)$ the null of the first 20 autocorrelations being all zero. For the two-week returns, we strongly reject $(\alpha=0.01)$ the null of the first 10 autocorrelations being zero. The latter result is quite suprising since we did not see significant spikes at 10 lags or earlier for the two-week. These results strongly indicate that there is prevalence of asset return predictability for both two-day and two-week returns.
 
+Variance ratio test:
+
+```{r, include=F}
+VDR <- function(vr,iq){
+  iTT = length(vr)
+  im = floor(iTT/iq)
+  iT = im*iq
+  
+  rr = vr[1:iT]
+  mu = mean(rr)
+  sa2 = var(rr)
+  
+  arr = NULL
+  for(iter in 1:(iT-iq+1))
+    arr = c(arr,sum(rr[iter:(iter+iq-1)]))
+  
+  sc2 = sum((arr-mu*iq)**2)/iq/(iT-iq+1)/(1-(1/im))
+  
+  VD = sc2 - sa2
+  VR = sc2/sa2
+  tmp = sqrt(2*(2*iq-1)*(iq-1)/3/iq)
+  
+  VD = VD*sqrt(iT)/sa2/tmp
+  VR = (VR-1)*sqrt(iT)/tmp
+  
+  RW1_p_VD <- 2*(1-pnorm(abs(VD)))
+  RW1_p_VR <- 2*(1-pnorm(abs(VR)))
+  
+  return(list(VD=VD, VR=VR, RW1_p_VD=RW1_p_VD, RW1_p_VR=RW1_p_VR))
+}
+
+q <- c(2,4,8,16)
+res_d <- matrix(NA, nrow=4, ncol=4)
+res_w <- matrix(NA, nrow=4, ncol=4)
+
+for (i in 1:length(q)){
+res_1 <- VDR(vr=twoday_ann,iq=q[i])
+res_2 <- VDR(vr=twoweek_ann,iq=q[i])
+res_d[i,1] <- res_1$VD
+res_d[i,2] <- res_1$RW1_p_VD
+res_d[i,3] <- res_1$VR
+res_d[i,4] <- res_1$RW1_p_VR
+res_w[i,1] <- res_2$VD
+res_w[i,2] <- res_2$RW1_p_VD
+res_w[i,3] <- res_2$VR
+res_w[i,4] <- res_2$RW1_p_VR
+}
+cbind(round(res_d,3),round(res_w,3))
+```
+\begin{table}[ht]
+\centering
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Dow jones two-day and two-week (annualized) log returns}
+\label{tab:VDR2}
+\begin{tabular}{c|cccc|cccc}
+\hline
+\multicolumn{1}{c|}{} &
+\multicolumn{4}{c|}{Data Column 1} & \multicolumn{4}{c}{Data Column 2} \\ \hline
+q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
+1 & -0.880 & 0.379 & -0.880 & 0.379 & -0.603 & 0.546 & -0.603 & 0.546 \\
+2 & 2.068 & 0.039 & 2.068 & 0.039 & 0.324 & 0.746 & 0.324 & 0.746 \\
+3 & 3.355 & 0.001 & 3.355 & 0.001 & 0.662 & 0.508 & 0.662 & 0.508 \\
+4 & 3.070 & 0.002 & 3.070 & 0.002 & 1.487 & 0.137 & 1.487 & 0.137 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+
+
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
 
-```{r Q 1.3 Splitting the data}
+```{r}
 # Dividing the data set into three equally sized time windows 
-djd_s1 <- DJ_d[1:6280, 3]
-djd_s2 <- DJ_d[6281:12560, 3]
-djd_s3 <- DJ_d[12561:18839, 3]
-djw_s1 <- DJ_w[1:1562, 3]
-djw_s2 <- DJ_w[1563:3124, 3]
-djw_s3 <- DJ_w[3125:4686, 3]
+djd_s1 <- DJ_d[1:6280, ]
+djd_s2 <- DJ_d[6281:12560, ]
+djd_s3 <- DJ_d[12561:18839, ]
+djw_s1 <- DJ_w[1:1562, ]
+djw_s2 <- DJ_w[1563:3124, ]
+djw_s3 <- DJ_w[3125:4686, ]
 ```
 
-```{r Q 1.3 ACF}
+```{r}
 par(mfrow=c(1,3))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 823aa2386fa3a3a9d93ce9ced2aabed139ce93de
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"), ylim = c(-0.25, 0.25))
 Acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"), ylim = c(-0.25, 0.25))
 Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"), ylim = c(-0.25, 0.25))
@@ -223,6 +299,18 @@ Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"), ylim = c(-
 Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"), ylim = c(-0.25, 0.25))
 Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"), ylim = c(-0.25, 0.25))
 Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"), ylim = c(-0.25, 0.25))
+<<<<<<< HEAD
+=======
+
+Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"))
+Acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"))
+Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"))
+
+Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"))
+Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"))
+Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"))
+
+>>>>>>> 823aa2386fa3a3a9d93ce9ced2aabed139ce93de
 par(mfrow=c(1,1))
 ```
 
@@ -230,7 +318,7 @@ We cannot find anything that would indicate a structural break in the different 
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
-```{r splitting the 2-day and 2-week data}
+```{r}
 length(twoday_ann) / 3 # 3140
 length(twoweek_ann) / 3 # 781
 
@@ -242,7 +330,7 @@ dj_2w_p2 <- twoweek_ann[782:1562]
 dj_2w_p3 <- twoweek_ann[1563:2343]
 ```
 
-```{r acf plots for subperiods}
+```{r}
 par(mfrow=c(1,3))
 acf(dj_2d_p1, lag.max = 20, main = paste("ACF for DJ_d 2-day period 1"))
 acf(dj_2d_p2, lag.max = 20, main = paste("ACF for DJ_d 2-day period 2"))
