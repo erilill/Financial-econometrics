@@ -204,6 +204,76 @@ LB(twoday_ann, lag=10, ip=0)
 ```
 So the result tells us that for the two-day returns, that we strongly reject $(\alpha=0.01)$ the null of the first 20 autocorrelations being all zero. For the two-week returns, we strongly reject $(\alpha=0.01)$ the null of the first 10 autocorrelations being zero. The latter result is quite suprising since we did not see significant spikes at 10 lags or earlier for the two-week. These results strongly indicate that there is prevalence of asset return predictability for both two-day and two-week returns.
 
+Variance ratio test:
+
+```{r, include=F}
+VDR <- function(vr,iq){
+  iTT = length(vr)
+  im = floor(iTT/iq)
+  iT = im*iq
+  
+  rr = vr[1:iT]
+  mu = mean(rr)
+  sa2 = var(rr)
+  
+  arr = NULL
+  for(iter in 1:(iT-iq+1))
+    arr = c(arr,sum(rr[iter:(iter+iq-1)]))
+  
+  sc2 = sum((arr-mu*iq)**2)/iq/(iT-iq+1)/(1-(1/im))
+  
+  VD = sc2 - sa2
+  VR = sc2/sa2
+  tmp = sqrt(2*(2*iq-1)*(iq-1)/3/iq)
+  
+  VD = VD*sqrt(iT)/sa2/tmp
+  VR = (VR-1)*sqrt(iT)/tmp
+  
+  RW1_p_VD <- 2*(1-pnorm(abs(VD)))
+  RW1_p_VR <- 2*(1-pnorm(abs(VR)))
+  
+  return(list(VD=VD, VR=VR, RW1_p_VD=RW1_p_VD, RW1_p_VR=RW1_p_VR))
+}
+
+q <- c(2,4,8,16)
+res_d <- matrix(NA, nrow=4, ncol=4)
+res_w <- matrix(NA, nrow=4, ncol=4)
+
+for (i in 1:length(q)){
+res_1 <- VDR(vr=twoday_ann,iq=q[i])
+res_2 <- VDR(vr=twoweek_ann,iq=q[i])
+res_d[i,1] <- res_1$VD
+res_d[i,2] <- res_1$RW1_p_VD
+res_d[i,3] <- res_1$VR
+res_d[i,4] <- res_1$RW1_p_VR
+res_w[i,1] <- res_2$VD
+res_w[i,2] <- res_2$RW1_p_VD
+res_w[i,3] <- res_2$VR
+res_w[i,4] <- res_2$RW1_p_VR
+}
+cbind(round(res_d,3),round(res_w,3))
+```
+\begin{table}[ht]
+\centering
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Dow jones two-day and two-week (annualized) log returns}
+\label{tab:VDR2}
+\begin{tabular}{c|cccc|cccc}
+\hline
+\multicolumn{1}{c|}{} &
+\multicolumn{4}{c|}{Data Column 1} & \multicolumn{4}{c}{Data Column 2} \\ \hline
+q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
+1 & -0.880 & 0.379 & -0.880 & 0.379 & -0.603 & 0.546 & -0.603 & 0.546 \\
+2 & 2.068 & 0.039 & 2.068 & 0.039 & 0.324 & 0.746 & 0.324 & 0.746 \\
+3 & 3.355 & 0.001 & 3.355 & 0.001 & 0.662 & 0.508 & 0.662 & 0.508 \\
+4 & 3.070 & 0.002 & 3.070 & 0.002 & 1.487 & 0.137 & 1.487 & 0.137 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+
+
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
 
 ```{r Q 1.3 Splitting the data}
