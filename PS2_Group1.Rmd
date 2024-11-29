@@ -165,7 +165,63 @@ round(res_w,3)
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
+<<<<<<< HEAD
+=======
+```{r A1_VR, echo=F}
+oneday <- DJ_d$r_Dow_Jones
+oneday <- oneday[-1]
+oneweek <- DJ_w$r_close
+
+twoday <- oneday[seq(1, length(oneday), by = 2)] + oneday[seq(2, length(oneday), by = 2)]
+twoday_ann <- twoday/2
+
+
+twoweek <- oneweek[seq(1, length(oneweek), by = 2)] + oneweek[seq(2, length(oneweek), by = 2)]
+twoweek_ann <- twoweek/2
+
+par(mfrow=c(1,2))
+ts.plot(twoday_ann)
+ts.plot(twoweek_ann)
+par(mfrow=c(1,1))
+
+par(mfrow=c(1,2))
+p3 <- Acf(twoday_ann, lag.max = 20, main = "Dow Jones two day annualized log returns")
+p4 <- Acf(twoweek_ann, lag.max = 20, main = "Dow Jones two-week annualized log returns")
+par(mfrow=c(1,1))
+```
+
+>>>>>>> 8172b1b8f32cba3dcf02155b70cbf7fa174ab59b
+
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
+
+```{r Q 1.3 Splitting the data}
+# Dividing the data set into three equally sized time windows 
+djd_s1 <- DJ_d[1:6280, ]
+djd_s2 <- DJ_d[6281:12560, ]
+djd_s3 <- DJ_d[12561:18839, ]
+djw_s1 <- DJ_w[1:1562, ]
+djw_s2 <- DJ_w[1563:3124, ]
+djw_s3 <- DJ_w[3125:4686, ]
+```
+
+```{r Q 1.3 ACF}
+par(mfrow=c(1,3))
+acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"))
+acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"))
+acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"))
+
+acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"))
+acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"))
+acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"))
+par(mfrow=c(1,1))
+```
+
+We cannot find anything that would indicate a structural break in the different time periods for either daily nor weekly data. 
+
+We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
+
+
+
 
 ## Draw overall conclusions regarding asset return predictability based on this analysis.
 
