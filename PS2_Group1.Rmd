@@ -94,7 +94,7 @@ cbind(t1,t2)
 \end{tabular}
 \end{table}
 
-We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictions. 
+We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictability. 
 
 Variance ratio test:
 
@@ -160,6 +160,8 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \hline
 \end{tabular}
 \end{table}
+
+For the daily series, the variance distance (VR) and ratio (VD) are above 1, indicating that we have positive auto-correlation. The p-values are zero for all $q$, indicating that we have significant evidence for asset return predictability. For the weekly series, VR and VD are below 1, indicating negative auto-covariance. However, looking at the p-values we see that the results are not statistically significant and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the weekly data.
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
