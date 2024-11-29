@@ -13,6 +13,7 @@ output:
 header-includes:
   - \usepackage{float}
   - \usepackage{booktabs}
+  - \usepackage{multirow}
   - \usepackage{caption}
   - \usepackage{subcaption}
   - \usepackage{adjustbox}
@@ -54,7 +55,7 @@ We see significant auto-correlations for the first few lags in the daily data, t
 
 Ljung-Box test:
 
-```{r A1_LB, echo=F}
+```{r A1_LB, include=F}
 LB <- function(vx,lag,ip){
   tmp = acf(vx,lag.max=lag,plot=F)$acf
   tmp = tmp[2:(lag+1)]**2
@@ -73,9 +74,44 @@ gridsearch <- function(data, lag){
 }
 lag = c(1:20)
 t1 <- gridsearch(DJ_d$r_Dow_Jones, lag)
-tgridsearch(DJ_w$r_close, lag)
-
+t2 <- gridsearch(DJ_w$r_close, lag)
+cbind(t1,t2)
 ```
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Statistics for Dow Jones Daily and Weekly Returns (Rounded to 3 Decimal Places)}
+\begin{tabular}{lcccc}
+\toprule
+\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Dow Jones Daily} & \multicolumn{2}{c}{Dow Jones Weekly} \\ 
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
+\midrule
+1  & 179.105 & 0.000 & 0.918 & 0.338 \\ 
+2  & 287.650 & 0.000 & 0.923 & 0.630 \\ 
+3  & 290.524 & 0.000 & 1.454 & 0.693 \\ 
+4  & 322.834 & 0.000 & 2.255 & 0.689 \\ 
+5  & 329.899 & 0.000 & 5.144 & 0.399 \\ 
+6  & 348.859 & 0.000 & 8.320 & 0.216 \\ 
+7  & 353.048 & 0.000 & 12.379 & 0.089 \\ 
+8  & 365.251 & 0.000 & 13.268 & 0.103 \\ 
+9  & 366.429 & 0.000 & 13.475 & 0.142 \\ 
+10 & 371.600 & 0.000 & 13.592 & 0.192 \\ 
+11 & 371.600 & 0.000 & 13.611 & 0.255 \\ 
+12 & 372.899 & 0.000 & 14.025 & 0.299 \\ 
+13 & 374.639 & 0.000 & 14.795 & 0.320 \\ 
+14 & 378.137 & 0.000 & 19.685 & 0.140 \\ 
+15 & 379.141 & 0.000 & 19.946 & 0.174 \\ 
+16 & 379.994 & 0.000 & 20.387 & 0.203 \\ 
+17 & 384.854 & 0.000 & 21.244 & 0.216 \\ 
+18 & 385.707 & 0.000 & 22.535 & 0.209 \\ 
+19 & 387.883 & 0.000 & 22.543 & 0.258 \\ 
+20 & 388.925 & 0.000 & 23.320 & 0.273 \\ 
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
 Variance ratio test:
 
 ```{r A1_VR, echo=F}
