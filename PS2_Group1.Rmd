@@ -192,8 +192,9 @@ Above we can see ACF plots for the annualized two-day and two-week log returns w
 
 What we see from the first ACF plot for the two-day is that we have large significant spikes at lag 2 and 4, 11, 15 and 17. For the two-week data we see two significant spikes at 12 and 15, but they are not very large.
 
-So for two-day we see significant auto-correlations for many lags, and quite far out, this is an indication of asset return predictability. For two-week we see significant auto-correlations for two lags quite far out, this is an indication of asset return predictability. But realistically using more than 10 lags for two week data does not make sense. It is too many lags out for two-weekly data. So I think we can reasonably disregard this finding and say that it is due to randomness/noise. But for two-day we for sure see strong signs of market prediciti
+So for two-day we see significant auto-correlations for many lags, and quite far out also, this is an indication of asset return predictability. For two-week we see significant auto-correlations for two lags quite far out, this is an indication of asset return predictability.
 
+But realistically using more than 10 lags for two week data does not make much sense. It is too many lags out for two-weekly data. So I think we can reasonably disregard this finding and say that it is due to randomness/noise. But for two-day we for sure see strong signs of market predictability.
 
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
 
