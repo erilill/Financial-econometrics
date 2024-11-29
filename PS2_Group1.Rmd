@@ -72,7 +72,7 @@ gridsearch <- function(data, lag){
     }
   return(results)
 }
-lag = c(1:20)
+lag = c(5,10,20)
 t1 <- gridsearch(DJ_d$r_Dow_Jones, lag)
 t2 <- gridsearch(DJ_w$r_close, lag)
 cbind(t1,t2)
@@ -87,35 +87,18 @@ cbind(t1,t2)
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
  & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
 \midrule
-1  & 179.105 & 0.000 & 0.918 & 0.338 \\ 
-2  & 287.650 & 0.000 & 0.923 & 0.630 \\ 
-3  & 290.524 & 0.000 & 1.454 & 0.693 \\ 
-4  & 322.834 & 0.000 & 2.255 & 0.689 \\ 
 5  & 329.899 & 0.000 & 5.144 & 0.399 \\ 
-6  & 348.859 & 0.000 & 8.320 & 0.216 \\ 
-7  & 353.048 & 0.000 & 12.379 & 0.089 \\ 
-8  & 365.251 & 0.000 & 13.268 & 0.103 \\ 
-9  & 366.429 & 0.000 & 13.475 & 0.142 \\ 
-10 & 371.600 & 0.000 & 13.592 & 0.192 \\ 
-11 & 371.600 & 0.000 & 13.611 & 0.255 \\ 
-12 & 372.899 & 0.000 & 14.025 & 0.299 \\ 
-13 & 374.639 & 0.000 & 14.795 & 0.320 \\ 
-14 & 378.137 & 0.000 & 19.685 & 0.140 \\ 
-15 & 379.141 & 0.000 & 19.946 & 0.174 \\ 
-16 & 379.994 & 0.000 & 20.387 & 0.203 \\ 
-17 & 384.854 & 0.000 & 21.244 & 0.216 \\ 
-18 & 385.707 & 0.000 & 22.535 & 0.209 \\ 
-19 & 387.883 & 0.000 & 22.543 & 0.258 \\ 
-20 & 388.925 & 0.000 & 23.320 & 0.273 \\ 
+10  & 371.600 & 0.000 & 13.592 & 0.192 \\ 
+20  & 388.925 & 0.000 & 23.320 & 0.273 \\ 
 \bottomrule
 \end{tabular}
 \end{table}
 
-We see from table \ref{tab1:LB} that the p-values for all 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above 0.05. For lag 7, $\hat{p}\leq 0.1$, but the p-values for all other lags are above $\alpha=0.1$. Using $\alpha=0.05$ we reject the null that there is auto-correlation, indicating that there is no prevalence of asset return predictions. 
+We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictions. 
 
 Variance ratio test:
 
-```{r A1_VR, echo=F}
+```{r A1_VR, include=F}
 VDR <- function(vr,iq){
   iTT = length(vr)
   im = floor(iTT/iq)
@@ -159,9 +142,24 @@ res_w[i,2] <- res_2$RW1_p_VD
 res_w[i,3] <- res_2$VR
 res_w[i,4] <- res_2$RW1_p_VR
 }
-round(res_d,3)
-round(res_w,3)
+cbind(round(res_d,3),round(res_w,3))
 ```
+\begin{table}[ht]
+\centering
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Dow Jones daily and weekly data.}
+\label{tab:VDR1}
+\begin{tabular}{c|cccc|cccc}
+\hline
+\multicolumn{1}{c|}{} &
+\multicolumn{4}{c|}{Dow Jones Daily} & \multicolumn{4}{c}{Dow Jones Weekly} \\ \hline
+q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
+2 & 13.402 & 0.000 & 13.402 & 0.000 & -0.936 & 0.349 & -0.936 & 0.349 \\
+4 & 5.642 & 0.000 & 5.642 & 0.000 & -0.489 & 0.625 & -0.489 & 0.625 \\
+8 & 5.410 & 0.000 & 5.410 & 0.000 & 0.197 & 0.844 & 0.197 & 0.844 \\
+16 & 5.359 & 0.000 & 5.359 & 0.000 & 0.574 & 0.566 & 0.574 & 0.566 \\
+\hline
+\end{tabular}
+\end{table}
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
