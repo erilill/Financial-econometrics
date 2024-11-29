@@ -310,7 +310,6 @@ Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"))
 Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"))
 Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"))
 
->>>>>>> f9f4dc42e26b9bc7ecf9d0dbac0953d27d133895
 par(mfrow=c(1,1))
 ```
 
