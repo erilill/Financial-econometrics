@@ -360,6 +360,14 @@ hi10 <- portcap_m$Hi_10 / 100
 hi10 <- portcap_m$Hi_10 / 100
 ```
 
+```{r B1_ACF, echo=F}
+par(mfrow=c(1,2))
+p1 <- Acf(lo10, lag.max = 12, main = "Portfolio returns for low 10%")
+p2 <- Acf(hi10, lag.max = 12, main = "Portfolio returns for top 10%.")
+par(mfrow=c(1,1))
+```
+Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%. Positive auto-correlations indicates that there could
+
 ```{r}
 LB(lo10,lag=12,ip=0)
 LB(hi10,lag=12,ip=0)
@@ -388,13 +396,7 @@ for (i in 1:length(q)) {
 names(res_1) <- names(res_2) <- q
 ```
 
-```{r B1_ACF, echo=F}
-par(mfrow=c(1,2))
-p1 <- Acf(lo10, lag.max = 12, main = "Portfolio returns for low 10%")
-p2 <- Acf(hi10, lag.max = 12, main = "Portfolio returns for top 10%.")
-par(mfrow=c(1,1))
-```
-Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%. Positive auto-correlations indicates that there could
+
 
 ## 2. Is this relationship stable over time?
 
