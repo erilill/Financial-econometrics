@@ -426,8 +426,8 @@ res_2
 \multicolumn{1}{c|}{} &
 \multicolumn{4}{c|}{Portfolio returns for low 10\%} & \multicolumn{4}{c}{Portfolio returns for top 10\%} \\ \hline
 $q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
-2 & 6.684 & $2.32 \times 10^{-11}$ & 6.684 & $2.32 \times 10^{-11}$ & 2.218 & 0.027 & 2.218 & 0.027 \\
-4 & 4.656 & $3.23 \times 10^{-6}$ & 4.656 & $3.23 \times 10^{-6}$ & 0.690 & 0.490 & 0.690 & 0.490 \\
+2 & 6.684 & 0.000 & 6.684 & 0.000 & 2.218 & 0.027 & 2.218 & 0.027 \\
+4 & 4.656 & 0.000 & 4.656 & 0.000 & 0.690 & 0.490 & 0.690 & 0.490 \\
 8 & 1.715 & 0.086 & 1.715 & 0.086 & 0.764 & 0.445 & 0.764 & 0.445 \\
 16 & 1.611 & 0.107 & 1.611 & 0.107 & 1.479 & 0.139 & 1.479 & 0.139 \\
 \hline
@@ -489,6 +489,45 @@ round(results, 3)
 \end{tabular}
 \end{table}
 What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
+
+Looking at the variance ratio test:
+```{r, echo=F}
+q <- c(2,4,8,16)
+res_lo <- matrix(NA, nrow=4, ncol=4)
+res_hi <- matrix(NA, nrow=4, ncol=4)
+
+for (i in 1:length(q)){
+res_1 <- VDR(vr=twomonth_lo10_ann,iq=q[i])
+res_2 <- VDR(vr=twomonth_hi10_ann,iq=q[i])
+res_lo[i,1] <- res_1$VD
+res_lo[i,2] <- res_1$RW1_p_VD
+res_lo[i,3] <- res_1$VR
+res_lo[i,4] <- res_1$RW1_p_VR
+res_hi[i,1] <- res_2$VD
+res_hi[i,2] <- res_2$RW1_p_VD
+res_hi[i,3] <- res_2$VR
+res_hi[i,4] <- res_2$RW1_p_VR
+}
+cbind(round(res_lo,3),round(res_hi,3))
+```
+\begin{table}[ht]
+\centering
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Portfolio returns for low and top 10\%.}
+\label{tab:VDRB22}
+\begin{tabular}{c|cccc|cccc}
+\hline
+\multicolumn{1}{c|}{} &
+\multicolumn{4}{c|}{Portfolio returns for low 10\%} & \multicolumn{4}{c}{Portfolio returns for top 10\%} \\ \hline
+$q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
+2  & 0.772 & 0.440 & 0.772 & 0.440 & -0.702 & 0.483 & -0.702 & 0.483 \\
+4  & -0.952 & 0.341 & -0.952 & 0.341 & -0.031 & 0.975 & -0.031 & 0.975 \\
+8  & -0.370 & 0.712 & -0.370 & 0.712 & 0.899 & 0.369 & 0.899 & 0.369 \\
+16 & -0.695 & 0.487 & -0.695 & 0.487 & 0.390 & 0.697 & 0.390 & 0.697 \\
+\hline
+\end{tabular}
+\end{table}
+In table \ref{tab:VDRB22} we see the results from the variance ratio test for the two month aggregated portfolio returns. Here we see the results that we cannot reject the null and come to the conclusion that the series are not 
+
 
 ## 2. Is this relationship stable over time?
 
