@@ -387,11 +387,11 @@ round(results, 3)
 ```
 \begin{table}[ht]
 \centering
-\caption{Ljung-Box Test Results for Portfolio returns for low and top 10% with lag 6 and 12.}
+\caption{Ljung-Box Test Results for Portfolio returns for low and top 10\% with lag 6 and 12.}
 \label{tab:LB_test}
 \begin{tabular}{lcccc}
 \toprule
-\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Low 10%} & \multicolumn{2}{c}{Top 10\%} \\ 
+\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Low 10\%} & \multicolumn{2}{c}{Top 10\%} \\ 
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
  & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
 \midrule
@@ -419,7 +419,7 @@ res_2
 ```
 \begin{table}[ht]
 \centering
-\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Portfolio returns for low and top 10%.}
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Portfolio returns for low and top 10\%.}
 \label{tab:VDRB2}
 \begin{tabular}{c|cccc|cccc}
 \hline
@@ -475,7 +475,7 @@ round(results, 3)
 ```
 \begin{table}[ht]
 \centering
-\caption{Ljung-Box Test Results for two month aggregated portfolio returns for low and top 10% with lag 3 and 6.}
+\caption{Ljung-Box Test Results for two month aggregated portfolio returns for low and top 10\% with lag 3 and 6.}
 \label{tab:LB_test}
 \begin{tabular}{lcccc}
 \toprule
@@ -488,7 +488,7 @@ round(results, 3)
 \bottomrule
 \end{tabular}
 \end{table}
-What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
+What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10\%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
 
 Looking at the variance ratio test:
 ```{r, echo=F}
