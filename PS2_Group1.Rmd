@@ -362,31 +362,20 @@ portcap_m
 ```
 
 ```{r}
-lo30 <- portcap_m$Lo_30 / 100 
-hi30 <- portcap_m$Hi_30 / 100 
-t1 <- VDR(lo30, iq = 4)
-t2 <- VDR(hi30, iq = 4)
-t3 <- VDR(portcap_m$)
-t1;t2
-
-res_d <- matrix(NA, nrow=4, ncol=4)
-res_w <- matrix(NA, nrow=4, ncol=4)
+lo10 <- portcap_m$Lo_10 / 100 
+hi10 <- portcap_m$Hi_10 / 100 
 
 q <- c(2,4,8,16)
-for (i in 1:length(q)){
-res_1 <- VDR(vr=DJ_d$r_Dow_Jones,iq=q[i])
-res_2 <- VDR(vr=DJ_w$r_close,iq=q[i])
-res_d[i,1] <- res_1$VD
-res_d[i,2] <- res_1$RW1_p_VD
-res_d[i,3] <- res_1$VR
-res_d[i,4] <- res_1$RW1_p_VR
-res_w[i,1] <- res_2$VD
-res_w[i,2] <- res_2$RW1_p_VD
-res_w[i,3] <- res_2$VR
-res_w[i,4] <- res_2$RW1_p_VR
-}
-```
+res_1 <- vector("list", length(q))
+res_2 <- vector("list", length(q))
 
+VDR(lo10, iq = 4)
+for (i in 1:length(q)) {
+  res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i]))  # Include q in the result
+  res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) # Include q in the result
+}
+names(res_1) <- names(res_2) <- q
+```
 
 
 ## 2. Is this relationship stable over time?
