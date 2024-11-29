@@ -362,11 +362,11 @@ portcap_m
 ```
 
 ```{r}
-lo30 <- portcap_m$Lo_30 / 100 
-hi30 <- portcap_m$Hi_30 / 100 
+lo10 <- portcap_m$Lo_10 / 100 
+hi10 <- portcap_m$Hi_10 / 100
 t1 <- VDR(lo30, iq = 4)
 t2 <- VDR(hi30, iq = 4)
-t3 <- VDR(portcap_m$)
+#t3 <- VDR(portcap_m$)
 t1;t2
 
 res_d <- matrix(NA, nrow=4, ncol=4)
