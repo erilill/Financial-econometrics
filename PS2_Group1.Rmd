@@ -293,7 +293,10 @@ djw_s3 <- DJ_w[3125:4686, ]
 
 ```{r}
 par(mfrow=c(1,3))
+<<<<<<< HEAD
+=======
 
+>>>>>>> 823aa2386fa3a3a9d93ce9ced2aabed139ce93de
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"), ylim = c(-0.25, 0.25))
 Acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"), ylim = c(-0.25, 0.25))
 Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"), ylim = c(-0.25, 0.25))
@@ -301,6 +304,8 @@ Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"), ylim = c(-
 Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"), ylim = c(-0.25, 0.25))
 Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"), ylim = c(-0.25, 0.25))
 Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"), ylim = c(-0.25, 0.25))
+<<<<<<< HEAD
+=======
 
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"))
 Acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"))
@@ -310,6 +315,7 @@ Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"))
 Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"))
 Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"))
 
+>>>>>>> 823aa2386fa3a3a9d93ce9ced2aabed139ce93de
 par(mfrow=c(1,1))
 ```
 
