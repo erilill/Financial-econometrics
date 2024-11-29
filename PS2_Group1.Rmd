@@ -278,12 +278,12 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 
 ```{r}
 # Dividing the data set into three equally sized time windows 
-djd_s1 <- DJ_d[1:6280, 3]
-djd_s2 <- DJ_d[6281:12560, 3]
-djd_s3 <- DJ_d[12561:18839, 3]
-djw_s1 <- DJ_w[1:1562, 3]
-djw_s2 <- DJ_w[1563:3124, 3]
-djw_s3 <- DJ_w[3125:4686, 3]
+djd_s1 <- DJ_d[1:6280, ]
+djd_s2 <- DJ_d[6281:12560, ]
+djd_s3 <- DJ_d[12561:18839, ]
+djw_s1 <- DJ_w[1:1562, ]
+djw_s2 <- DJ_w[1563:3124, ]
+djw_s3 <- DJ_w[3125:4686, ]
 ```
 
 ```{r}
