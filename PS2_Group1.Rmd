@@ -165,8 +165,6 @@ round(res_w,3)
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
-<<<<<<< HEAD
-=======
 ```{r A1_VR, echo=F}
 oneday <- DJ_d$r_Dow_Jones
 oneday <- oneday[-1]
@@ -185,12 +183,17 @@ ts.plot(twoweek_ann)
 par(mfrow=c(1,1))
 
 par(mfrow=c(1,2))
-p3 <- Acf(twoday_ann, lag.max = 20, main = "Dow Jones two day annualized log returns")
-p4 <- Acf(twoweek_ann, lag.max = 20, main = "Dow Jones two-week annualized log returns")
+p3 <- Acf(twoday_ann, lag.max = 20, main = "DJIA two day ann. log returns")
+p4 <- Acf(twoweek_ann, lag.max = 20, main = "DJIA two-week ann. log returns")
 par(mfrow=c(1,1))
 ```
 
->>>>>>> 8172b1b8f32cba3dcf02155b70cbf7fa174ab59b
+Above we can see ACF plots for the annualized two-day and two-week log returns with 20 lags. For easier interpretation, lag 0 has been omitted.
+
+What we see from the first ACF plot for the two-day is that we have large significant spikes at lag 2 and 4, 11, 15 and 17. For the two-week data we see two significant spikes at 12 and 15, but they are not very large.
+
+So for two-day we see significant auto-correlations for many lags, and quite far out, this is an indication of asset return predictability. For two-week we see significant auto-correlations for two lags quite far out, this is an indication of asset return predictability. But realistically using more than 10 lags for two week data does not make sense. It is too many lags out for two-weekly data. So I think we can reasonably disregard this finding and say that it is due to randomness/noise. But for two-day we for sure see strong signs of market prediciti
+
 
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
 
