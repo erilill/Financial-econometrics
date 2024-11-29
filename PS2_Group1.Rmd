@@ -196,6 +196,14 @@ So for two-day we see significant auto-correlations for many lags, and quite far
 
 But realistically using more than 10 lags for two week data does not make much sense. It is too many lags out for two-weekly data. So I think we can reasonably disregard this finding and say that it is due to randomness/noise. But for two-day we for sure see strong signs of market predictability.
 
+Lets do Ljung Box tests, but restrict two-week to have lag=10.
+```{r}
+LB(twoday_ann, lag=20, ip=0)
+
+LB(twoday_ann, lag=10, ip=0)
+```
+So the result tells us that for the two-day returns, that we strongly reject $(\alpha=0.01)$ the null of the first 20 autocorrelations being all zero. For the two-week returns, we strongly reject $(\alpha=0.01)$ the null of the first 10 autocorrelations being zero. The latter result is quite suprising since we did not see significant spikes at 10 lags or earlier for the two-week. These results strongly indicate that there is prevalence of asset return predictability for both two-day and two-week returns.
+
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
 
 ```{r Q 1.3 Splitting the data}
