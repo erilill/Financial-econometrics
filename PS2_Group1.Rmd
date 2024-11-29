@@ -348,6 +348,7 @@ For 2-week data and period 1 we only observe period 7 to be significant. For per
 
 
 # B. Testing for Return Predictability in Size Portfolios
+Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
 
 ## 1. Is there a relationship between market capitalization and asset return predictability and does it also hold for higher aggregated returns?
 ```{r}
@@ -356,8 +357,15 @@ portcap_m
 
 ```{r}
 lo10 <- portcap_m$Lo_10 / 100 
+<<<<<<< HEAD
+=======
 hi10 <- portcap_m$Hi_10 / 100 
+>>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 hi10 <- portcap_m$Hi_10 / 100
+lo20 <- portcap_m$Lo_20 / 100 
+hi20 <- portcap_m$Hi_20 / 100
+lo30 <- portcap_m$Lo_30 / 100 
+hi30 <- portcap_m$Hi_30 / 100
 ```
 
 ```{r B1_ACF, echo=F}
@@ -376,6 +384,8 @@ LB(hi10,lag=12,ip=0)
 We can see that we reject the null of the first 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
 
 ```{r}
+<<<<<<< HEAD
+=======
 t1 <- VDR(lo30, iq = 4)
 t2 <- VDR(hi30, iq = 4)
 #t3 <- VDR(portcap_m$)
@@ -384,17 +394,29 @@ t1;t2
 res_d <- matrix(NA, nrow=4, ncol=4)
 res_w <- matrix(NA, nrow=4, ncol=4)
 
+>>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 q <- c(2,4,8,16)
 res_1 <- vector("list", length(q))
 res_2 <- vector("list", length(q))
 
+<<<<<<< HEAD
+
+
+=======
 VDR(lo10, iq = 4)
+>>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 for (i in 1:length(q)) {
   res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i]))  # Include q in the result
   res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) # Include q in the result
 }
 names(res_1) <- names(res_2) <- q
+res_1
+res_2
 ```
+We observe that for Lo_10 portfolio returns the test statistic from VGD is significant for q 2 and 4 which would suggest that these are not random walks. For q 8 and 16 we cannot reject null and therefore have no evidence to prove that they are not random walks.
+
+For Hi_10 portfolio returns there is some evidence that is contradictory. The theory suggests that the biggest companies should be random walk however our finding when q is 2 is that we can reject the null of random walk. For this reason, we assume that Hi_10 companies are predictable in the very few successive time periods but not longer. 
+
 
 
 
@@ -418,5 +440,6 @@ hi10p3 <- portcap_m$Hi_10[629:942] #period 3
 ```
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios?
+
 
 ## 4. Can you confirm the results of Campbell/Lo/MacKinlay (1997) that high-cap stocks lead small-cap stocks? How stable is this result over time?
