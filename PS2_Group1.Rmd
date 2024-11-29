@@ -437,6 +437,16 @@ hi10p1 <- portcap_m$Hi_10[1:314] #period 1
 hi10p2 <- portcap_m$Hi_10[315:628] #period 2
 hi10p3 <- portcap_m$Hi_10[629:942] #period 3
 
+LB(lo10p1,lag=12,ip=0)
+LB(hi10p1,lag=12,ip=0)
+
+LB(lo10p2,lag=12,ip=0)
+LB(hi10p2,lag=12,ip=0)
+
+LB(lo10p3,lag=12,ip=0)
+LB(hi10p3,lag=12,ip=0)
+
+
 ```
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios?
