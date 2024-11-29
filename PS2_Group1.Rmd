@@ -28,6 +28,8 @@ library(knitr)
 library(forecast)
 library(patchwork)
 library(kableExtra)
+library(dplyr)
+library(purrr)
 data("DJ_w")
 data("DJ_d")
 data("portcap_m")
@@ -512,8 +514,84 @@ Lag & ACF\\
 \bottomrule
 \end{tabular}
 
-When negative lag, it means that the returns of Lo_10 is compared to the future returns of the Hi_10. When positive lags it means that the Hi_10 is compared to the future returns of the Lo_10. We observe significant lags both for negative and positive lags. Furthermore, the lags are in both directions, both positive and negative cross autocorrelations and for this reason it is very hard to draw a conclusion that supports the theory. We will continue by dividing it into subperiods. 
+When negative lag, it means that the returns of Lo_10 is compared to the future returns of the Hi_10. When positive lags it means that the Hi_10 is compared to the future returns of the Lo_10. We observe significant lags both for negative and positive lags. Furthermore, the lags are in both directions, both positive and negative cross autocorrelations and for this reason it is very hard to draw a conclusion one general conclusion. One thing that is evident is however the significant lag 1, which means that Hi_10 is correlated with future returns of Lo_10, supporting the theory that big companies leads and small companies lags. We will continue by dividing it into subperiods and examining the autocorrelations again. 
+```{r}
+res_1 <- ccf(lo10p1, hi10p1, lag.max = 20)
+res_2 <- ccf(lo10p2, hi10p2, lag.max = 20)
+res_3 <- ccf(lo10p3, hi10p3, lag.max = 20)
+res_1 <- data.frame(
+  Lag = res_1[["lag"]], 
+  ACF = res_1[["acf"]]
+)
+res_2 <- data.frame(
+  Lag = res_2[["lag"]], 
+  ACF = res_2[["acf"]]
+)
+res_3 <- data.frame(
+  Lag = res_3[["lag"]], 
+  ACF = res_3[["acf"]]
+)
 
+res_f <- reduce(list(res_1, res_2, res_3), left_join, by = "Lag")
+
+#kable(res_f, format = "latex", booktabs = TRUE) # Necessary to produce latex table 
+```
+For period 1, it is evident that there are more significant positive lags than negative, supporting the theory of leading large companies. In the second period we observe no significant negative lags but three significant positive lags which are at lags 1, 3, and 7. Finally, for period three we observe two significant negative lags (8, 12) and four significant positive lags (1, 4, 16, and 18). These findings suggest that lag 1 is always positive and significant which supports the theory of leading large companies.   
+\begin{tabular}{rrrr}
+\toprule
+Lag & ACF P1 & ACF P2 & ACF P3\\
+\midrule
+-20 & -0.1103998 & -0.0432523 & -0.1045049\\
+-19 & -0.0102827 & -0.0514065 & -0.1059982\\
+-18 & 0.0823519 & -0.0545906 & -0.0286165\\
+-17 & 0.1391339 & -0.0064733 & 0.0639247\\
+-16 & -0.0195983 & -0.0072937 & 0.0123273\\
+\addlinespace
+-15 & 0.0463637 & 0.1083565 & -0.0418253\\
+-14 & -0.1058507 & -0.0831579 & -0.0202578\\
+-13 & -0.0522825 & -0.0705355 & -0.0902624\\
+-12 & -0.0083745 & 0.0499713 & -0.1279071\\
+-11 & 0.0080956 & 0.0387980 & -0.0381943\\
+\addlinespace
+-10 & 0.0220173 & -0.0009402 & 0.1021607\\
+-9 & 0.1194956 & 0.0873122 & -0.0638926\\
+-8 & 0.0517223 & -0.0833388 & -0.1374145\\
+-7 & 0.0131612 & -0.0490651 & 0.0050515\\
+-6 & -0.0226866 & -0.0794861 & 0.0272519\\
+\addlinespace
+-5 & 0.0167546 & 0.0008242 & 0.0475835\\
+-4 & 0.0192456 & 0.0520687 & -0.0649172\\
+-3 & -0.0892614 & 0.0246773 & -0.0842593\\
+-2 & -0.0445604 & -0.0149691 & -0.0969952\\
+-1 & 0.1126604 & 0.0027913 & 0.0331768\\
+\addlinespace
+0 & 0.7619358 & 0.6605027 & 0.5878333\\
+1 & 0.2458573 & 0.2153915 & 0.1740160\\
+2 & 0.0244658 & 0.0315184 & 0.0100482\\
+3 & -0.1949702 & 0.1225646 & 0.0348512\\
+4 & -0.0847712 & 0.0278292 & -0.1177156\\
+\addlinespace
+5 & 0.0111564 & 0.0160018 & -0.0058055\\
+6 & -0.0304142 & -0.0544791 & -0.0089222\\
+7 & 0.0271244 & -0.1163203 & -0.0233280\\
+8 & 0.0096359 & -0.0703728 & -0.0319809\\
+9 & 0.1939537 & 0.0492911 & -0.0938559\\
+\addlinespace
+10 & 0.0829907 & -0.0980722 & 0.0299945\\
+11 & -0.0846743 & -0.0158970 & -0.0123815\\
+12 & -0.0570957 & 0.0163617 & -0.0174782\\
+13 & -0.1350653 & 0.0320444 & -0.0582166\\
+14 & -0.0649635 & -0.0624044 & -0.0266399\\
+\addlinespace
+15 & -0.0061131 & 0.0113940 & -0.0697472\\
+16 & -0.1176521 & -0.0693399 & -0.1257395\\
+17 & 0.0724068 & -0.0182994 & -0.0346438\\
+18 & 0.0253502 & -0.0172441 & -0.1513245\\
+19 & 0.0467810 & -0.1017195 & 0.0104923\\
+\addlinespace
+20 & -0.1534308 & -0.0414355 & 0.0240477\\
+\bottomrule
+\end{tabular}
 
 
 # Ljung-Box and lastly sub periods 
