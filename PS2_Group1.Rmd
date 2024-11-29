@@ -391,7 +391,7 @@ round(results, 3)
 \label{tab:LB_test}
 \begin{tabular}{lcccc}
 \toprule
-\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Dow Jones Daily} & \multicolumn{2}{c}{Dow Jones Weekly} \\ 
+\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Low 10%} & \multicolumn{2}{c}{Top 10\%} \\ 
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
  & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
 \midrule
@@ -479,7 +479,7 @@ round(results, 3)
 \label{tab:LB_test}
 \begin{tabular}{lcccc}
 \toprule
-\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Dow Jones Daily} & \multicolumn{2}{c}{Dow Jones Weekly} \\ 
+\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Low 10\%} & \multicolumn{2}{c}{Top 10\%} \\ 
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
  & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
 \midrule
@@ -488,7 +488,7 @@ round(results, 3)
 \bottomrule
 \end{tabular}
 \end{table}
-
+What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
 
 ## 2. Is this relationship stable over time?
 
