@@ -372,14 +372,38 @@ par(mfrow=c(1,1))
 ```
 Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%, this indicates asset return predictability.
 
-```{r}
-LB(lo10,lag=12,ip=0)
-LB(hi10,lag=12,ip=0)
+```{r, include=F}
+lagss <- c(6,12)
+results <- matrix(NA, nrow = length(lagss), ncol = 4)
+for(i in 1:length(lagss)){
+lb1 <- LB(lo10,lag=lagss[i],ip=0)
+lb2 <- LB(hi10,lag=lagss[i],ip=0)
+results[i, 1] <- lb1$test
+results[i, 2] <- lb1$pval
+results[i, 3] <- lb2$test
+results[i, 4] <- lb2$pval
+}
+round(results, 3)
 ```
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Results for Portfolio returns for low and top 10% with lag 6 and 12.}
+\label{tab:LB_test}
+\begin{tabular}{lcccc}
+\toprule
+\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Low 10%} & \multicolumn{2}{c}{Top 10\%} \\ 
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
+\midrule
+6  & 58.034 & 0.000 & 23.452 & 0.001 \\ 
+12  & 83.855 & 0.000 & 31.439  & 0.002 \\ 
+\bottomrule
+\end{tabular}
+\end{table}
 
-We can see that we reject the null of the first 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
+We can see that we reject the null of the first 6 and 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
 
-```{r}
+```{r, include=F}
 q <- c(2,4,8,16)
 res_1 <- vector("list", length(q))
 res_2 <- vector("list", length(q))
@@ -402,8 +426,8 @@ res_2
 \multicolumn{1}{c|}{} &
 \multicolumn{4}{c|}{Portfolio returns for low 10\%} & \multicolumn{4}{c}{Portfolio returns for top 10\%} \\ \hline
 $q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
-2 & 6.684 & $2.32 \times 10^{-11}$ & 6.684 & $2.32 \times 10^{-11}$ & 2.218 & 0.027 & 2.218 & 0.027 \\
-4 & 4.656 & $3.23 \times 10^{-6}$ & 4.656 & $3.23 \times 10^{-6}$ & 0.690 & 0.490 & 0.690 & 0.490 \\
+2 & 6.684 & 0.000 & 6.684 & 0.000 & 2.218 & 0.027 & 2.218 & 0.027 \\
+4 & 4.656 & 0.000 & 4.656 & 0.000 & 0.690 & 0.490 & 0.690 & 0.490 \\
 8 & 1.715 & 0.086 & 1.715 & 0.086 & 0.764 & 0.445 & 0.764 & 0.445 \\
 16 & 1.611 & 0.107 & 1.611 & 0.107 & 1.479 & 0.139 & 1.479 & 0.139 \\
 \hline
@@ -415,7 +439,94 @@ We observe that for Lo_10 portfolio returns the test statistic from VGD is signi
 
 For Hi_10 portfolio returns there is some evidence that is contradictory. The theory suggests that the biggest companies should be random walk however our finding when q is 2 is that we can reject the null of random walk. For this reason, we assume that Hi_10 companies are predictable in the very few successive time periods but not longer. 
 
+Next we want to check if these results hold for higher aggregated returns. We will use two-month returns:
 
+```{r, echo=F}
+onemonth_lo10 <- lo10
+onemonth_hi10 <- hi10
+
+twomonth_lo10 <- onemonth_lo10[seq(1, length(onemonth_lo10), by = 2)] + onemonth_lo10[seq(2, length(onemonth_lo10), by = 2)]
+twomonth_lo10_ann <- twomonth_lo10/2
+
+twomonth_hi10 <- onemonth_hi10[seq(1, length(onemonth_hi10), by = 2)] + onemonth_hi10[seq(2, length(onemonth_hi10), by = 2)]
+twomonth_hi10_ann <- twomonth_hi10/2
+```
+```{r B1_ACF2, echo=F, warning=F, error=F}
+par(mfrow=c(1,2))
+p1 <- Acf(twomonth_lo10_ann, lag.max = 12, main = "Portfolio returns for low 10%")
+p2 <- Acf(twomonth_hi10_ann, lag.max = 12, main = "Portfolio returns for top 10%.")
+par(mfrow=c(1,1))
+```
+As we can see in the ACF-plots above, there are several significant auto-correlations for the low 10\%, however, for the top 10\% there is only one significant auto-correlation at lag 7. This is an indication that there is likely asset return predictability in the low 10\% but less likely in the top 10\%.
+
+Performing the Ljung-Box test:
+```{r, include=F}
+lagss <- c(3,6)
+results <- matrix(NA, nrow = length(lagss), ncol = 4)
+for(i in 1:length(lagss)){
+lb1 <- LB(twomonth_lo10_ann,lag=lagss[i],ip=0)
+lb2 <- LB(twomonth_hi10_ann,lag=lagss[i],ip=0)
+results[i, 1] <- lb1$test
+results[i, 2] <- lb1$pval
+results[i, 3] <- lb2$test
+results[i, 4] <- lb2$pval
+}
+round(results, 3)
+```
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Results for two month aggregated portfolio returns for low and top 10% with lag 3 and 6.}
+\label{tab:LB_test}
+\begin{tabular}{lcccc}
+\toprule
+\multirow{2}{*}{Lag} & \multicolumn{2}{c}{Low 10\%} & \multicolumn{2}{c}{Top 10\%} \\ 
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
+\midrule
+3  & 8.042 & 0.045 & 1.883 & 0.597 \\ 
+6  & 17.380 & 0.008 & 7.232  & 0.300 \\ 
+\bottomrule
+\end{tabular}
+\end{table}
+What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
+
+Looking at the variance ratio test:
+```{r, echo=F}
+q <- c(2,4,8,16)
+res_lo <- matrix(NA, nrow=4, ncol=4)
+res_hi <- matrix(NA, nrow=4, ncol=4)
+
+for (i in 1:length(q)){
+res_1 <- VDR(vr=twomonth_lo10_ann,iq=q[i])
+res_2 <- VDR(vr=twomonth_hi10_ann,iq=q[i])
+res_lo[i,1] <- res_1$VD
+res_lo[i,2] <- res_1$RW1_p_VD
+res_lo[i,3] <- res_1$VR
+res_lo[i,4] <- res_1$RW1_p_VR
+res_hi[i,1] <- res_2$VD
+res_hi[i,2] <- res_2$RW1_p_VD
+res_hi[i,3] <- res_2$VR
+res_hi[i,4] <- res_2$RW1_p_VR
+}
+cbind(round(res_lo,3),round(res_hi,3))
+```
+\begin{table}[ht]
+\centering
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Portfolio returns for low and top 10\%.}
+\label{tab:VDRB22}
+\begin{tabular}{c|cccc|cccc}
+\hline
+\multicolumn{1}{c|}{} &
+\multicolumn{4}{c|}{Portfolio returns for low 10\%} & \multicolumn{4}{c}{Portfolio returns for top 10\%} \\ \hline
+$q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
+2  & 0.772 & 0.440 & 0.772 & 0.440 & -0.702 & 0.483 & -0.702 & 0.483 \\
+4  & -0.952 & 0.341 & -0.952 & 0.341 & -0.031 & 0.975 & -0.031 & 0.975 \\
+8  & -0.370 & 0.712 & -0.370 & 0.712 & 0.899 & 0.369 & 0.899 & 0.369 \\
+16 & -0.695 & 0.487 & -0.695 & 0.487 & 0.390 & 0.697 & 0.390 & 0.697 \\
+\hline
+\end{tabular}
+\end{table}
+In table \ref{tab:VDRB22} we see the results from the variance ratio test for the two month aggregated portfolio returns. Here we see the results that we cannot reject the null and come to the conclusion that the series are not 
 
 
 ## 2. Is this relationship stable over time?
