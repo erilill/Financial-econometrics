@@ -188,8 +188,8 @@ ts.plot(twoweek_ann)
 par(mfrow=c(1,1))
 
 par(mfrow=c(1,2))
-p3 <- Acf(twoday_ann, lag.max = 20, main = "DJIA two day ann. log returns")
-p4 <- Acf(twoweek_ann, lag.max = 20, main = "DJIA two-week ann. log returns")
+p3 <- Acf(twoday_ann, lag.max = 20, main = "DJ two day ann. log returns")
+p4 <- Acf(twoweek_ann, lag.max = 20, main = "DJ two-week ann. log returns")
 par(mfrow=c(1,1))
 ```
 
@@ -265,7 +265,7 @@ cbind(round(res_d,3),round(res_w,3))
 \begin{tabular}{c|cccc|cccc}
 \hline
 \multicolumn{1}{c|}{} &
-\multicolumn{4}{c|}{Data Column 1} & \multicolumn{4}{c}{Data Column 2} \\ \hline
+\multicolumn{4}{c|}{Two-day} & \multicolumn{4}{c}{Two-week} \\ \hline
 q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 1 & -0.880 & 0.379 & -0.880 & 0.379 & -0.603 & 0.546 & -0.603 & 0.546 \\
 2 & 2.068 & 0.039 & 2.068 & 0.039 & 0.324 & 0.746 & 0.324 & 0.746 \\
