@@ -408,7 +408,6 @@ q <- c(2,4,8,16)
 res_1 <- vector("list", length(q))
 res_2 <- vector("list", length(q))
 
-
 for (i in 1:length(q)) {
   res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i])) 
   res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) 
@@ -554,20 +553,12 @@ LB(hi10p2,lag=12,ip=0)
 
 LB(lo10p3,lag=12,ip=0)
 LB(hi10p3,lag=12,ip=0)
-
-
 ```
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios?
 
 ```{r}
 res <- ccf(lo10, hi10, lag.max = 20)
-
-##res_df <- data.frame(
-#  Lag = res[["lag"]], 
-#  ACF = res[["acf"]]
-#)
-#kable(res_df, format = "latex", booktabs = TRUE) # Necessary to produce latex table 
 ```
 \begin{tabular}{rr}
 \toprule
@@ -630,22 +621,6 @@ When negative lag, it means that the returns of Lo_10 is compared to the future 
 res_1 <- ccf(lo10p1, hi10p1, lag.max = 20)
 res_2 <- ccf(lo10p2, hi10p2, lag.max = 20)
 res_3 <- ccf(lo10p3, hi10p3, lag.max = 20)
-# Ta bort när vi är färdiga innan inlämning
-#res_1df <- data.frame(
-#  Lag = res_1[["lag"]], 
-#  ACF = res_1[["acf"]]
-#)
-#res_2df <- data.frame(
-#  Lag = res_2[["lag"]], 
-#  ACF = res_2[["acf"]]
-#)
-#res_3df <- data.frame(
-#  Lag = res_3[["lag"]], 
-#  ACF = res_3[["acf"]]
-#)
-
-#### res_f <- reduce(list(res_1df, res_2df, res_3df), left_join, by = "Lag")
-#kable(res_f, format = "latex", booktabs = TRUE) # Necessary to produce latex table 
 ```
 For period 1, it is evident that there are more significant positive lags than negative, supporting the theory of leading large companies. In the second period we observe no significant negative lags but three significant positive lags which are at lags 1, 3, and 7. Finally, for period three we observe two significant negative lags (8, 12) and four significant positive lags (1, 4, 16, and 18). These findings suggest that lag 1 is always positive and significant which supports the theory of leading large companies. Following is a table of the magnitudes. 
 
@@ -720,12 +695,8 @@ LB(res$acf, lag = 1, ip = 0)
 LB(res_1$acf, lag = 1, ip = 0)
 LB(res_2$acf, lag = 1, ip = 0)
 LB(res_3$acf, lag = 1, ip = 0)
-
 ```
 In this case, all periods except for the third are significant at a 5\% level, the third is significant at 10\% level. This concludes and proves the theory that large companies are leading. 
-
-# Här är jag väldigt rädd om lag har blivit rädd. 
-
 
 ## 4. Can you confirm the results of Campbell/Lo/MacKinlay (1997) that high-cap stocks lead small-cap stocks? How stable is this result over time?
 Yes, we can confirm the results of Campbell/Lo/Mackinlay (1997) and the theory that high-cap stocks lead small-cap stocks. The results are stable over time on a 10\% level and on a 5\% level on the whole dataset and in period 1 and 3. 
