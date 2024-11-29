@@ -276,7 +276,7 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 
 ## 3. Divide the sample into appropriate sub-periods and analyze whether you find evidence of an increasing market efficiency over time.
 
-```{r Q 1.3 Splitting the data}
+```{r}
 # Dividing the data set into three equally sized time windows 
 djd_s1 <- DJ_d[1:6280, 3]
 djd_s2 <- DJ_d[6281:12560, 3]
@@ -286,7 +286,7 @@ djw_s2 <- DJ_w[1563:3124, 3]
 djw_s3 <- DJ_w[3125:4686, 3]
 ```
 
-```{r Q 1.3 ACF}
+```{r}
 par(mfrow=c(1,3))
 
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"), ylim = c(-0.25, 0.25))
@@ -312,7 +312,7 @@ We cannot find anything that would indicate a structural break in the different 
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
-```{r splitting the 2-day and 2-week data}
+```{r}
 length(twoday_ann) / 3 # 3140
 length(twoweek_ann) / 3 # 781
 
@@ -324,7 +324,7 @@ dj_2w_p2 <- twoweek_ann[782:1562]
 dj_2w_p3 <- twoweek_ann[1563:2343]
 ```
 
-```{r acf plots for subperiods}
+```{r}
 par(mfrow=c(1,3))
 acf(dj_2d_p1, lag.max = 20, main = paste("ACF for DJ_d 2-day period 1"))
 acf(dj_2d_p2, lag.max = 20, main = paste("ACF for DJ_d 2-day period 2"))
