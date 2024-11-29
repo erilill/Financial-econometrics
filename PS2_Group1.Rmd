@@ -398,6 +398,23 @@ For Hi_10 portfolio returns there is some evidence that is contradictory. The th
 
 ## 2. Is this relationship stable over time?
 
+
+Let us split up it in three time periods.
+```{r}
+lo10p1 <- portcap_m$Lo_10[1:314] #period 1
+lo10p2 <- portcap_m$Lo_10[315:628] #period 2
+lo10p3 <- portcap_m$Lo_10[629:942] #period 3
+
+length(lo10p1)
+length(lo10p2)
+length(lo10p3)
+
+hi10p1 <- portcap_m$Hi_10[1:314] #period 1
+hi10p2 <- portcap_m$Hi_10[315:628] #period 2
+hi10p3 <- portcap_m$Hi_10[629:942] #period 3
+
+```
+
 ## 3. Are there significant cross-autocorrelations between different size portfolios?
 
 
