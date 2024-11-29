@@ -27,6 +27,7 @@ library(FE)
 library(knitr)
 library(forecast)
 library(patchwork)
+library(kableExtra)
 data("DJ_w")
 data("DJ_d")
 data("portcap_m")
@@ -347,6 +348,7 @@ For 2-week data and period 1 we only observe period 7 to be significant. For per
 ## Draw overall conclusions regarding asset return predictability based on this analysis.
 
 
+
 # B. Testing for Return Predictability in Size Portfolios
 Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
 
@@ -382,8 +384,8 @@ res_2 <- vector("list", length(q))
 
 
 for (i in 1:length(q)) {
-  res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i]))  # Include q in the result
-  res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) # Include q in the result
+  res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i])) 
+  res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) 
 }
 names(res_1) <- names(res_2) <- q
 res_1
@@ -417,5 +419,76 @@ hi10p3 <- portcap_m$Hi_10[629:942] #period 3
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios?
 
+```{r}
+res <- ccf(lo10, hi10, lag.max = 20)
+
+res <- data.frame(
+  Lag = res[["lag"]], 
+  ACF = res[["acf"]]
+)
+#kable(res, format = "latex", booktabs = TRUE) # Necessary to produce latex table 
+```
+\begin{tabular}{rr}
+\toprule
+Lag & ACF\\
+\midrule
+-20 & -0.0995100\\
+-19 & -0.0359168\\
+-18 & 0.0397203\\
+-17 & 0.1048444\\
+-16 & -0.0088606\\
+\addlinespace
+-15 & 0.0385249\\
+-14 & -0.0876180\\
+-13 & -0.0615885\\
+-12 & -0.0153525\\
+-11 & 0.0055631\\
+\addlinespace
+-10 & 0.0296554\\
+-9 & 0.0808252\\
+-8 & -0.0010983\\
+-7 & 0.0038968\\
+-6 & -0.0223456\\
+\addlinespace
+-5 & 0.0180234\\
+-4 & 0.0111506\\
+-3 & -0.0707419\\
+-2 & -0.0483765\\
+-1 & 0.0793763\\
+\addlinespace
+0 & 0.6985677\\
+1 & 0.2225634\\
+2 & 0.0221419\\
+3 & -0.1071838\\
+4 & -0.0713023\\
+\addlinespace
+5 & 0.0078996\\
+6 & -0.0298914\\
+7 & -0.0028170\\
+8 & -0.0083827\\
+9 & 0.1197998\\
+\addlinespace
+10 & 0.0428947\\
+11 & -0.0594163\\
+12 & -0.0369711\\
+13 & -0.0958468\\
+14 & -0.0597143\\
+\addlinespace
+15 & -0.0197416\\
+16 & -0.1052750\\
+17 & 0.0421748\\
+18 & -0.0137750\\
+19 & 0.0160187\\
+\addlinespace
+20 & -0.1067921\\
+\bottomrule
+\end{tabular}
+
+When negative lag, it means that the returns of Lo_10 is compared to the future returns of the Hi_10. When positive lags it means that the Hi_10 is compared to the future returns of the Lo_10. We observe significant lags both for negative and positive lags. Furthermore, the lags are in both directions, both positive and negative cross autocorrelations and for this reason it is very hard to draw a conclusion that supports the theory. We will continue by dividing it into subperiods. 
+
+
+
+# Ljung-Box and lastly sub periods 
 
 ## 4. Can you confirm the results of Campbell/Lo/MacKinlay (1997) that high-cap stocks lead small-cap stocks? How stable is this result over time?
+
