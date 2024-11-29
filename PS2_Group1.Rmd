@@ -387,7 +387,13 @@ res_w[i,4] <- res_2$RW1_p_VR
 }
 ```
 
-
+```{r B1_ACF, echo=F}
+par(mfrow=c(1,2))
+p1 <- Acf(lo10, lag.max = 12, main = "Portfolio returns for low 10%")
+p2 <- Acf(hi10, lag.max = 12, main = "Portfolio returns for top 10%.")
+par(mfrow=c(1,1))
+```
+Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%. Positive auto-correlations indicates that there could
 
 ## 2. Is this relationship stable over time?
 
