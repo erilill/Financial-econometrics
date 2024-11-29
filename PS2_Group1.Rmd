@@ -80,6 +80,7 @@ cbind(t1,t2)
 \begin{table}[ht]
 \centering
 \caption{Ljung-Box Test Statistics for Dow Jones Daily and Weekly Returns (Rounded to 3 Decimal Places)}
+\label{tab1:LB}
 \begin{tabular}{lcccc}
 \toprule
 \multirow{2}{*}{Lag} & \multicolumn{2}{c}{Dow Jones Daily} & \multicolumn{2}{c}{Dow Jones Weekly} \\ 
@@ -110,7 +111,7 @@ cbind(t1,t2)
 \end{tabular}
 \end{table}
 
-
+We see from table \ref{tab1:LB} that the p-values for all 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above 0.05. For lag 7, $\hat{p}\leq 0.1$, but the p-values for all other lags are above $\alpha=0.1$. Using $\alpha=0.05$ we reject the null that there is auto-correlation, indicating that there is no prevalence of asset return predictions. 
 
 Variance ratio test:
 
@@ -142,9 +143,24 @@ VDR <- function(vr,iq){
   
   return(list(VD=VD, VR=VR, RW1_p_VD=RW1_p_VD, RW1_p_VR=RW1_p_VR))
 }
+q <- c(2,4,8,16)
+res_d <- matrix(NA, nrow=4, ncol=4)
+res_w <- matrix(NA, nrow=4, ncol=4)
 
-res_d <- VDR(vr=DJ_d$r_Dow_Jones,iq=5)
-res_w <- VDR(vr=DJ_w$r_close,iq=5)
+for (i in 1:length(q)){
+res_1 <- VDR(vr=DJ_d$r_Dow_Jones,iq=q[i])
+res_2 <- VDR(vr=DJ_w$r_close,iq=q[i])
+res_d[i,1] <- res_1$VD
+res_d[i,2] <- res_1$RW1_p_VD
+res_d[i,3] <- res_1$VR
+res_d[i,4] <- res_1$RW1_p_VR
+res_w[i,1] <- res_2$VD
+res_w[i,2] <- res_2$RW1_p_VD
+res_w[i,3] <- res_2$VR
+res_w[i,4] <- res_2$RW1_p_VR
+}
+round(res_d,3)
+round(res_w,3)
 ```
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
