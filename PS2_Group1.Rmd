@@ -363,12 +363,34 @@ portcap_m
 
 ```{r}
 lo10 <- portcap_m$Lo_10 / 100 
+<<<<<<< HEAD
 hi10 <- portcap_m$Hi_10 / 100 
+=======
+hi10 <- portcap_m$Hi_10 / 100
+```
+
+```{r}
+LB(lo10,lag=12,ip=0)
+LB(hi10,lag=12,ip=0)
+```
+
+We can see that we reject the null of the first 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
+
+```{r}
+t1 <- VDR(lo30, iq = 4)
+t2 <- VDR(hi30, iq = 4)
+#t3 <- VDR(portcap_m$)
+t1;t2
+
+res_d <- matrix(NA, nrow=4, ncol=4)
+res_w <- matrix(NA, nrow=4, ncol=4)
+>>>>>>> 4aa4528220fd6d127a8af8677faf313d37b214d5
 
 q <- c(2,4,8,16)
 res_1 <- vector("list", length(q))
 res_2 <- vector("list", length(q))
 
+<<<<<<< HEAD
 VDR(lo10, iq = 4)
 for (i in 1:length(q)) {
   res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i]))  # Include q in the result
@@ -377,6 +399,15 @@ for (i in 1:length(q)) {
 names(res_1) <- names(res_2) <- q
 ```
 
+=======
+```{r B1_ACF, echo=F}
+par(mfrow=c(1,2))
+p1 <- Acf(lo10, lag.max = 12, main = "Portfolio returns for low 10%")
+p2 <- Acf(hi10, lag.max = 12, main = "Portfolio returns for top 10%.")
+par(mfrow=c(1,1))
+```
+Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%. Positive auto-correlations indicates that there could
+>>>>>>> 4aa4528220fd6d127a8af8677faf313d37b214d5
 
 ## 2. Is this relationship stable over time?
 
