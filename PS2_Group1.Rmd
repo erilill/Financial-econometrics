@@ -357,15 +357,7 @@ portcap_m
 
 ```{r}
 lo10 <- portcap_m$Lo_10 / 100 
-<<<<<<< HEAD
-=======
 hi10 <- portcap_m$Hi_10 / 100 
->>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
-hi10 <- portcap_m$Hi_10 / 100
-lo20 <- portcap_m$Lo_20 / 100 
-hi20 <- portcap_m$Hi_20 / 100
-lo30 <- portcap_m$Lo_30 / 100 
-hi30 <- portcap_m$Hi_30 / 100
 ```
 
 ```{r B1_ACF, echo=F}
@@ -384,27 +376,11 @@ LB(hi10,lag=12,ip=0)
 We can see that we reject the null of the first 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
 
 ```{r}
-<<<<<<< HEAD
-=======
-t1 <- VDR(lo30, iq = 4)
-t2 <- VDR(hi30, iq = 4)
-#t3 <- VDR(portcap_m$)
-t1;t2
-
-res_d <- matrix(NA, nrow=4, ncol=4)
-res_w <- matrix(NA, nrow=4, ncol=4)
-
->>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 q <- c(2,4,8,16)
 res_1 <- vector("list", length(q))
 res_2 <- vector("list", length(q))
 
-<<<<<<< HEAD
 
-
-=======
-VDR(lo10, iq = 4)
->>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 for (i in 1:length(q)) {
   res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i]))  # Include q in the result
   res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) # Include q in the result
