@@ -364,6 +364,16 @@ portcap_m
 ```{r}
 lo10 <- portcap_m$Lo_10 / 100 
 hi10 <- portcap_m$Hi_10 / 100
+```
+
+```{r}
+LB(lo10,lag=12,ip=0)
+LB(hi10,lag=12,ip=0)
+```
+
+We can see that we reject the null of the first 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
+
+```{r}
 t1 <- VDR(lo30, iq = 4)
 t2 <- VDR(hi30, iq = 4)
 #t3 <- VDR(portcap_m$)
