@@ -293,10 +293,7 @@ djw_s3 <- DJ_w[3125:4686, ]
 
 ```{r}
 par(mfrow=c(1,3))
-<<<<<<< HEAD
-=======
 
->>>>>>> f9f4dc42e26b9bc7ecf9d0dbac0953d27d133895
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"), ylim = c(-0.25, 0.25))
 Acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"), ylim = c(-0.25, 0.25))
 Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"), ylim = c(-0.25, 0.25))
@@ -304,9 +301,6 @@ Acf(djd_s3[, 3], lag.max = 20, main = paste("ACF for DJ_d period 3"), ylim = c(-
 Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"), ylim = c(-0.25, 0.25))
 Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"), ylim = c(-0.25, 0.25))
 Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"), ylim = c(-0.25, 0.25))
-<<<<<<< HEAD
-=======
-
 
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"))
 Acf(djd_s2[, 3], lag.max = 20, main = paste("ACF for DJ_d period 2"))
@@ -316,7 +310,6 @@ Acf(djw_s1[, 5], lag.max = 20, main = paste("ACF for DJ_w period 1"))
 Acf(djw_s2[, 5], lag.max = 20, main = paste("ACF for DJ_w period 2"))
 Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"))
 
->>>>>>> f9f4dc42e26b9bc7ecf9d0dbac0953d27d133895
 par(mfrow=c(1,1))
 ```
 
@@ -355,6 +348,7 @@ For 2-week data and period 1 we only observe period 7 to be significant. For per
 
 
 # B. Testing for Return Predictability in Size Portfolios
+Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
 
 ## 1. Is there a relationship between market capitalization and asset return predictability and does it also hold for higher aggregated returns?
 ```{r}
@@ -363,12 +357,24 @@ portcap_m
 
 ```{r}
 lo10 <- portcap_m$Lo_10 / 100 
+<<<<<<< HEAD
+=======
+hi10 <- portcap_m$Hi_10 / 100 
+>>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 hi10 <- portcap_m$Hi_10 / 100
 lo20 <- portcap_m$Lo_20 / 100 
 hi20 <- portcap_m$Hi_20 / 100
 lo30 <- portcap_m$Lo_30 / 100 
 hi30 <- portcap_m$Hi_30 / 100
 ```
+
+```{r B1_ACF, echo=F}
+par(mfrow=c(1,2))
+p1 <- Acf(lo10, lag.max = 12, main = "Portfolio returns for low 10%")
+p2 <- Acf(hi10, lag.max = 12, main = "Portfolio returns for top 10%.")
+par(mfrow=c(1,1))
+```
+Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%, this indicates asset return predictability.
 
 ```{r}
 LB(lo10,lag=12,ip=0)
@@ -378,12 +384,27 @@ LB(hi10,lag=12,ip=0)
 We can see that we reject the null of the first 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
 
 ```{r}
+<<<<<<< HEAD
+=======
+t1 <- VDR(lo30, iq = 4)
+t2 <- VDR(hi30, iq = 4)
+#t3 <- VDR(portcap_m$)
+t1;t2
+
+res_d <- matrix(NA, nrow=4, ncol=4)
+res_w <- matrix(NA, nrow=4, ncol=4)
+
+>>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 q <- c(2,4,8,16)
 res_1 <- vector("list", length(q))
 res_2 <- vector("list", length(q))
 
+<<<<<<< HEAD
 
 
+=======
+VDR(lo10, iq = 4)
+>>>>>>> 839694f350a9d53cc219a09835a5158d4e53a8b1
 for (i in 1:length(q)) {
   res_1[[i]] <- c(VDR(lo10, iq = q[i]), list(q = q[i]))  # Include q in the result
   res_2[[i]] <- c(VDR(hi10, iq = q[i]), list(q = q[i])) # Include q in the result
@@ -397,15 +418,7 @@ We observe that for Lo_10 portfolio returns the test statistic from VGD is signi
 For Hi_10 portfolio returns there is some evidence that is contradictory. The theory suggests that the biggest companies should be random walk however our finding when q is 2 is that we can reject the null of random walk. For this reason, we assume that Hi_10 companies are predictable in the very few successive time periods but not longer. 
 
 
-=======
-```{r B1_ACF, echo=F}
-par(mfrow=c(1,2))
-p1 <- Acf(lo10, lag.max = 12, main = "Portfolio returns for low 10%")
-p2 <- Acf(hi10, lag.max = 12, main = "Portfolio returns for top 10%.")
-par(mfrow=c(1,1))
-```
-Looking at the ACF-plots above we see significant auto-correlations for both the low and top 10\%. Positive auto-correlations indicates that there could
->>>>>>> 4aa4528220fd6d127a8af8677faf313d37b214d5
+
 
 ## 2. Is this relationship stable over time?
 
