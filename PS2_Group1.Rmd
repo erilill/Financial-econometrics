@@ -32,8 +32,11 @@ data("portcap_m")
 ```
 
 # A. Testing for asset return predicatability.
+Use the data sets ”DJ_d” (Dow Jones daily) and ”DJ_w” (Dow Jones weekly) containing daily and weekly observations of the Dow Jones index. In the following, you have to test for asset return predictability based on autocorrelation functions, Ljung-Box statistics as well as variance ratio tests.
 
 ## 1. Do you find significant evidence for asset return predictability on the daily and weekly level?
+
+For this question, we will use autocorrelation functions, Lung-Box statistics and variance ratio tests in order to gage whether there is significant evidence for asset return predictability.
 
 ACF: 
 ```{r A1_ACF, echo=F}
@@ -42,6 +45,12 @@ p1 <- Acf(DJ_d$r_Dow_Jones, lag.max = 20, main = "Dow Jones daily")
 p2 <- Acf(DJ_w$r_close, lag.max = 20, main = "Dow Jones weekly")
 par(mfrow=c(1,1))
 ```
+Above you see the ACF plots for the Dow Jones daily and weekly data with 20 lags. For easier interpretation, lag 0 has been omitted.
+
+What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we do not see any highly significant auto-correlations. 
+
+We see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability, at least short-term.
+
 
 Ljung-Box test:
 
@@ -63,8 +72,8 @@ gridsearch <- function(data, lag){
   return(results)
 }
 lag = c(1:20)
-gridsearch(DJ_d$r_Dow_Jones, lag)
-gridsearch(DJ_w$r_close, lag)
+t1 <- gridsearch(DJ_d$r_Dow_Jones, lag)
+tgridsearch(DJ_w$r_close, lag)
 
 ```
 Variance ratio test:
