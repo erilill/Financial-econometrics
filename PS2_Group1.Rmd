@@ -389,6 +389,24 @@ names(res_1) <- names(res_2) <- q
 res_1
 res_2
 ```
+\begin{table}[ht]
+\centering
+\caption{The variance ratio test under RW1. Presented are variance distance, ratio, and p-values for Portfolio returns for low and top 10%.}
+\label{tab:VDRB2}
+\begin{tabular}{c|cccc|cccc}
+\hline
+\multicolumn{1}{c|}{} &
+\multicolumn{4}{c|}{Portfolio returns for low 10\%} & \multicolumn{4}{c}{Portfolio returns for top 10\%} \\ \hline
+$q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
+2 & 6.684 & $2.32 \times 10^{-11}$ & 6.684 & $2.32 \times 10^{-11}$ & 2.218 & 0.027 & 2.218 & 0.027 \\
+4 & 4.656 & $3.23 \times 10^{-6}$ & 4.656 & $3.23 \times 10^{-6}$ & 0.690 & 0.490 & 0.690 & 0.490 \\
+8 & 1.715 & 0.086 & 1.715 & 0.086 & 0.764 & 0.445 & 0.764 & 0.445 \\
+16 & 1.611 & 0.107 & 1.611 & 0.107 & 1.479 & 0.139 & 1.479 & 0.139 \\
+\hline
+\end{tabular}
+\end{table}
+
+
 We observe that for Lo_10 portfolio returns the test statistic from VGD is significant for q 2 and 4 which would suggest that these are not random walks. For q 8 and 16 we cannot reject null and therefore have no evidence to prove that they are not random walks.
 
 For Hi_10 portfolio returns there is some evidence that is contradictory. The theory suggests that the biggest companies should be random walk however our finding when q is 2 is that we can reject the null of random walk. For this reason, we assume that Hi_10 companies are predictable in the very few successive time periods but not longer. 
