@@ -204,8 +204,32 @@ We cannot find anything that would indicate a structural break in the different 
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
+```{r splitting the 2-day and 2-week data}
+length(twoday_ann) / 3 # 3140
+length(twoweek_ann) / 3 # 781
 
+dj_2d_p1 <- twoday_ann[1:3140]
+dj_2d_p2 <- twoday_ann[3141:6280]
+dj_2d_p3 <- twoday_ann[6281:9419]
+dj_2w_p1 <- twoweek_ann[1:781]
+dj_2w_p2 <- twoweek_ann[782:1562]
+dj_2w_p3 <- twoweek_ann[1563:2343]
+```
 
+```{r acf plots for subperiods}
+par(mfrow=c(1,3))
+acf(dj_2d_p1, lag.max = 20, main = paste("ACF for DJ_d 2-day period 1"))
+acf(dj_2d_p2, lag.max = 20, main = paste("ACF for DJ_d 2-day period 2"))
+acf(dj_2d_p3, lag.max = 20, main = paste("ACF for DJ_d 2-day period 3"))
+
+acf(dj_2w_p1, lag.max = 20, main = paste("ACF for DJ_w 2-week period 1"))
+acf(dj_2w_p2, lag.max = 20, main = paste("ACF for DJ_w 2-week period 2"))
+acf(dj_2w_p3, lag.max = 20, main = paste("ACF for DJ_w 2-week period 3"))
+par(mfrow=c(1,1))
+```
+For 2d data we observe lags 2,3,4, 11 and 15 are significant for period 1. For period 2 we observe lag 2 and 13 and for the last period we observe lags 5, 15 and 17 are significant. Given these findings we observe that the autocorrelation have a different structure from the other lags. These findings indicate that in the first period we observe some short-term autocorrelation and this structure is different from what we observe in the other two periods. 
+
+For 2-week data and period 1 we only observe period 7 to be significant. For period 2 we observe lags 7, 9, 12, and 15 while for the last period we observe no lags to be significant. In the 2-week data we observe that period two has some autocorrelation around 7, 9 and 12 periods. This could indicate that the time periods 2 and 3 months before affect the price today and therefore some bimonthly and trimonthly autocorrelation. In the other two periods we observe no such findings.  
 
 ## Draw overall conclusions regarding asset return predictability based on this analysis.
 
