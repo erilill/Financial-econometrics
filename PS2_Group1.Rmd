@@ -621,7 +621,7 @@ res <- ccf(lo10, hi10, lag.max = 20)
 
 When negative lag, it means that the returns of Lo_10 is compared to the future returns of the Hi_10. When positive lags it means that the Hi_10 is compared to the future returns of the Lo_10. We observe significant lags both for negative and positive lags. Furthermore, the lags are in both directions, both positive and negative cross-autocorrelations and for this reason it is very hard to draw one general conclusion. One thing that is evident is however the significant lag 1, which means that Hi_10 is correlated with short-term future returns of Lo_10, supporting the theory that big companies leads and small companies lags. We will continue by dividing it into subperiods and examining the autocorrelations again. Above is a table of the magnitudes. 
 ```{r, echo=F}
-par(mfrow=c(3,1))
+par(mfrow=c(1,3))
 res_1 <- ccf(lo10p1, hi10p1, lag.max = 20)
 res_2 <- ccf(lo10p2, hi10p2, lag.max = 20)
 res_3 <- ccf(lo10p3, hi10p3, lag.max = 20)
