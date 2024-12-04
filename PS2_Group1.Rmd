@@ -457,18 +457,23 @@ Results from previous studies show that for portfolios of large size companies w
 
 We can conclude that we see evidence for asset return predictability for both portfolios of large and small companies, but we do not observe what is expected from previous studies.
 
-Next we want to check if these results hold for higher aggregated returns. We will use two-month returns:
+Next we want to check if these results hold for higher aggregated returns. We will use annualized two-month returns which we create like this.
 
-```{r, echo=F}
+```{r, echo=T, results='hide'}
 onemonth_lo10 <- lo10
 onemonth_hi10 <- hi10
 
-twomonth_lo10 <- onemonth_lo10[seq(1, length(onemonth_lo10), by = 2)] + onemonth_lo10[seq(2, length(onemonth_lo10), by = 2)]
+twomonth_lo10 <- onemonth_lo10[seq(1, length(onemonth_lo10), by = 2)] +
+                 onemonth_lo10[seq(2, length(onemonth_lo10), by = 2)]
+
 twomonth_lo10_ann <- twomonth_lo10/2
 
-twomonth_hi10 <- onemonth_hi10[seq(1, length(onemonth_hi10), by = 2)] + onemonth_hi10[seq(2, length(onemonth_hi10), by = 2)]
+twomonth_hi10 <- onemonth_hi10[seq(1, length(onemonth_hi10), by = 2)] +
+                 onemonth_hi10[seq(2, length(onemonth_hi10), by = 2)]
+
 twomonth_hi10_ann <- twomonth_hi10/2
 ```
+
 ```{r B1_ACF2, echo=F, warning=F, error=F}
 par(mfrow=c(1,2))
 p1 <- Acf(twomonth_lo10_ann, lag.max = 12, main = "Portfolio returns for low 10%")
