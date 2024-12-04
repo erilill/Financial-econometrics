@@ -292,7 +292,7 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \end{tabular}
 \end{table}
 
-For the two-day series, the p-values are <0.01 for all $q$ except $q=2$, indicating that we have some evidence for asset return predictability for the two-day returns. For the two-week series, looking at the p-values we see that the results are not statistically significant at even the 10% level, and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the two-week data.
+For the two-day series, the p-values are <0.05 for all $q$ except $q=2$, indicating that we have some evidence for asset return predictability for the two-day returns. For the two-week series, looking at the p-values we see that the results are not statistically significant at even the 10% level, and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the two-week data.
 
 
 
