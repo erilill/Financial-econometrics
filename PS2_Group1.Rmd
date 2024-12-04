@@ -535,9 +535,10 @@ In table \ref{tab:VDRB22} we see the results from the variance ratio test for th
 
 ## 2. Is this relationship stable over time?
 
-
 Let us split up it in three time periods.
-```{r, echo=F}
+
+
+```{r, echo=F,fig.pos = "H",fig.height=4, fig.width=6}
 lo10p1 <- portcap_m$Lo_10[1:314] #period 1
 lo10p2 <- portcap_m$Lo_10[315:628] #period 2
 lo10p3 <- portcap_m$Lo_10[629:942] #period 3
@@ -555,7 +556,13 @@ par(mfrow=c(1,3))
 Acf(lo10p1, lag.max = 20, main = paste("ACF for lo_10 period 1"), ylim = c(-0.25, 0.25))
 Acf(lo10p2, lag.max = 20, main = paste("ACF for lo_10 period 2"), ylim = c(-0.25, 0.25))
 Acf(lo10p3, lag.max = 20, main = paste("ACF for lo_10 period 3"), ylim = c(-0.25, 0.25))
+par(mfrow=c(1,1))
 
+```
+
+
+```{r, echo=F,fig.pos = "H",fig.height=4, fig.width=6}
+par(mfrow=c(1,3))
 Acf(hi10p1, lag.max = 20, main = paste("ACF for hi_10 period 1"), ylim = c(-0.25, 0.25))
 Acf(hi10p2, lag.max = 20, main = paste("ACF for hi_10 period 2"), ylim = c(-0.25, 0.25))
 Acf(hi10p3, lag.max = 20, main = paste("ACF for hi_10 period 3"), ylim = c(-0.25, 0.25))
