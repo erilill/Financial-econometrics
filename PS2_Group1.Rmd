@@ -397,7 +397,7 @@ round(results, 3)
 \end{tabular}
 \end{table}
 
-We can see that we reject the null of the first 6 and 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
+We can see that we reject the null of the first 6 and 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject more strongly for low 10 \%, which indicates what market predictability is more prevalent for lower capitalized stocks than high.
 
 ```{r, include=F}
 q <- c(2,4,8,16)
@@ -521,7 +521,7 @@ $q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \hline
 \end{tabular}
 \end{table}
-In table \ref{tab:VDRB22} we see the results from the variance ratio test for the two month aggregated portfolio returns. Here we see the results that we cannot reject the null and come to the conclusion that the series are not 
+In table \ref{tab:VDRB22} we see the results from the variance ratio test for the two month aggregated portfolio returns. Here we see the results that we cannot reject the null, contradicting the results from the ACF-plots and Ljung-Box test. This makes it more difficult to come to a conclusion, but we believe based on the ACF and Ljung-Box test that there is likely asset return predictability in the low 10\% but not in the top 10\% for the two month aggregated returns.
 
 
 ## 2. Is this relationship stable over time?
