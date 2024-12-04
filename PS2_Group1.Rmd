@@ -308,7 +308,7 @@ djw_s2 <- DJ_w[1563:3124, ]
 djw_s3 <- DJ_w[3125:4686, ]
 ```
 
-```{r}
+```{r, echo=F}
 par(mfrow=c(1,3))
 
 Acf(djd_s1[, 3], lag.max = 20, main = paste("ACF for DJ_d period 1"), ylim = c(-0.25, 0.25))
@@ -337,7 +337,7 @@ dj_2w_p2 <- twoweek_ann[782:1562]
 dj_2w_p3 <- twoweek_ann[1563:2343]
 ```
 
-```{r}
+```{r, echo=F}
 par(mfrow=c(1,3))
 Acf(dj_2d_p1, lag.max = 20, main = paste("ACF for DJ_d 2-day period 1"), ylim = c(-0.15, 0.15))
 Acf(dj_2d_p2, lag.max = 20, main = paste("ACF for DJ_d 2-day period 2"), ylim = c(-0.15, 0.15))
@@ -509,7 +509,7 @@ round(results, 3)
 What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10\%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
 
 Looking at the variance ratio test:
-```{r, echo=F}
+```{r, include=F}
 q <- c(2,4,8,16)
 res_lo <- matrix(NA, nrow=4, ncol=4)
 res_hi <- matrix(NA, nrow=4, ncol=4)
@@ -617,61 +617,7 @@ We can see that we reject the null of the first 12 autocorrelations being zero f
 ```{r, echo=F}
 res <- ccf(lo10, hi10, lag.max = 20)
 ```
-\begin{tabular}{rr}
-\toprule
-Lag & ACF\\
-\midrule
--20 & -0.0995100\\
--19 & -0.0359168\\
--18 & 0.0397203\\
--17 & 0.1048444\\
--16 & -0.0088606\\
-\addlinespace
--15 & 0.0385249\\
--14 & -0.0876180\\
--13 & -0.0615885\\
--12 & -0.0153525\\
--11 & 0.0055631\\
-\addlinespace
--10 & 0.0296554\\
--9 & 0.0808252\\
--8 & -0.0010983\\
--7 & 0.0038968\\
--6 & -0.0223456\\
-\addlinespace
--5 & 0.0180234\\
--4 & 0.0111506\\
--3 & -0.0707419\\
--2 & -0.0483765\\
--1 & 0.0793763\\
-\addlinespace
-0 & 0.6985677\\
-1 & 0.2225634\\
-2 & 0.0221419\\
-3 & -0.1071838\\
-4 & -0.0713023\\
-\addlinespace
-5 & 0.0078996\\
-6 & -0.0298914\\
-7 & -0.0028170\\
-8 & -0.0083827\\
-9 & 0.1197998\\
-\addlinespace
-10 & 0.0428947\\
-11 & -0.0594163\\
-12 & -0.0369711\\
-13 & -0.0958468\\
-14 & -0.0597143\\
-\addlinespace
-15 & -0.0197416\\
-16 & -0.1052750\\
-17 & 0.0421748\\
-18 & -0.0137750\\
-19 & 0.0160187\\
-\addlinespace
-20 & -0.1067921\\
-\bottomrule
-\end{tabular}
+
 
 When negative lag, it means that the returns of Lo_10 is compared to the future returns of the Hi_10. When positive lags it means that the Hi_10 is compared to the future returns of the Lo_10. We observe significant lags both for negative and positive lags. Furthermore, the lags are in both directions, both positive and negative cross-autocorrelations and for this reason it is very hard to draw one general conclusion. One thing that is evident is however the significant lag 1, which means that Hi_10 is correlated with short-term future returns of Lo_10, supporting the theory that big companies leads and small companies lags. We will continue by dividing it into subperiods and examining the autocorrelations again. Above is a table of the magnitudes. 
 ```{r, echo=F}
@@ -680,63 +626,6 @@ res_2 <- ccf(lo10p2, hi10p2, lag.max = 20)
 res_3 <- ccf(lo10p3, hi10p3, lag.max = 20)
 ```
 For period 1, it is evident that there are more significant positive lags than negative, supporting the theory of leading large companies. In the second period we observe no significant negative lags but three significant positive lags which are at lags 1, 3, and 7. Finally, for period three we observe two significant negative lags (8, 12) and four significant positive lags (1, 4, 16, and 18). These findings suggest that lag 1 is always positive and significant which supports the theory of leading large companies. Following is a table of the magnitudes. 
-
-\begin{tabular}{rrrr}
-\toprule
-Lag & ACF P1 & ACF P2 & ACF P3\\
-\midrule
--20 & -0.1103998 & -0.0432523 & -0.1045049\\
--19 & -0.0102827 & -0.0514065 & -0.1059982\\
--18 & 0.0823519 & -0.0545906 & -0.0286165\\
--17 & 0.1391339 & -0.0064733 & 0.0639247\\
--16 & -0.0195983 & -0.0072937 & 0.0123273\\
-\addlinespace
--15 & 0.0463637 & 0.1083565 & -0.0418253\\
--14 & -0.1058507 & -0.0831579 & -0.0202578\\
--13 & -0.0522825 & -0.0705355 & -0.0902624\\
--12 & -0.0083745 & 0.0499713 & -0.1279071\\
--11 & 0.0080956 & 0.0387980 & -0.0381943\\
-\addlinespace
--10 & 0.0220173 & -0.0009402 & 0.1021607\\
--9 & 0.1194956 & 0.0873122 & -0.0638926\\
--8 & 0.0517223 & -0.0833388 & -0.1374145\\
--7 & 0.0131612 & -0.0490651 & 0.0050515\\
--6 & -0.0226866 & -0.0794861 & 0.0272519\\
-\addlinespace
--5 & 0.0167546 & 0.0008242 & 0.0475835\\
--4 & 0.0192456 & 0.0520687 & -0.0649172\\
--3 & -0.0892614 & 0.0246773 & -0.0842593\\
--2 & -0.0445604 & -0.0149691 & -0.0969952\\
--1 & 0.1126604 & 0.0027913 & 0.0331768\\
-\addlinespace
-0 & 0.7619358 & 0.6605027 & 0.5878333\\
-1 & 0.2458573 & 0.2153915 & 0.1740160\\
-2 & 0.0244658 & 0.0315184 & 0.0100482\\
-3 & -0.1949702 & 0.1225646 & 0.0348512\\
-4 & -0.0847712 & 0.0278292 & -0.1177156\\
-\addlinespace
-5 & 0.0111564 & 0.0160018 & -0.0058055\\
-6 & -0.0304142 & -0.0544791 & -0.0089222\\
-7 & 0.0271244 & -0.1163203 & -0.0233280\\
-8 & 0.0096359 & -0.0703728 & -0.0319809\\
-9 & 0.1939537 & 0.0492911 & -0.0938559\\
-\addlinespace
-10 & 0.0829907 & -0.0980722 & 0.0299945\\
-11 & -0.0846743 & -0.0158970 & -0.0123815\\
-12 & -0.0570957 & 0.0163617 & -0.0174782\\
-13 & -0.1350653 & 0.0320444 & -0.0582166\\
-14 & -0.0649635 & -0.0624044 & -0.0266399\\
-\addlinespace
-15 & -0.0061131 & 0.0113940 & -0.0697472\\
-16 & -0.1176521 & -0.0693399 & -0.1257395\\
-17 & 0.0724068 & -0.0182994 & -0.0346438\\
-18 & 0.0253502 & -0.0172441 & -0.1513245\\
-19 & 0.0467810 & -0.1017195 & 0.0104923\\
-\addlinespace
-20 & -0.1534308 & -0.0414355 & 0.0240477\\
-\bottomrule
-\end{tabular}
-
 
 Finally, we conduct a Ljung-Box test to test if the cross autocorrelation are significant. 
 ```{r, include=F}
