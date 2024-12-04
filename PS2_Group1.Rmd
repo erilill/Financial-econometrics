@@ -479,7 +479,7 @@ As we can see in the ACF-plots above, there are several significant auto-correla
 
 Performing the Ljung-Box test:
 ```{r, include=F}
-lagss <- c(3,6)
+lagss <- c(6,12)
 results <- matrix(NA, nrow = length(lagss), ncol = 4)
 for(i in 1:length(lagss)){
 lb1 <- LB(twomonth_lo10_ann,lag=lagss[i],ip=0)
@@ -501,12 +501,12 @@ round(results, 3)
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
  & $Q_{LB}$ & p-value & $Q_{LB}$ & p-value \\ 
 \midrule
-3  & 8.042 & 0.045 & 1.883 & 0.597 \\ 
 6  & 17.380 & 0.008 & 7.232  & 0.300 \\ 
+12  & 39.492  & 0.000  & 25.595   & 0.012 \\ 
 \bottomrule
 \end{tabular}
 \end{table}
-What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 3 and 6 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10\%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
+What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 6 and 12 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10\%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
 
 Looking at the variance ratio test:
 ```{r, include=F}
