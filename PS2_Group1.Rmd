@@ -51,9 +51,9 @@ par(mfrow=c(1,1))
 ```
 Above you see the ACF plots for the Dow Jones daily and weekly data with 20 lags. For easier interpretation, lag 0 has been omitted.
 
-What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we do not see any highly significant auto-correlations. 
+What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we essentially only see 1 (barely) significant spike, but it can definately be due to randomness, since we can expect 1 in 20 to be significant because of the 5% level blue bands. 
 
-We see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability, at least short-term.
+So because we see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability, at least short-term.
 
 
 Ljung-Box test:
@@ -97,7 +97,7 @@ cbind(t1,t2)
 \end{tabular}
 \end{table}
 
-We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictability. 
+So we now test the nulls that the first 5, 10 and 20 autocorrelations are all zero. We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictability. 
 
 Variance ratio test:
 
@@ -164,7 +164,7 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \end{tabular}
 \end{table}
 
-For the daily series, the variance distance (VR) and ratio (VD) are above 1, indicating that we have positive auto-correlation. The p-values are zero for all $q$, indicating that we have significant evidence for asset return predictability. For the weekly series, VR and VD are below 1, indicating negative auto-covariance. However, looking at the p-values we see that the results are not statistically significant and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the weekly data.
+We now test the null of Random Walk returns, i.e. no predictability. For the daily series, the variance distance (VR) and ratio (VD) are above 1, indicating that we have positive auto-correlation. The p-values are zero for all $q$, indicating that we have significant evidence for asset return predictability. For the weekly series, VR and VD are below 1, indicating both positive and negative auto-covariance. However, looking at the p-values we see that the results are not statistically significant and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the weekly data.
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
@@ -351,14 +351,19 @@ Given all these findings, we can conclude that asset predictability is possible 
 Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
 
 ## 1. Is there a relationship between market capitalization and asset return predictability and does it also hold for higher aggregated returns?
+
+We start by inspecting the data.
 ```{r}
 portcap_m
 ```
+We chose to analyze the top and low 10\%, however e.g. top and low 30\% would also be an appropriate choice. We divide the returns by 100 as they are in percentages in the original data. 
 
 ```{r}
 lo10 <- portcap_m$Lo_10 / 100 
 hi10 <- portcap_m$Hi_10 / 100 
 ```
+
+We will assume that the data contains log returns, this is not clear based on the description but when plotting (simple `ts.plot()`) we see that the returns are centered around zero which is indicative of log returns.
 
 ```{r B1_ACF, echo=F}
 par(mfrow=c(1,2))
@@ -397,7 +402,7 @@ round(results, 3)
 \end{tabular}
 \end{table}
 
-We can see that we reject the null of the first 6 and 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject much more strongly for low 10 \%, which indicates what market predictability is more prevelant for lower capitalized stocks than high.
+We can see that we reject the null of the first 6 and 12 autocorrelations being zero for both low 10\% and high 10\%, which indicates market predictability for both. Although we reject more strongly for low 10 \%, which indicates what market predictability is more prevalent for lower capitalized stocks than high.
 
 ```{r, include=F}
 q <- c(2,4,8,16)
@@ -432,7 +437,11 @@ $q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 
 We observe that for Lo_10 portfolio returns the test statistic from VGD is significant for q 2 and 4 which would suggest that these are not random walks. For q 8 and 16 we cannot reject null and therefore have no evidence to prove that they are not random walks.
 
-For Hi_10 portfolio returns there is some evidence that is contradictory. The theory suggests that the biggest companies should be random walk however our finding when q is 2 is that we can reject the null of random walk. For this reason, we assume that Hi_10 companies are predictable in the very few successive time periods but not longer. 
+For Hi_10 portfolio returns there is some evidence that is contradictory. The theory suggests that the biggest companies should be random walk however our finding when q is 2 is that we can reject the null of random walk. For this reason, we assume that Hi_10 companies are predictable in the very few successive time periods but not longer.
+
+Results from previous studies show that for portfolios of large size companies we should not see any significant autocorrelations, and for portfolios of small-size companies we should see significantly positive autocorrelations. Our results are contradictory, we actually see significant autocorrelations for large size companies. For small-size companies portfolio we do see significant positive autocorrelations, but we also see 1 small spike that is negative, but it perhaps that one can be attributed to chance, as it is not extremely large spike (lag 3).
+
+We can conclude that we see evidence for asset return predictability for both portfolios of large and small companies, but we do not observe what is expected from previous studies.
 
 Next we want to check if these results hold for higher aggregated returns. We will use two-month returns:
 
@@ -521,7 +530,7 @@ $q$ & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \hline
 \end{tabular}
 \end{table}
-In table \ref{tab:VDRB22} we see the results from the variance ratio test for the two month aggregated portfolio returns. Here we see the results that we cannot reject the null and come to the conclusion that the series are not 
+In table \ref{tab:VDRB22} we see the results from the variance ratio test for the two month aggregated portfolio returns. Here we see the results that we cannot reject the null, contradicting the results from the ACF-plots and Ljung-Box test. This makes it more difficult to come to a conclusion, but we believe based on the ACF and Ljung-Box test that there is likely asset return predictability in the low 10\% but not in the top 10\% for the two month aggregated returns.
 
 
 ## 2. Is this relationship stable over time?
@@ -541,15 +550,44 @@ hi10p1 <- portcap_m$Hi_10[1:314] #period 1
 hi10p2 <- portcap_m$Hi_10[315:628] #period 2
 hi10p3 <- portcap_m$Hi_10[629:942] #period 3
 
-LB(lo10p1,lag=12,ip=0)
-LB(hi10p1,lag=12,ip=0)
+par(mfrow=c(1,3))
 
-LB(lo10p2,lag=12,ip=0)
-LB(hi10p2,lag=12,ip=0)
+Acf(lo10p1, lag.max = 20, main = paste("ACF for lo_10 period 1"), ylim = c(-0.25, 0.25))
+Acf(lo10p2, lag.max = 20, main = paste("ACF for lo_10 period 2"), ylim = c(-0.25, 0.25))
+Acf(lo10p3, lag.max = 20, main = paste("ACF for lo_10 period 3"), ylim = c(-0.25, 0.25))
 
-LB(lo10p3,lag=12,ip=0)
-LB(hi10p3,lag=12,ip=0)
+Acf(hi10p1, lag.max = 20, main = paste("ACF for hi_10 period 1"), ylim = c(-0.25, 0.25))
+Acf(hi10p2, lag.max = 20, main = paste("ACF for hi_10 period 2"), ylim = c(-0.25, 0.25))
+Acf(hi10p3, lag.max = 20, main = paste("ACF for hi_10 period 3"), ylim = c(-0.25, 0.25))
+par(mfrow=c(1,1))
+
+#LB(lo10p1,lag=12,ip=0)
+#LB(hi10p1,lag=12,ip=0)
+
+#LB(lo10p2,lag=12,ip=0)
+#LB(hi10p2,lag=12,ip=0)
+
+#LB(lo10p3,lag=12,ip=0)
+#LB(hi10p3,lag=12,ip=0)
 ```
+
+
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Results for Different Portfolios}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Portfolio} & \textbf{Test Statistic} & \textbf{p-value} \\ \hline
+Lo10 (Period 1) & 37.070 & 0.000 \\ \hline
+Hi10 (Period 1) & 26.537 & 0.009 \\ \hline
+Lo10 (Period 2) & 36.781 & 0.000 \\ \hline
+Hi10 (Period 2) & 18.119 & 0.112 \\ \hline
+Lo10 (Period 3) & 34.388 & 0.001 \\ \hline
+Hi10 (Period 3) & 13.472 & 0.336 \\ \hline
+\end{tabular}
+\label{tab:LB_test_results}
+\end{table}
+
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios?
 
