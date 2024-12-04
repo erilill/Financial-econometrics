@@ -53,7 +53,7 @@ Above you see the ACF plots for the Dow Jones daily and weekly data with 20 lags
 
 What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we essentially only see 1 (barely) significant spike, but it can definately be due to randomness, since we can expect 1 in 20 to be significant because of the 5% level blue bands. 
 
-So because we see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability, at least short-term.
+So because we see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability on the daily level.
 
 
 Ljung-Box test:
