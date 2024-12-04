@@ -170,17 +170,17 @@ We now test the null of Random Walk returns, i.e. no predictability. For the dai
 
 We create the annualized two-day and two-week returns like below.
 
-```{r, echo=F}
+```{r, echo=T}
 oneday <- DJ_d$r_Dow_Jones
 oneday <- oneday[-1] # remove first obs, otherwise below doesn't work
 oneweek <- DJ_w$r_close
 
 twoday <- oneday[seq(1, length(oneday), by = 2)] + oneday[seq(2, length(oneday), by = 2)]
-twoday_ann <- twoday/2
+twoday_ann <- twoday/2 #to make it annualized
 
 
 twoweek <- oneweek[seq(1, length(oneweek), by = 2)] + oneweek[seq(2, length(oneweek), by = 2)]
-twoweek_ann <- twoweek/2
+twoweek_ann <- twoweek/2 #to make it annualized
 ```
 
 
@@ -311,7 +311,7 @@ We cannot find anything that would indicate a structural break in the different 
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
-```{r}
+```{r,results='hide'}
 length(twoday_ann) / 3 # 3140
 length(twoweek_ann) / 3 # 781
 
