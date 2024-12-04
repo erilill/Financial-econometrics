@@ -178,7 +178,6 @@ oneweek <- DJ_w$r_close
 twoday <- oneday[seq(1, length(oneday), by = 2)] + oneday[seq(2, length(oneday), by = 2)]
 twoday_ann <- twoday/2 #to make it annualized
 
-
 twoweek <- oneweek[seq(1, length(oneweek), by = 2)] + oneweek[seq(2, length(oneweek), by = 2)]
 twoweek_ann <- twoweek/2 #to make it annualized
 ```
