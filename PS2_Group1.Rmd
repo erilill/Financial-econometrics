@@ -339,8 +339,13 @@ For 2d data we observe lags 2,3,4, 11 and 15 are significant for period 1. For p
 For 2-week data and period 1 we only observe period 7 to be significant. For period 2 we observe lags 7, 9, 12, and 15 while for the last period we observe no lags to be significant. In the 2-week data we observe that period two has some autocorrelation around 7, 9 and 12 periods. This could indicate that the time periods 2 and 3 months before affect the price today and therefore some bimonthly and trimonthly autocorrelation. In the other two periods we observe no such findings.  
 
 ## Draw overall conclusions regarding asset return predictability based on this analysis.
+Firstly, in question 1 we could see some evidence pointing towards predictability in daily data but not in weekly data. The ACF plots had a couple of significant spikes for daily data and barely any for weekly data. This findings are confirmed by Ljung-Box test which were significant for daily data but not for weekly data. Also the VR/VD was significant for daily but not for weekly. 
 
+Secondly, we analyzed the aggregated returns which were very similar to the findings in question 1. We saw some evidence in the ACF plots for 2d daily data but not for weekly data. The Ljung-Box test confirmed these findings, being significant for 2d aggregated data but not for 2w aggregated data. In the VR/VD test, the test statistics were significant for all periods except for when q = 2. For weekly not one test was significant. 
 
+Thirdly, in question 3 we checked some for different periods and saw some weak evidence of structural breaks. In daily data, we saw that period 3 were slightly different since the first two periods had more significant lags up to lag 5. For weekly data there was no indication that the different periods were different. For aggregated returns we saw that period 1 was slightly different in the most recent lags compared to the two successive periods and for weekly data we saw some weak evidence that period 2 were different from the other periods. 
+
+Given all these findings, we can conclude that asset predictability is possible for daily data, even if it is aggregated but not for weekly data under any circumstances. This is since for daily data, all tests and plots we do points towards asset predictability. For weekly data it is almost the opposite, there are barely any evidence pointing towards asset predictability and on the contrary pointing towards that the series is a random walk. Given the findings in the ACF plots, this holds mostly for recent lags. There was one finding that was a slightly contradictory to this, for 2-day aggregated return the insignificant VR/VD test for q = 2 but this could also be due to randomness since all other tests pointed towards asset predictability, especially in the recent lags. 
 
 # B. Testing for Return Predictability in Size Portfolios
 Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
@@ -582,6 +587,8 @@ Hi10 (Period 3) & 13.472 & 0.336 \\ \hline
 \end{tabular}
 \label{tab:LB_test_results}
 \end{table}
+
+We can see that we reject the null of the first 12 autocorrelations being zero for Low 10% period 1, High 10% period 1, Low 10% period 2 and Low 10% period 3. We can not reject the null of the first 12 autocorrelations being zero for High 10% period 2 and High 10% period 3. What does this tell us? It tells us that for the Low 10% portfolio, we see evidence for asset return predictability in all 3 periods, whereas for High 10% we only see evidence for asset return predictability for period 1, not for period 2 and 3.
 
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios? 
