@@ -463,10 +463,14 @@ Next we want to check if these results hold for higher aggregated returns. We wi
 onemonth_lo10 <- lo10
 onemonth_hi10 <- hi10
 
-twomonth_lo10 <- onemonth_lo10[seq(1, length(onemonth_lo10), by = 2)] + onemonth_lo10[seq(2, length(onemonth_lo10), by = 2)]
+twomonth_lo10 <- onemonth_lo10[seq(1, length(onemonth_lo10), by = 2)] +
+                 onemonth_lo10[seq(2, length(onemonth_lo10), by = 2)]
+
 twomonth_lo10_ann <- twomonth_lo10/2
 
-twomonth_hi10 <- onemonth_hi10[seq(1, length(onemonth_hi10), by = 2)] + onemonth_hi10[seq(2, length(onemonth_hi10), by = 2)]
+twomonth_hi10 <- onemonth_hi10[seq(1, length(onemonth_hi10), by = 2)] +
+                 onemonth_hi10[seq(2, length(onemonth_hi10), by = 2)]
+
 twomonth_hi10_ann <- twomonth_hi10/2
 ```
 
