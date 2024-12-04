@@ -97,7 +97,7 @@ cbind(t1,t2)
 \end{tabular}
 \end{table}
 
-So we now test the nulls that the first 5, 10 and 20 autocorrelations are all zero. We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero ($<\alpha=0.01$) for the daily data, meaning that we have significant auto-correlations at the 1% level. This is quite strong evidence for asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$, so we can not even reject at the 10% level. So for weekly data we do not reject the null that the first 5, 10 and 20 autocorrelations are all zero, indicating that there is no prevalence of asset return predictability. 
+So we now test the nulls that the first 5, 10 and 20 autocorrelations are all zero. We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero ($<\alpha=0.01$) for the daily data, meaning that we have significant auto-correlations at the 1% level. This is quite strong evidence for asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$, so we can not even reject at the 10% level. So for weekly data we do not reject the nulls that the first 5, 10 and 20 autocorrelations are all zero, indicating that there is no prevalence of asset return predictability. 
 
 Variance ratio test:
 
