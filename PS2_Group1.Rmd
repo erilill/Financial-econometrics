@@ -542,13 +542,13 @@ lo10p1 <- portcap_m$Lo_10[1:314] #period 1
 lo10p2 <- portcap_m$Lo_10[315:628] #period 2
 lo10p3 <- portcap_m$Lo_10[629:942] #period 3
 
-length(lo10p1)
-length(lo10p2)
-length(lo10p3)
+#length(lo10p1)
+#length(lo10p2)
+#length(lo10p3)
 
-#hi10p1 <- portcap_m$Hi_10[1:314] #period 1
-#hi10p2 <- portcap_m$Hi_10[315:628] #period 2
-#hi10p3 <- portcap_m$Hi_10[629:942] #period 3
+hi10p1 <- portcap_m$Hi_10[1:314] #period 1
+hi10p2 <- portcap_m$Hi_10[315:628] #period 2
+hi10p3 <- portcap_m$Hi_10[629:942] #period 3
 
 par(mfrow=c(1,3))
 
