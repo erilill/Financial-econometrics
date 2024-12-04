@@ -51,9 +51,9 @@ par(mfrow=c(1,1))
 ```
 Above you see the ACF plots for the Dow Jones daily and weekly data with 20 lags. For easier interpretation, lag 0 has been omitted.
 
-What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we do not see any highly significant auto-correlations. 
+What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we essentially only see 1 (barely) significant spike, but it can definately be due to randomness, since we can expect 1 in 20 to be significant because of the 5% level blue bands. 
 
-We see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability, at least short-term.
+So because we see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability, at least short-term.
 
 
 Ljung-Box test:
@@ -97,7 +97,7 @@ cbind(t1,t2)
 \end{tabular}
 \end{table}
 
-We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictability. 
+So we now test the nulls that the first 5, 10 and 20 autocorrelations are all zero. We see from table \ref{tab1:LB} that the p-values for 5, 10, and 20 lags are zero for the daily data, meaning that we have significant auto-correlations. This is an indication that there is potentially asset return predictability in the daily data. For the weekly series, all p-values are above $\alpha=0.1$. Using $\alpha=0.1$ we reject the null that there is auto-correlation in the weekly data, indicating that there is no prevalence of asset return predictability. 
 
 Variance ratio test:
 
@@ -164,7 +164,7 @@ q & VD & p-value & VR & p-value & VD & p-value & VR & p-value \\ \hline
 \end{tabular}
 \end{table}
 
-For the daily series, the variance distance (VR) and ratio (VD) are above 1, indicating that we have positive auto-correlation. The p-values are zero for all $q$, indicating that we have significant evidence for asset return predictability. For the weekly series, VR and VD are below 1, indicating negative auto-covariance. However, looking at the p-values we see that the results are not statistically significant and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the weekly data.
+We now test the null of Random Walk returns, i.e. no predictability. For the daily series, the variance distance (VR) and ratio (VD) are above 1, indicating that we have positive auto-correlation. The p-values are zero for all $q$, indicating that we have significant evidence for asset return predictability. For the weekly series, VR and VD are below 1, indicating both positive and negative auto-covariance. However, looking at the p-values we see that the results are not statistically significant and we can therefore not reject the null. As such, we do not have evidence of asset return predictability for the weekly data.
 
 ## 2. What about the asset return predictability of two-day and two-week returns? What about the higher aggregated returns?
 
