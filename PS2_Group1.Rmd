@@ -204,11 +204,26 @@ So for two-day we see significant auto-correlations for many lags, and quite far
 But realistically using more than 10 lags for two week data does not make much sense. It is too many lags out for two-weekly data. So I think we can reasonably disregard this finding and say that it is due to randomness/noise. But for two-day we for sure see strong signs of market predictability.
 
 Lets do Ljung Box tests, but restrict two-week to have lag=10.
-```{r}
+```{r, include=F}
 LB(twoday_ann, lag=20, ip=0)
 
 LB(twoday_ann, lag=10, ip=0)
 ```
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Results for Two-Day Aggregated Series}
+\begin{tabular}{lccl}
+\hline
+\textbf{Lag} & \textbf{Test Statistic} & \textbf{p-value} \\
+\hline
+10   & 64.681  & 0.00\\
+20   & 110.169 & 0.00\\
+\hline
+\end{tabular}
+\label{tab:lb_twoday}
+\end{table}
+
+
 So the result tells us that for the two-day returns, that we strongly reject $(\alpha=0.01)$ the null of the first 20 autocorrelations being all zero. For the two-week returns, we strongly reject $(\alpha=0.01)$ the null of the first 10 autocorrelations being zero. The latter result is quite suprising since we did not see significant spikes at 10 lags or earlier for the two-week. These results strongly indicate that there is prevalence of asset return predictability for both two-day and two-week returns.
 
 Variance ratio test:
