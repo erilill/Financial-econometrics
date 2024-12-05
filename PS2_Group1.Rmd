@@ -317,7 +317,7 @@ Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"), ylim = c(-
 par(mfrow=c(1,1))
 ```
 
-We cannot find anything that would indicate a structural break in the different time periods for either daily nor weekly data. 
+We cannot find anything that would indicate a structural break in the different time periods for either daily nor weekly data. It is the same story as before, the ACF plot tell us that in all periods there is quite strong evidence for predictability for the daily data, and not so much for the weekly data.
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
