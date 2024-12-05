@@ -210,7 +210,7 @@ LB(twoweek_ann, lag=20, ip=0)
 \caption{Ljung-Box Test Results for Two-Day and Two-week Aggregated Series}
 \begin{tabular}{lccl}
 \hline
-\textbf{Data} \textbf{Lags} & \textbf{Test Statistic} & \textbf{p-value} \\
+\textbf{Data} & \textbf{Lags} & \textbf{Test Statistic} & \textbf{p-value} \\
 \hline
 two-day & 20   & 110.17  & 0.00\\
 two-week & 20   & 21.54 & 0.37\\
