@@ -667,7 +667,7 @@ Hi10 (Period 3) & 13.472 & 0.336 \\ \hline
 \label{tab:LB_test_results}
 \end{table}
 
-We can see that we reject the null of the first 12 autocorrelations being zero for Low 10% period 1, High 10% period 1, Low 10% period 2 and Low 10% period 3. We can not reject the null of the first 12 autocorrelations being zero for High 10% period 2 and High 10% period 3. What does this tell us? It tells us that for the Low 10% portfolio, we see evidence for asset return predictability in all 3 periods, whereas for High 10% we only see evidence for asset return predictability for period 1, not for period 2 and 3.
+We can see that we reject the null of the first 12 autocorrelations being zero for Low 10% period 1, High 10% period 1, Low 10% period 2 and Low 10% period 3. We can not reject the null of the first 12 autocorrelations being zero for High 10% period 2 and High 10% period 3. What does this tell us? It tells us that for the Low 10% portfolio, we see evidence for asset return predictability in all 3 periods, whereas for High 10% we only see evidence for asset return predictability for period 1, not for period 2 and 3. So what we got from before was that we see stronger evidence for asset return predictability for the low 10% than for the High 10%, and this seems to be stable over time as the sub-samples show the same conclusion.
 
 
 ## 3. Are there significant cross-autocorrelations between different size portfolios? 
