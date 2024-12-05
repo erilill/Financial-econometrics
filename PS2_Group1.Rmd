@@ -564,7 +564,7 @@ round(results, 3)
 \bottomrule
 \end{tabular}
 \end{table}
-What we see in table \ref{tab:LB_test} is that the auto-correlations for lags 6 and 12 are significant at $\alpha=0.05$ for the two month aggregated portfolio returns for low 10\%, but for top 10\% the auto-correlations are not significant. This indicates that for two month aggregated returns, asset return predictability only holds for the low 10\%.
+What we see in table \ref{tab:LB_test} that we reject the nulls of the first 6 autocorrelations being zero for the Low 10% but not for the Top 10%. But when we extend to the first 12 autocorrelations, we see that we reject for both on a 5% significance level. This indicates that for two month aggregated returns, we see evidence of asset return predictability for both Low 10% and Top 10%, but stronger evidence for Low 10%.
 
 Looking at the variance ratio test:
 ```{r, include=F}
