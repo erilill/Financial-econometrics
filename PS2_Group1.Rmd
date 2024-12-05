@@ -51,9 +51,7 @@ par(mfrow=c(1,1))
 ```
 Above you see the ACF plots for the Dow Jones daily and weekly data with 20 lags. For easier interpretation, lag 0 has been omitted.
 
-What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we essentially only see 1 (barely) significant spike, but it can definately be due to randomness, since we can expect 1 in 20 to be significant because of the 5% level blue bands. 
-
-So because we see significant auto-correlations for the first few lags in the daily data, this is an indication of asset return predictability on the daily level.
+What we see from the plots is that we have large spikes for the first two lags in the daily data, with some moderately large spikes for further lags. For the weekly data we essentially only see 2 barely significant spikes. This is a quite strong indication of asset return predictability on the daily level, and a for the weekly level it is an indication that there may be some asset predictability, but not very much. At least we need to investigate further, as it is not as clear like for the daily data.
 
 
 Ljung-Box test:
@@ -199,32 +197,30 @@ Above we can see ACF plots for the annualized two-day and two-week log returns w
 
 What we see from the first ACF plot for the two-day is that we have large significant spikes at lag 2 and 4, 11, 15 and 17. For the two-week data we see two significant spikes at 12 and 15, but they are not very large.
 
-So for two-day we see significant auto-correlations for many lags, and quite far out also, this is an indication of asset return predictability. For two-week we see significant auto-correlations for two lags quite far out, this is an indication of asset return predictability.
+So for two-day we see significant auto-correlations for many lags, and quite far out also, this is an indication of asset return predictability. For two-week we see significant auto-correlations for two lags quite far out, this is also an indication of asset return predictability. It is kind of the same conclusion as before, for the two-daily there is strong signs of asset return predictability, for the two-week level we get an indication that there may be some asset predictability, but not very much.
 
-But realistically using more than 10 lags for two week data does not make much sense. It is too many lags out for two-weekly data. So I think we can reasonably disregard this finding and say that it is due to randomness/noise. But for two-day we for sure see strong signs of market predictability.
-
-Lets do Ljung Box tests, but restrict two-week to have lag=10.
+Lets do Ljung Box tests to investigate further.
 ```{r, include=F}
 LB(twoday_ann, lag=20, ip=0)
 
-LB(twoday_ann, lag=10, ip=0)
+LB(twoweek_ann, lag=20, ip=0)
 ```
 \begin{table}[ht]
 \centering
-\caption{Ljung-Box Test Results for Two-Day Aggregated Series}
+\caption{Ljung-Box Test Results for Two-Day and Two-week Aggregated Series}
 \begin{tabular}{lccl}
 \hline
-\textbf{Lag} & \textbf{Test Statistic} & \textbf{p-value} \\
+\textbf{Data} \textbf{Lags} & \textbf{Test Statistic} & \textbf{p-value} \\
 \hline
-10   & 64.681  & 0.00\\
-20   & 110.169 & 0.00\\
+two-day & 20   & 110.17  & 0.00\\
+two-week & 20   & 21.54 & 0.37\\
 \hline
 \end{tabular}
 \label{tab:lb_twoday}
 \end{table}
 
 
-So the result tells us that for the two-day returns, that we strongly reject $(\alpha=0.01)$ the null of the first 20 autocorrelations being all zero. For the two-week returns, we strongly reject $(\alpha=0.01)$ the null of the first 10 autocorrelations being zero. The latter result is quite suprising since we did not see significant spikes at 10 lags or earlier for the two-week. These results strongly indicate that there is prevalence of asset return predictability for both two-day and two-week returns.
+So the result tells us that for the two-day returns, that we strongly reject at the 1% level $(\alpha=0.01)$ the null of the first 20 autocorrelations being all zero. For the two-week returns, we can not reject even at the 10% level the null of the first 20 autocorrelations being zero. These results strongly indicate that there is prevalence of asset return predictability for both two-day returns but not for two-week returns.
 
 Variance ratio test:
 
