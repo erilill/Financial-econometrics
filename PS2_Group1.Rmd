@@ -318,7 +318,7 @@ par(mfrow=c(1,1))
 ```
 
 Even after dividing into sub-periods, it is kind of the same story as before. The ACF plot tell us that in all periods there is quite strong evidence for predictability for the daily data, and some but not overwhelming evidence for weekly data. Although now the weekly data has larger spikes, so now it may be that after dividing up into periods, we see more evidence for prectability on the weekly level.
-```{r, echo=FALSE}
+```{r, include=FALSE, results='hide'}
 Box.test(djd_s1[, 3], lag = 20, type = c("Ljung-Box"))
 Box.test(djd_s2[, 3], lag = 20, type = c("Ljung-Box"))
 Box.test(djd_s3[, 3], lag = 20, type = c("Ljung-Box"))
@@ -345,7 +345,7 @@ weekly period 3 & 20   & 32.508 & 0.04\\
 \end{table}
 
 
-The Box-Ljung test although now paint a different picture. At least for daily, it is like before, we reject the nulls and there is strong evidence for market predictability in all periods. But for weekly, we now see that on a 10% level we now reject the null in all periods, so for each period, we see evidence for predictability for weekly data, which we did not see before.
+The Box-Ljung test although now paint a different picture. At least for daily, it is like before, we reject the nulls and there is strong evidence for market predictability in all periods. But for weekly, we know see that in period 2 and 3 we can reject the null on a 5% level, and in period 1 we can reject on a 10% level. So for each period, we see evidence for predictability for weekly data, which we did not see before.
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
@@ -372,9 +372,38 @@ Acf(dj_2w_p2, lag.max = 20, main = paste("ACF for DJ_w 2-week period 2"), ylim =
 Acf(dj_2w_p3, lag.max = 20, main = paste("ACF for DJ_w 2-week period 3"), ylim = c(-0.15, 0.15))
 par(mfrow=c(1,1))
 ```
-For 2d data we observe lags 2,3,4, 11 and 15 are significant for period 1. For period 2 we observe lag 2 and 13 and for the last period we observe lags 5, 15 and 17 are significant. Given these findings we observe that the autocorrelation have a different structure from the other lags. These findings indicate that in the first period we observe some short-term autocorrelation and this structure is different from what we observe in the other two periods. 
+Again, the ACF plots tell a similar story. For two-day data, we definitely see evidence of market predictability and for two-week data we see some evidence of market predictability, but not as much as for daily.
 
-For 2-week data and period 1 we only observe period 7 to be significant. For period 2 we observe lags 7, 9, 12, and 15 while for the last period we observe no lags to be significant. In the 2-week data we observe that period two has some autocorrelation around 7, 9 and 12 periods. This could indicate that the time periods 2 and 3 months before affect the price today and therefore some bimonthly and trimonthly autocorrelation. In the other two periods we observe no such findings.  
+```{r}
+Box.test(dj_2d_p1, lag = 20, type = c("Ljung-Box"))
+Box.test(dj_2d_p2, lag = 20, type = c("Ljung-Box"))
+Box.test(dj_2d_p3, lag = 20, type = c("Ljung-Box"))
+
+Box.test(dj_2w_p1, lag = 20, type = c("Ljung-Box"))
+Box.test(dj_2w_p2, lag = 20, type = c("Ljung-Box"))
+Box.test(dj_2w_p3, lag = 20, type = c("Ljung-Box"))
+```
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Results for two-day and two-week data in each period}
+\begin{tabular}{lccl}
+\hline
+\textbf{Data} & \textbf{Lags} & \textbf{Test Statistic} & \textbf{p-value} \\
+\hline
+two-day period 1 & 20   & 86.233  & 0.0000\\
+two-day period 2 & 20   & 28.431 & 0.0996\\
+two-day period 3 & 20   & 38.645 & 0.0074\\
+two-week period 1 & 20   & 16.632 & 0.6768\\
+two-week period 2 & 20   & 35.863 & 0.0160\\
+two-week period 3 & 20   & 23.075 & 0.2851\\
+\hline
+\end{tabular}
+\end{table}
+
+For two-day data, we reject on the 1% level in period 1 and 3, but only on the 10% level in period 2. Still, this is kind of the same story as before, we do see evidence for predictability for two-day data. But on the other hand for two-week data, we can not reject on even the 10% level for period 1 and 3, although we can reject on the 5% level for period 2. So we see now evidence for predictability for two-week data, at least in period 2, which we did not see before.
+
+Summarizing, the results are, for one day and two day data, even if we split it up in different time periods, we see evidence of market predictability. So we do not really find increasing market efficiency over time when it comes to one day and two-day data, for the simple fact that we see evidence for predictability in all periods for one-day and two-day data, which implies market inefficiency. For weekly data, for one-week we see more evidence of market predictability in all sub-periods, for two-week data we see more predictability at least in period 2. So you could say that the market was more efficient in period 1 and period 3, in regards to two-week data. And for one-week data the market can be seen as more inefficient when looking at the subperiods rather than the whole period ,because the subperiods indicate predictability while the whole period does not.
+
 
 ## Draw overall conclusions regarding asset return predictability based on this analysis.
 Firstly, in question 1 we could see some evidence pointing towards predictability in daily data but not in weekly data. The ACF plots had a couple of significant spikes for daily data and barely any for weekly data. These findings are confirmed by Ljung-Box test which were significant for daily data but not for weekly data. Also the VR/VD was significant for daily but not for weekly. 
