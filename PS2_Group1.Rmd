@@ -317,8 +317,8 @@ Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"), ylim = c(-
 par(mfrow=c(1,1))
 ```
 
-Even after dividing into sub-periods, it is the same story as before. The ACF plot tell us that in all periods there is quite strong evidence for predictability for the daily data, and not so much for the weekly data.
-```{r}
+Even after dividing into sub-periods, it is kind of the same story as before. The ACF plot tell us that in all periods there is quite strong evidence for predictability for the daily data, and some but not overwhelming evidence for weekly data. Although now the weekly data has larger spikes, so now it may be that after dividing up into periods, we see more evidence for prectability on the weekly level.
+```{r, echo=FALSE}
 Box.test(djd_s1[, 3], lag = 20, type = c("Ljung-Box"))
 Box.test(djd_s2[, 3], lag = 20, type = c("Ljung-Box"))
 Box.test(djd_s3[, 3], lag = 20, type = c("Ljung-Box"))
@@ -327,6 +327,24 @@ Box.test(djw_s1[, 5], lag = 20, type = c("Ljung-Box"))
 Box.test(djw_s2[, 5], lag = 20, type = c("Ljung-Box"))
 Box.test(djw_s3[, 5], lag = 20, type = c("Ljung-Box"))
 ```
+\begin{table}[ht]
+\centering
+\caption{Ljung-Box Test Results for daily and weekly data in each period}
+\begin{tabular}{lccl}
+\hline
+\textbf{Data} & \textbf{Lags} & \textbf{Test Statistic} & \textbf{p-value} \\
+\hline
+daily period 1 & 20   & 133.21  & 0.00\\
+daily period 2 & 20   & 265.93 & 0.00\\
+daily period 3 & 20   & 212.22 & 0.00\\
+weekly period 1 & 20   & 31.383 & 0.05\\
+weekly period 2 & 20   & 41.694 & 0.00\\
+weekly period 3 & 20   & 32.508 & 0.04\\
+\hline
+\end{tabular}
+\end{table}
+
+
 The Box-Ljung test although now paint a different picture. At least for daily, it is like before, we reject the nulls and there is strong evidence for market predictability in all periods. But for weekly, we now see that on a 10% level we now reject the null in all periods, so for each period, we see evidence for predictability for weekly data, which we did not see before.
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
