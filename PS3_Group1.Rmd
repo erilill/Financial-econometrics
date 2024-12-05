@@ -1,0 +1,172 @@
+---
+title: "Report for PS3"
+author:
+- Mark Becker, Erik Lillrank & Vilim Nedic
+date: ''
+output:
+  pdf_document:
+    keep_tex: true
+  df_print: kable
+  html_document:
+    df_print: paged
+  word_document: default
+header-includes:
+  - \usepackage{float}
+  - \usepackage{booktabs}
+  - \usepackage{multirow}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
+  - \usepackage{adjustbox}
+toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(FE)
+library(knitr)
+library(patchwork)
+library(kableExtra)
+library(dplyr)
+library(psych)
+data("portfolio_m")
+```
+
+# A Size and book-to-market effects
+Use the data set `portfolio_m` consisting of returns of U.S. stock portfolios built on size and book-to-market ratio according to Fama and French (1993, 1996). In the following you have to test the validity of the CAPM based on these portfolios.
+
+## 1. Analyze the descriptive statistics of the returns of the different portfolios. Do you find systematic differences in dependence of size and the book-to-market ratio?
+
+```{r descriptive, echo=F}
+descriptive_stats <- describe(portfolio_m[,5:24])[,c("mean", "sd", "skew", "kurtosis", "min", "max")]
+kable(decriptive_stats, digits = 3) # Har jag tolkat rätt att det är ME1-ME10 och MEBE1-MEBE10 som är portfolios?
+```
+What we see in the table above is that the smaller firms (ME1-ME3) have higher average returns and volatility than the larger firms (e.g. ME10). Looking at the book-to-market effext, the higher book-to-market (e.g. MEBE10) portfolios exhibit higher average returns and colatility compared to the lower book-to-market (MEBE1) portfolios. ME portfolios show positive skewness, indicating occasional extreme positive returns while the MEBE portfolios are more symmetric with some slightly negative skewness. The smaller firms and higher book-to-market portfolios have high kurtosis, suggesting heavy-tailed return distributions. Looking at the minimum and maximum values we also see that for the smaller firms and higher book-to-market portfolios there are extreme returns. From the descriptive statistics we see evidence of both the size effect and the value effect.
+
+
+## 2. For all individual size and book-to-market portfolios as well as the market portfolio(s), compute the corresponding excess returns. Then, estimate the CAPM for selected portfolios and answer the following questions:
+
+We start by computing the excess returns, which are given by:
+
+$$
+Z_{it} = R_{it}-R_f \quad and \quad Z_{mt}=R_{mt}-R_f
+$$
+
+```{r}
+excess_returns <- portfolio_m[,c(3,5:24)]-portfolio_m$Tbill
+```
+The next step is the fit the following regression equation:
+
+$$
+Z_{it}=\alpha_i + \beta_i Z_{mt} + \epsilon_{it}
+$$
+Implementing in `R` using a simple `for`-loop:
+
+```{r}
+results <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  R2 = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  stringsAsFactors = FALSE
+)
+
+portfolios <- colnames(excess_returns)[2:21]
+for (i in portfolios){
+  ER <- excess_returns[[i]]
+  capm_model <- lm(ER ~ excess_returns$Market)
+  
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["excess_returns$Market"]
+  r_squared <- summary(capm_model)$r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["excess_returns$Market", "Std. Error"]
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["excess_returns$Market", "Pr(>|t|)"]
+  
+  results <- rbind(
+    results,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      R2 = r_squared,
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta
+    )
+  )
+}
+
+rownames(results) <- NULL
+kable(results, digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm1")
+```
+
+
+### (a) Test the validity of the CAPM for the individual size and book-to-market portfolios. Can you confirm the CAPM relationship across the cross-section of size and book-to-market portfolios?
+
+What we will be inspecting in order to answer this question is $\alpha$ and the corresponding p-value. In CAPM, $\alpha$ represents the excess return not explained by the market. For CAPM to hold, $\alpha$ should be statistically insignificant and close to 0, $\beta$ should capture the cross-sectional variation of expected excess returns.
+
+In table \ref{tab:capm1} we see that $\alpha$ is only statistically significant at 10\% for MEBE5 and MEBE8, with only MEBE8 being significant at 5\%. We see that $\alpha$ is close to zero for all portfolios, however we do see that it is higher for smaller portfolios and for higher book-to-market portfolios. Based on these results it seems that CAPM is valid for most of the portfolios, however it holds better for portfolios of larger firms and lower book-to-market portfolios.
+
+### (b) Is there a systematic relation between the estimated market beta and size as well as the book-to-market ratio? Interpret your findings.
+
+Looking at the $\beta$'s in table \raf{tab:capm1}, we see that the portfolios of smaller firms tend to have higher $\beta$'s while the portfolios of larger firms have lower $\beta$'s. This indicates that smaller firms are more sensitive to market movements. we also see that $\beta$'s are higher for highest book-to-market portfolios compared to lower book-to-market portfolios. This indicates that CAPM might hold better for portfolios of larger firms and lower market-to-book portfolios.
+
+### (c) Is there a systematic relation between the \($R^2\) and market capitalization as well as book-to-market ratio? What does this mean?
+
+Looking at the $R^2$'s, we see that it is lower for the lower market capitalization portfolios compared to the higher market capitalization portfolios, This suggests that CAPM captures most of the variation in excess return for the higher market capitalization portfolios while the explanatory power is weaker for the smaller portfolios. 
+
+Looking at the relation between $R^2$ and the book-to-market ratio, we see that the explanatory power is stronger for the portfolios of lower book-to-market ratio compared to those with higher.
+
+In conclusion, these results suggests that CAPM performs well for larger stocks and for lower book-to-market portfolios, but for smaller portfolios and higher book-to-market portfolios, the $\alpha$'s and lower $R^2$ suggests that other factors than market risk could be driving returns.
+
+## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
+
+## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
+
+### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
+
+### (b) Analyze wether the inclusion of period-specific effexts does increase the model's goodnes-of-fit.
+
+### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
+
+
+# B. Cross-sectional regressions
+Use the data set `portfolio_m` analyzed in the previous section. In the following you have to analyze the cross-sectional implications of the CAPM
+
+## 1. Write R code to implement the First Pass regression which computes the cross-section of market betas, and save them together with the period-specific excess returns. Apply the code to compute the betas for the 100 size-book-to-market portfolios. Using the results to analyze the following issues:
+
+### (a) Evaluate the cross-sectional distribution of the estimated betas. Test whether the average betas are significantly different from one. Interpret your findings.
+
+### (b) Evaluate the cross-sectional distribution of the computed (time series) \(R^2\)'s. What can you learn from this analysis?
+
+### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
+
+
+## 2 Estimate the following cross-sectional model for individual periods t in Second Pass:
+
+$$
+Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_m + \eta_t
+$$
+
+where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\tims 1$ vector of pre-estimated CAPM betas. Test whether:
+
+### (a) \(\gamma_{0t}=0\) for all t
+### (b) \(\gamma_{1t}>0\) for all t
+### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\ganmma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\ganmma}_{0t} = 0\)
+
+and evaluate the goodness-of-fit. How robust are your results over time?
+
+## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
+
+### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
+
+### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
+
