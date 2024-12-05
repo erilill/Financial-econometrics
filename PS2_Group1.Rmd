@@ -317,7 +317,17 @@ Acf(djw_s3[, 5], lag.max = 20, main = paste("ACF for DJ_w period 3"), ylim = c(-
 par(mfrow=c(1,1))
 ```
 
-We cannot find anything that would indicate a structural break in the different time periods for either daily nor weekly data. It is the same story as before, the ACF plot tell us that in all periods there is quite strong evidence for predictability for the daily data, and not so much for the weekly data.
+Even after dividing into sub-periods, it is the same story as before. The ACF plot tell us that in all periods there is quite strong evidence for predictability for the daily data, and not so much for the weekly data.
+```{r}
+Box.test(djd_s1[, 3], lag = 20, type = c("Ljung-Box"))
+Box.test(djd_s2[, 3], lag = 20, type = c("Ljung-Box"))
+Box.test(djd_s3[, 3], lag = 20, type = c("Ljung-Box"))
+
+Box.test(djw_s1[, 5], lag = 20, type = c("Ljung-Box"))
+Box.test(djw_s2[, 5], lag = 20, type = c("Ljung-Box"))
+Box.test(djw_s3[, 5], lag = 20, type = c("Ljung-Box"))
+```
+The Box-Ljung test although now paint a different picture. At least for daily, it is like before, we reject the nulls and there is strong evidence for market predictability in all periods. But for weekly, we now see that on a 10% level we now reject the null in all periods, so for each period, we see evidence for predictability for weekly data, which we did not see before.
 
 We pursue to examine the non-overlapping 2 day and 2 weeks paired datasets. 
 
