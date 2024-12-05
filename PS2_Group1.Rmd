@@ -374,7 +374,7 @@ par(mfrow=c(1,1))
 ```
 Again, the ACF plots tell a similar story. For two-day data, we definitely see evidence of market predictability and for two-week data we see some evidence of market predictability, but not as much as for daily.
 
-```{r}
+```{r, include=FALSE, results='hide'}
 Box.test(dj_2d_p1, lag = 20, type = c("Ljung-Box"))
 Box.test(dj_2d_p2, lag = 20, type = c("Ljung-Box"))
 Box.test(dj_2d_p3, lag = 20, type = c("Ljung-Box"))
@@ -406,13 +406,13 @@ Summarizing, the results are, for one day and two day data, even if we split it 
 
 
 ## Draw overall conclusions regarding asset return predictability based on this analysis.
-Firstly, in question 1 we could see some evidence pointing towards predictability in daily data but not in weekly data. The ACF plots had a couple of significant spikes for daily data and barely any for weekly data. These findings are confirmed by Ljung-Box test which were significant for daily data but not for weekly data. Also the VR/VD was significant for daily but not for weekly. 
+Firstly, in question 1 we could see evidence for asset return predictability in daily data but not in weekly data. The ACF plots had many significant spikes for daily data and two barely significant spikes for weekly data. These findings are confirmed by Ljung-Box test where we rejected the null for daily data but not for weekly data, i.e. daily showed predictability while weekly did not. Also the VR/VD was significant for daily but not for weekly, same conclusion.
 
-Secondly, we analyzed the aggregated returns which were very similar to the findings in question 1. We saw some evidence in the ACF plots for two-day data but not really for weekly data. The Ljung-Box test confirmed these findings, being significant for 2d aggregated data but not for 2w aggregated data. In the VR/VD test, the test statistics were significant for all periods except for when q = 2. For weekly not one test was significant. 
+Secondly, we analyzed the aggregated returns which were very similar to the findings in question 1. We saw some evidence in the ACF plots for two-day data and some evidence but not as strong for two-week data. The Ljung-Box test confirmed these findings, where we rejected the null for the two-day data but not for the two-week data, saying that asset return predictability was prevelent for two-day data but not for two-week. In the VR/VD test, the test statistics were significant for all periods except for when q = 2. For weekly not one test was significant. So again, evidence for predictability was found for two-day but not for two-week.
 
-Thirdly, in question 3 we checked some for different periods and saw some weak evidence of structural breaks. In daily data, we saw that period 3 were slightly different since the first two periods had more significant lags up to lag 5. For weekly data there was no indication that the different periods were different. For aggregated returns we saw that period 1 was slightly different in the most recent lags compared to the two successive periods and for weekly data we saw some weak evidence that period 2 were different from the other periods. 
+In question 3, we saw some different results. For daily data however, even if we split up the data into periods, both one-day and two-day showed evidence for market predictability. But for one-week data we now saw evidence for predictability. For two-week, we only saw for period 2.
 
-Given all these findings, we can conclude that asset predictability is probable for the daily data, even if it is aggregated but not for weekly data. This is since for daily data, all tests and plots we do points towards asset predictability. For the weekly data we see no evidence pointing towards asset predictability and on the contrary, we see indicatoins that the series is a random walk. Given the findings in the ACF plots, this holds mostly for recent lags. There was one finding that was a slightly contradictory to this, for 2-day aggregated return the insignificant VR/VD test for q = 2 but this could also be due to randomness since all other tests pointed towards asset predictability, especially in the recent lags. 
+Given all these findings, we can conclude that asset return predictability is definitely present for daily data, even if it is aggregated. For weekly data, we see some evidence for predictability for one-week and two-week if we split up the data in subsamples, but if we do not split up the data, neither one-week or two-week data show evidence for predictability.
 
 # B. Testing for Return Predictability in Size Portfolios
 Use the data set ”portcap_m” containing monthly returns of different U.S. stock portfolios built based on market capitalization. Using (cross-)autocorrelation functions, Ljung-Box statistics as well as variance ratio tests based on the complete time series as well as appropriate sub-periods you have to investigate the following issues
