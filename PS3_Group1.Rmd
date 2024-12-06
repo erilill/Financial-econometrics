@@ -130,9 +130,12 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
 
-```{r}
+```{r, include=F}
+# Tror att detta är fel men lämnar det sålänge, se nästa chunk.
+
+
 # Stack data for joint estimation
-portfolio_returns <- portfolio_m[, 5:24] #tror det ska vara alla 124 alltså 5:124
+portfolio_returns <- portfolio_m[, 5:124] #tror det ska vara alla 124 alltså 5:124
 excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
 market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
 portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
@@ -152,6 +155,109 @@ f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", 
 print(f_test)
 
 ```
+In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test.
+
+The test used is the F-test proposed by Gibbons/Ross/Shanken 1989:
+
+$$
+J_1 = \frac{T-N-1}{N}\left[1+\frac{\hat{\mu}_m^2}{\hat{\sigma}^2_m} \right]^{-1} \hat{\alpha}^{\prime}\hat{\Sigma}^{-1}\hat{\alpha}\sim F_{N,T-N-1}
+$$
+where
+$$
+x = \sqrt{T}\left[1+\frac{\hat{\mu}_m^2}{\hat{\sigma}^2_m}\right]^{-1}\hat{\alpha},\;\; A=T\hat{\Sigma}, \;\; m=N, \;\; n=T-2
+$$
+
+```{r, echo=F}
+FamaMacbeth0 <- function(mZ, vZm)
+{
+  iT = nrow(mZ)
+  iN = ncol(mZ)
+  
+  # First Pass
+  mX = cbind(1,vZm)
+  pars = chol2inv(chol(crossprod(mX)))%*%crossprod(mX,mZ)
+  alpha = c(pars[1,])
+  # estimated betas
+  beta = c(pars[2,])
+  # sample mean of each excess return
+  mu = apply(mZ,2,mean)
+  # sample mean of the market excess return
+  mum = mean(vZm)
+  # variance of the market excess return
+  sigm2 = c(crossprod(vZm-mum))/iT
+  # residules
+  me = mZ-mX%*%pars
+  # covariance matrix of the residules
+  Sigma = crossprod(me)/iT
+  
+  # do the test on pp.24 & 25 in slides for lecture 4
+  tmp = c(t(alpha)%*%chol2inv(chol(Sigma))%*%alpha)/(1+mum^2/sigm2)
+  
+  # Gibbons/Ross/Shanken (1989)
+  J1 = tmp*(iT-iN-1)/iN
+  jpval = 1-pf(J1,df1=iN,df2=iT-iN-1)
+  
+  # Wald
+  W = tmp*iT
+  wpval = 1-pchisq(W,df=iN)
+  
+  # modified LR, Jobson/Korkie (1982)
+  mX = matrix(vZm,iT,1)
+  pars = chol2inv(chol(crossprod(mX)))%*%crossprod(mX,mZ)
+  me = mZ-mX%*%pars
+  # covariance matrix of the residules
+  SigmaR = crossprod(me)/iT
+  LR = (sum(log(eigen(SigmaR)$values))-sum(log(eigen(Sigma)$values)))*(iT-iN/2-2)
+  lrpval = 1-pchisq(LR,df=iN)
+  
+  
+  # Second Pass
+  mX = cbind(1,beta)
+  xxinv = chol2inv(chol(crossprod(mX)))
+  xxinvx = tcrossprod(xxinv,mX)
+  gamma = NULL; gamsd = NULL
+  for(iter in 1:iT){
+    vy = mZ[iter,]
+    tmp = xxinvx%*%vy
+    # gamma
+    gamma = rbind(gamma, c(tmp))
+    s2 = c(crossprod(vy - mX%*%tmp))/iN
+    # gammas' standard error
+    gamsd = rbind(gamsd, sqrt(diag(s2 * xxinv)))
+  }
+  
+  # gamma0 and market risk premia
+  gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
+  mrprem = c(gamma[,2]); prsd = c(gamsd[,2])
+  
+  # w tests on pp.30 in slides for lecture 4
+  # should be compared with student t with T-1 degrees of freedom
+  # or with standard normal if T is large
+  wgamma0 = mean(gamma0)/sqrt(sum((gamma0-mean(gamma0))**2)/iT/(iT-1))
+  wgamma1 = mean(mrprem)/sqrt(sum((mrprem-mean(mrprem))**2)/iT/(iT-1))
+  
+  return(list(alpha=alpha,beta=beta,J1=c(J1,jpval),W=c(W,wpval),mLR=c(LR,lrpval),
+              gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1))
+}
+
+mR = as.matrix(portfolio_m[,5:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf)
+
+vZm = Rm - Rf
+
+ret = FamaMacbeth0(mZ=mZ, vZm=vZm)
+J1_stat <- ret$J1[1]
+p_value <- ret$J1[2]
+
+J1_results <- data.frame(
+  Test = c("F-test Statistic (J1)", "P-value"),
+  Value = c(round(ret$J1[1], 4), round(ret$J1[2], 4))
+)
+kable(J1_results, caption = "F-test Results for Joint Significance of Intercepts", label="tab:Ftest")
+```
+In table \ref{tab:Ftest} we see the results from the F-test. Here we test if $\alpha=0$, we see in the table that the p-value is very close to zero which means that we reject the null hypothesis, suggesting that the intercept is significantly different from zero.
 
 ## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
 
