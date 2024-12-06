@@ -132,7 +132,7 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ```{r}
 # Stack data for joint estimation
-portfolio_returns <- portfolio_m[, 5:24]
+portfolio_returns <- portfolio_m[, 5:24] #tror det ska vara alla 124 alltså 5:124
 excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
 market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
 portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
