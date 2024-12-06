@@ -261,6 +261,112 @@ In table \ref{tab:Ftest} we see the results from the F-test. Here we test if $\a
 
 ## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
 
+```{r}
+# Det här är rätt bajs, ni får jättegärna ändra om ni vill
+
+
+# Divide data into sub-periods, 314 time-points in each
+subsample1 <- 1:314
+subsample2 <- 315:628
+subsample3 <- 629:942
+
+#Create dummies
+portfolio_m$Period2 <- 0
+portfolio_m$Period3 <- 0
+portfolio_m[subsample2,]$Period2 <- portfolio_m[subsample2,]$Period2 + 1
+portfolio_m[subsample3,]$Period3 <- portfolio_m[subsample3,]$Period3 + 1
+
+excess_returns <- portfolio_m[,c(3,25:124)]-portfolio_m$Tbill
+
+
+
+results <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  Period2Coef = numeric(),
+  Period3Coef = numeric(),
+  InteractionPeriod2Market = numeric(),
+  InteractionPeriod3Market = numeric(),
+  R2 = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  PValuePeriod2 = numeric(),
+  PValuePeriod3 = numeric(),
+  PValueInteractionPeriod2Market = numeric(),
+  PValueInteractionPeriod3Market = numeric(),
+  stringsAsFactors = FALSE
+)
+
+portfolios <- colnames(excess_returns)[2:101]
+# Loop through each portfolio
+portfolios <- colnames(excess_returns)[2:101]
+for (i in portfolios) {
+  ER <- excess_returns[[i]]
+  
+  # Fit CAPM model with period-specific betas and intercepts (interaction terms)
+  capm_model <- lm(ER ~ excess_returns$Market + portfolio_m$Period2 + portfolio_m$Period3 + 
+                    portfolio_m$Period2 * excess_returns$Market + portfolio_m$Period3 * excess_returns$Market)
+  
+  # Extract coefficients, p-values, and statistics
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["excess_returns$Market"]
+  period2_coef <- coef(capm_model)["portfolio_m$Period2"]
+  period3_coef <- coef(capm_model)["portfolio_m$Period3"]
+  interaction_period2_market <- coef(capm_model)["excess_returns$Market:portfolio_m$Period2"]
+  interaction_period3_market <- coef(capm_model)["excess_returns$Market:portfolio_m$Period3"]
+  
+  r_squared <- summary(capm_model)$r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["excess_returns$Market", "Std. Error"]
+  
+  # Extract p-values
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["excess_returns$Market", "Pr(>|t|)"]
+  p_value_period2 <- coef(summary(capm_model))["portfolio_m$Period2", "Pr(>|t|)"]
+  p_value_period3 <- coef(summary(capm_model))["portfolio_m$Period3", "Pr(>|t|)"]
+  p_value_interaction_period2_market <- coef(summary(capm_model))["excess_returns$Market:portfolio_m$Period2", "Pr(>|t|)"]
+  p_value_interaction_period3_market <- coef(summary(capm_model))["excess_returns$Market:portfolio_m$Period3", "Pr(>|t|)"]
+  
+  # Store results in data frame
+  results <- rbind(
+    results,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      Period2Coef = period2_coef,
+      Period3Coef = period3_coef,
+      InteractionPeriod2Market = interaction_period2_market,
+      InteractionPeriod3Market = interaction_period3_market,
+      R2 = r_squared,
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta,
+      PValuePeriod2 = p_value_period2,
+      PValuePeriod3 = p_value_period3,
+      PValueInteractionPeriod2Market = p_value_interaction_period2_market,
+      PValueInteractionPeriod3Market = p_value_interaction_period3_market
+    )
+  )
+}
+
+# Display results using kable
+rownames(results) <- NULL
+
+period_spec <- as.data.frame( cbind(results$Period2Coef, results$PValuePeriod2, results$Period3Coef, results$PValuePeriod3, results$InteractionPeriod2Market, results$PValueInteractionPeriod2Market, results$InteractionPeriod3Market, results$PValueInteractionPeriod3Market))
+
+colnames(period_spec) <- c("Period2Coef", "PValuePeriod2", "Period3Coef", "PValuePeriod3", 
+                           "InteractionPeriod2Market", "PValueInteractionPeriod2Market", 
+                           "InteractionPeriod3Market", "PValueInteractionPeriod3Market")
+
+kable(period_spec, digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm3")
+
+```
+
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
 
 ### (b) Analyze wether the inclusion of period-specific effexts does increase the model's goodnes-of-fit.
