@@ -155,9 +155,15 @@ f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", 
 print(f_test)
 
 ```
-In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test.
+In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test. So we test the following for the vector of intercept terms
 
-The test used is the F-test proposed by Gibbons/Ross/Shanken 1989:
+$$
+\begin{aligned}
+H_0:\alpha &=0\\
+H_a:\alpha &\neq0
+\end{aligned}
+$$
+on a usual 5% significance level. The test used is the F-test proposed by Gibbons/Ross/Shanken 1989:
 
 $$
 J_1 = \frac{T-N-1}{N}\left[1+\frac{\hat{\mu}_m^2}{\hat{\sigma}^2_m} \right]^{-1} \hat{\alpha}^{\prime}\hat{\Sigma}^{-1}\hat{\alpha}\sim F_{N,T-N-1}
@@ -257,7 +263,7 @@ J1_results <- data.frame(
 )
 kable(J1_results, caption = "F-test Results for Joint Significance of Intercepts", label="tab:Ftest")
 ```
-In table \ref{tab:Ftest} we see the results from the F-test. Here we test if $\alpha=0$, we see in the table that the p-value is very close to zero which means that we reject the null hypothesis, suggesting that the intercept is significantly different from zero.
+In table \ref{tab:Ftest} we see the results from the F-test. We see in the table that the p-value is very close to zero, so we can see that we reject the null of $\alpha=$ on a 5% (also 1%) significance level. The interpretation is that we have strong evidence that at least 1 of the intercept terms $\alpha_i$ in the intercept vector $\alpha$ is significantly different from zero. So we can on the basis of this test conclude that CAPM does not seem to hold, when we estimate it jointly for all the portfolios.
 
 ## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
 
