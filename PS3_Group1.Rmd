@@ -268,6 +268,7 @@ In table \ref{tab:Ftest} we see the results from the F-test. We see in the table
 ## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
 
 ```{r}
+
 # Det här är rätt bajs, ni får jättegärna ändra om ni vill
 
 
@@ -374,6 +375,82 @@ kable(period_spec, digits = 3, caption = "Estimated CAPM for the portfolios", la
 ```
 
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
+
+We can perform the Chow Test. We estimate the full sample CAPM as
+
+$$
+Z_{t}=\alpha + \beta Z_{mt} + \epsilon_{t}
+$$
+We can split up the data into two groups, i.e. the first half of the data and the second half like
+
+$$
+\begin{aligned}
+Z_{t}=\alpha_1 + \beta_1 Z_{mt} + \epsilon_{t}\\
+Z_{t}=\alpha_2 + \beta_2 Z_{mt} + \epsilon_{t}
+\end{aligned}
+$$
+The null of the Chow test asserts that $\alpha_1=\alpha_2,\beta_1=\beta_2$, under the assumption that $\epsilon_t \overset{\mathrm{iid}}{\sim} N(0,\sigma^2)$. Then we have the Chow test statistic
+
+$$
+\frac{(S_C-(S_1+S_2))/k}{(S_1+S_2)/(N_1+N_2-2k)} \sim F_{k,N_1+N_2-2k}
+$$
+where $S_C$ is the sum of squared residuals from the full data sample, $S_1$ be the sum of squared residuals from the first group, $S_2$ be the sum of squared residuals from the second group, $N_1$ and $N_2$ are the number of observations in each group and $k$ is the total number of parameters estimated.
+
+```{r}
+# Kai rekommenderade Chow test för a)
+# Chow test
+
+#divide the data into 2 groups, first half and second half
+t1 <- 1:471
+t2 <- 472:942
+
+N_1 <- length(t1)
+N_2 <- length(t2)
+k <- 2 #alpha and beta
+
+
+excess_returnsMarket <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill)
+excess_returnsR11 <- as.matrix(portfolio_m[,25]-portfolio_m$Tbill) #example R11, column 25
+
+capm_modelR11 <- lm(excess_returnsR11 ~ excess_returnsMarket)
+
+S_C <- sum(capm_modelR11$residuals^2)
+
+# Split the excess returns into two groups based on indices t1 and t2
+excess_returnsMarket_t1 <- excess_returnsMarket[t1]
+excess_returnsMarket_t2 <- excess_returnsMarket[t2]
+
+excess_returnsR11_t1 <- excess_returnsR11[t1]
+excess_returnsR11_t2 <- excess_returnsR11[t2]
+
+
+capm_modelR11_t1 <- lm(excess_returnsR11_t1 ~ excess_returnsMarket_t1)
+capm_modelR11_t2 <- lm(excess_returnsR11_t2 ~ excess_returnsMarket_t2)
+
+S_1 <- sum(capm_modelR11_t1$residuals^2)
+S_2 <- sum(capm_modelR11_t2$residuals^2)
+
+Chow_test_stat <- ((S_C-(S_1+S_2))/k)/((S_1+S_2)/(N_1+N_2-2*k))
+
+
+pval = 1-pf(Chow_test_stat,df1=k,df2=N_1+N_2-2*k) #0.802
+
+my_chow.test <- c(Fstat=Chow_test_stat, df1=k,df2=N_1+N_2-2*k, pvalue=pval)
+
+#install.packages("gap")
+library(gap)
+y1 <- excess_returnsR11_t1
+y2 <- excess_returnsR11_t2
+x1 <- excess_returnsMarket_t1
+x2 <- excess_returnsMarket_t2
+
+my_chow.test
+chow.test(y1,x1,y2,x2) #same results
+```
+The obtained p-value is 0.802, so we reject that $\alpha_1=\alpha_2,\beta_1=\beta_2$, i.e. there seems to be time-varying market betas and intercept terms for the R11 portfolio.
+
+Tänker att vi kör en for loop över alla Rxx portfolios, se hur många pval<0.05.
+
 
 ### (b) Analyze wether the inclusion of period-specific effexts does increase the model's goodnes-of-fit.
 
