@@ -404,17 +404,9 @@ where $S_C$ is the sum of squared residuals from the full data sample, $S_1$ be 
 t1 <- 1:471
 t2 <- 472:942
 
-N_1 <- length(t1)
-N_2 <- length(t2)
-k <- 2 #alpha and beta
-
-
+# full sample data
 excess_returnsMarket <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill)
 excess_returnsR11 <- as.matrix(portfolio_m[,25]-portfolio_m$Tbill) #example R11, column 25
-
-capm_modelR11 <- lm(excess_returnsR11 ~ excess_returnsMarket)
-
-S_C <- sum(capm_modelR11$residuals^2)
 
 # Split the excess returns into two groups based on indices t1 and t2
 excess_returnsMarket_t1 <- excess_returnsMarket[t1]
@@ -423,19 +415,30 @@ excess_returnsMarket_t2 <- excess_returnsMarket[t2]
 excess_returnsR11_t1 <- excess_returnsR11[t1]
 excess_returnsR11_t2 <- excess_returnsR11[t2]
 
+### chow test function ###
+my.chow.test <- function(y1,x1,y2,x2){
+  
+  full_sample_fit <- lm(c(y1,y2)~c(x1,x2))
+  
+  S_C <- sum(full_sample_fit$residuals^2)
+  k <- length(full_sample_fit$coefficients)
+  
+  N_1 <- length(y1)
+  N_2 <- length(y2)
+  
+  group_1_fit <- lm(y1~x1)
+  group_2_fit <- lm(y2~x2)
+  
+  S_1 <- sum(group_1_fit$residuals^2)
+  S_2 <- sum(group_2_fit$residuals^2)
+  
+  Chow_test_stat <- ((S_C-(S_1+S_2))/k)/((S_1+S_2)/(N_1+N_2-2*k))
+  
+  pval = 1-pf(Chow_test_stat,df1=k,df2=N_1+N_2-2*k)
+  
+  return(c(Fstat=Chow_test_stat, df1=k,df2=N_1+N_2-2*k, pvalue=pval))
+}
 
-capm_modelR11_t1 <- lm(excess_returnsR11_t1 ~ excess_returnsMarket_t1)
-capm_modelR11_t2 <- lm(excess_returnsR11_t2 ~ excess_returnsMarket_t2)
-
-S_1 <- sum(capm_modelR11_t1$residuals^2)
-S_2 <- sum(capm_modelR11_t2$residuals^2)
-
-Chow_test_stat <- ((S_C-(S_1+S_2))/k)/((S_1+S_2)/(N_1+N_2-2*k))
-
-
-pval = 1-pf(Chow_test_stat,df1=k,df2=N_1+N_2-2*k) #0.802
-
-my_chow.test <- c(Fstat=Chow_test_stat, df1=k,df2=N_1+N_2-2*k, pvalue=pval)
 
 #install.packages("gap")
 library(gap)
@@ -444,10 +447,10 @@ y2 <- excess_returnsR11_t2
 x1 <- excess_returnsMarket_t1
 x2 <- excess_returnsMarket_t2
 
-my_chow.test
-chow.test(y1,x1,y2,x2) #same results
+my.chow.test(y1,x1,y2,x2)
+chow.test(y1,x1,y2,x2) #same results as the package
 ```
-The obtained p-value is 0.802, so we reject that $\alpha_1=\alpha_2,\beta_1=\beta_2$, i.e. there seems to be time-varying market betas and intercept terms for the R11 portfolio.
+The obtained p-value is 0.802, so we do not reject that $\alpha_1=\alpha_2,\beta_1=\beta_2$, i.e. there seems to be no time-varying market betas and intercept terms for the R11 portfolio, as they are not significantly different from each other on a 1% level.
 
 Tänker att vi kör en for loop över alla Rxx portfolios, se hur många pval<0.05.
 
