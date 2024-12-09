@@ -397,7 +397,6 @@ $$
 where $S_C$ is the sum of squared residuals from the full data sample, $S_1$ be the sum of squared residuals from the first group, $S_2$ be the sum of squared residuals from the second group, $N_1$ and $N_2$ are the number of observations in each group and $k$ is the total number of parameters estimated.
 
 ```{r}
-# Kai rekommenderade Chow test för a)
 # Chow test
 
 #divide the data into 2 groups, first half and second half
@@ -464,7 +463,7 @@ x2 <- ER_M[t2] #period 2
 pvals <- numeric(length(25:124))
 
 for (i in 25:124){
-  ER <- as.matrix(portfolio_m[,i]-portfolio_m$Tbill) #example R11, column 25
+  ER <- as.matrix(portfolio_m[,i]-portfolio_m$Tbill)
   y1 <- ER[t1]
   y2 <- ER[t2]
   pvals[i-24] <- my.chow.test(y1,x1,y2,x2)[4] #p-value
@@ -475,15 +474,14 @@ pvalsdf <- data.frame(pvals)
 plot <- ggplot(pvalsdf, aes(x=pvals)) + 
   geom_histogram()
 
-plot+ geom_vline(aes(xintercept=0.05),
+plot + geom_vline(aes(xintercept=0.05),
             color="blue", linetype="dashed", size=1)
 
-sum(pvals<0.05)/length(pvals)
-
+length(pvals)
+sum(pvals<0.05)
 ```
-The obtained p-value is 0.802, so we do not reject that $\alpha_1=\alpha_2,\beta_1=\beta_2$, i.e. there seems to be no time-varying market betas and intercept terms for the R11 portfolio, as they are not significantly different from each other on a 1% level.
 
-For 80 out of the 100 portfolios, we reject the null hypothesis at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
+For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha_1=\alpha_2,\beta_1=\beta_2$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
 
 
 ### (b) Analyze wether the inclusion of period-specific effexts does increase the model's goodnes-of-fit.
