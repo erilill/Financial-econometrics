@@ -588,7 +588,6 @@ This is a clear indication that the inclusion of period-specific effects increas
 ```{r}
 # En lösning, tror det kan vara vettigt?
 
-# Calculate betas for each period
 beta_period1 <- results$Beta
 beta_period2 <- beta_period1 + results$InteractionPeriod2Market
 beta_period3 <- beta_period1 + results$InteractionPeriod3Market
@@ -601,9 +600,10 @@ beta_variation <- apply(betas, 1, var)
 variation_threshold <- quantile(beta_variation, 0.9)
 high_variation <- beta_variation > variation_threshold
 
-# Print or analyze flagged portfolios
+# Print flagged portfolios
 cbind(betas,beta_variation)[high_variation,]
 ```
+In the output above we have printed the 10 portfolios which have the largest variation in betas between the time periods. Here we see that portfolios with higher book-to-market ratio generally have higher variation between the time periods. Size seems to matter less as we have examples from the 1-7th deciles in the output above. There are however some exceptions, namely R21 and R41 which both have lower book-to-market ratio.
 
 # B. Cross-sectional regressions
 Use the data set `portfolio_m` analyzed in the previous section. In the following you have to analyze the cross-sectional implications of the CAPM
