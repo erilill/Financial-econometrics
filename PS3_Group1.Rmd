@@ -585,6 +585,25 @@ This is a clear indication that the inclusion of period-specific effects increas
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
+```{r}
+# En lösning, tror det kan vara vettigt?
+
+# Calculate betas for each period
+beta_period1 <- results$Beta
+beta_period2 <- beta_period1 + results$InteractionPeriod2Market
+beta_period3 <- beta_period1 + results$InteractionPeriod3Market
+betas <- cbind(beta_period1, beta_period2, beta_period3)
+rownames(betas) <- colnames(excess_returns)[2:101]
+
+# Calculate variance of betas across periods
+beta_variation <- apply(betas, 1, var)
+
+variation_threshold <- quantile(beta_variation, 0.9)
+high_variation <- beta_variation > variation_threshold
+
+# Print or analyze flagged portfolios
+cbind(betas,beta_variation)[high_variation,]
+```
 
 # B. Cross-sectional regressions
 Use the data set `portfolio_m` analyzed in the previous section. In the following you have to analyze the cross-sectional implications of the CAPM
