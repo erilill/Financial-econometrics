@@ -292,7 +292,7 @@ $$
 
 ```{r}
 
-# Det här är rätt bajs, ni får jättegärna ändra om ni vill
+# Vet inte om det här är rätt metod
 
 
 # Divide data into sub-periods, 314 time-points in each
