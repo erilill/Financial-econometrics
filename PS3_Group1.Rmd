@@ -273,21 +273,21 @@ We chose to divide the sample into three even sub-periods. In order to include p
 $$
 \begin{aligned}
 \alpha_{Period\;1} &=\alpha \\
-\alpha_{Period\;2} &=\alpha+\beta*Preriod\;2 \\
-\alpha_{Period\;3} &=\alpha +\beta*Preriod\;3\\
+\alpha_{Period\;2} &=\alpha+\gamma_2 \\
+\alpha_{Period\;3} &=\alpha +\gamma_3\\
 \end{aligned}
 $$
-With $\beta$ denoting the corresponding coefficients, and the \emph{Period} variables are the dummy variables for the different periods. 
+With $\gamma$ denoting the coefficients for the dummy variables $D_2$ and $D_3$. 
 
 In order to include period-specific betas, we include interaction terms between the period dummies and the market excess:
 
 $$
-\beta(Preriod\;2*Z_{m}) \quad and \quad \beta(Preriod\;3*Z_m)
+\delta_4(D_2*Z_{mt}) \quad and \quad \delta_5(D_3*Z_{mt})
 $$
 Such that the CAPM model is:
 
 $$
-Z_{t}=\alpha_t+\beta_1*Z_{mt}+\beta_2*Preriod\;2+\beta_3*Preriod\;3+\beta_4(Preriod\;2*Z_{m}) + \beta_4(Preriod\;3*Z_m)+\epsilon_{t}
+Z_{t}=\alpha_t+\beta_1Z_{mt}+\gamma_2+\gamma_3+\delta_4(D_2*Z_{mt}) + \delta_5(D_3*Z_{mt})+\epsilon_{t}
 $$
 
 ```{r}
@@ -392,12 +392,15 @@ rownames(results) <- NULL
 
 period_spec <- as.data.frame( cbind(results$Period2Coef, results$PValuePeriod2, results$Period3Coef, results$PValuePeriod3, results$InteractionPeriod2Market, results$PValueInteractionPeriod2Market, results$InteractionPeriod3Market, results$PValueInteractionPeriod3Market))
 
-colnames(period_spec) <- c("Period2Coef", "PValuePeriod2", "Period3Coef", "PValuePeriod3", 
-                           "InteractionPeriod2Market", "PValueInteractionPeriod2Market", 
-                           "InteractionPeriod3Market", "PValueInteractionPeriod3Market")
+colnames(period_spec) <- c("Period2", "PValue_Period2", "Period3", "PValue_Period3", 
+                           "Period2&Market", "PValue_Period26Market", 
+                           "Period3&Market", "PValue_Period3&Market")
+rownames(period_spec) <- colnames(excess_returns)[2:101]
 
-kable(period_spec, digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm3")
+kable(head(period_spec), digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm3")
 ```
+In the table above, you see the coefficients and their corresponding p-values for the first few portfolios.
+
 
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
 
