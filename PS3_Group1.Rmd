@@ -520,7 +520,7 @@ $$
 Where SS denotes the sum of squares of the residuals and the total sum of squares. As including more variables always increase $R^2$, we will also investigate the adjusted $R^2$ which penalizes based on number of coefficients.
 
 
-```{r}
+```{r, include=F}
 results2 <- data.frame(
   Portfolio = character(),
   Alpha = numeric(),
@@ -570,13 +570,16 @@ for (i in portfolios) {
   )
 }
 
-# Display results using kable
 rownames(results2) <- NULL
+```
+```{r}
 sum(results$R2>results2$R2)
 sum(results$adj_R2>results2$adj_R2)
 ```
 
-Looking at the example where we subset the data into three time-periods, 
+Looking at the example where we subset the data into three time-periods, we see that all $R^2$ for the model including time-specific intercepts and betas are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger.
+
+This is a clear indication that the inclusion of period-specific effects increases the model's goodnes-of-fit.
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
