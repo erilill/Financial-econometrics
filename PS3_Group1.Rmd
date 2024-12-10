@@ -397,7 +397,6 @@ colnames(period_spec) <- c("Period2Coef", "PValuePeriod2", "Period3Coef", "PValu
                            "InteractionPeriod3Market", "PValueInteractionPeriod3Market")
 
 kable(period_spec, digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm3")
-
 ```
 
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
@@ -579,7 +578,7 @@ sum(results$adj_R2>results2$adj_R2)
 
 Looking at the example where we subset the data into three time-periods, we see that all $R^2$ for the model including time-specific intercepts and betas are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger.
 
-This is a clear indication that the inclusion of period-specific effects increases the model's goodnes-of-fit.
+This is a clear indication that the inclusion of period-specific effects increases the model's goodness-of-fit.
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
@@ -616,3 +615,124 @@ and evaluate the goodness-of-fit. How robust are your results over time?
 
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
 
+
+
+
+
+
+
+
+
+
+
+
+```{r, include=F}
+### Spar denna liten stund
+### Alternativ model för A3, jag föredrar dock den med dummies/Erik
+
+extended_CAPM <- function(y1, x1, y2, x2, y3, x3) {
+  # Fit models
+  full_sample_fit <- lm(c(y1, y2, y3) ~ c(x1, x2, x3))
+  group_1_fit <- lm(y1 ~ x1)
+  group_2_fit <- lm(y2 ~ x2)
+  group_3_fit <- lm(y3 ~ x3)
+  
+  results <- list(
+    full_sample = full_sample_fit,
+    period_1 = group_1_fit,
+    period_2 = group_2_fit,
+    period_3 = group_3_fit
+  )
+  
+  return(results)
+}
+
+
+# Divide data into time periods
+t1 <- 1:314
+t2 <- 315:628
+t3 <- 629:942
+
+# Market excess returns
+ER_M <- as.matrix(portfolio_m[, 3] - portfolio_m$Tbill)
+x1 <- ER_M[t1]
+x2 <- ER_M[t2]
+x3 <- ER_M[t3]
+
+# Initialize data frames for results
+results <- data.frame(
+  Portfolio = integer(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  R2 = numeric(),
+  AdjR2 = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric()
+)
+
+results_extended <- data.frame(
+  Portfolio = integer(),
+  Period = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  R2 = numeric(),
+  AdjR2 = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric()
+)
+
+# Loop through portfolios
+for (i in 25:124) {
+  # Portfolio excess returns
+  ER <- as.matrix(portfolio_m[, i] - portfolio_m$Tbill)
+  y1 <- ER[t1]
+  y2 <- ER[t2]
+  y3 <- ER[t3]
+  
+  # Run the CAPM
+  capm_results <- extended_CAPM(y1, x1, y2, x2, y3, x3)
+  
+  # Extract results for the full sample
+  full_sample_summary <- capm_results[["full_sample"]]
+  results <- rbind(
+    results,
+    data.frame(
+      Portfolio = i,
+      Alpha = coef(full_sample_summary)[1],  # Intercept
+      Beta = coef(full_sample_summary)[2],   # Slope
+      R2 = summary(full_sample_summary)$r.squared,
+      AdjR2 = summary(full_sample_summary)$adj.r.squared,
+      StdErrAlpha = coef(summary(full_sample_summary))[1, 2],
+      StdErrBeta = coef(summary(full_sample_summary))[2, 2],
+      PValueAlpha = coef(summary(full_sample_summary))[1, 4],
+      PValueBeta = coef(summary(full_sample_summary))[2, 4]
+    )
+  )
+  
+  # Extract results for sub-periods
+  for (period in c("period_1", "period_2", "period_3")) {
+    period_summary <- capm_results[[period]]
+    results_extended <- rbind(
+      results_extended,
+      data.frame(
+        Portfolio = i,
+        Period = period,
+        Alpha = coef(period_summary)[1],  # Intercept
+        Beta = coef(period_summary)[2],   # Slope
+        R2 = summary(period_summary)$r.squared,
+        AdjR2 = summary(period_summary)$adj.r.squared,
+        StdErrAlpha = coef(summary(period_summary))[1, 2],
+        StdErrBeta = coef(summary(period_summary))[2, 2],
+        PValueAlpha = coef(summary(period_summary))[1, 4],
+        PValueBeta = coef(summary(period_summary))[2, 4]
+      )
+    )
+  }
+}
+rownames(results) <- NULL
+rownames(results_extended) <- NULL
+```
