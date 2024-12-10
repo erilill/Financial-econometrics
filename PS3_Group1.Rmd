@@ -296,6 +296,7 @@ results <- data.frame(
   InteractionPeriod2Market = numeric(),
   InteractionPeriod3Market = numeric(),
   R2 = numeric(),
+  adj_R2 = numeric(),
   StdErrAlpha = numeric(),
   StdErrBeta = numeric(),
   PValueAlpha = numeric(),
@@ -326,6 +327,7 @@ for (i in portfolios) {
   interaction_period3_market <- coef(capm_model)["excess_returns$Market:portfolio_m$Period3"]
   
   r_squared <- summary(capm_model)$r.squared
+  adj_r_squared <- summary(capm_model)$adj.r.squared
   std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
   std_err_beta <- coef(summary(capm_model))["excess_returns$Market", "Std. Error"]
   
@@ -349,6 +351,7 @@ for (i in portfolios) {
       InteractionPeriod2Market = interaction_period2_market,
       InteractionPeriod3Market = interaction_period3_market,
       R2 = r_squared,
+      adj_R2 = adj_r_squared,
       StdErrAlpha = std_err_alpha,
       StdErrBeta = std_err_beta,
       PValueAlpha = p_value_alpha,
@@ -484,7 +487,62 @@ sum(pvals<0.05)
 For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha_1=\alpha_2,\beta_1=\beta_2$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
 
 
-### (b) Analyze wether the inclusion of period-specific effexts does increase the model's goodnes-of-fit.
+### (b) Analyze wether the inclusion of period-specific effects does increase the model's goodnes-of-fit.
+```{r}
+results2 <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  R2 = numeric(),
+  adj_R2 = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in portfolios) {
+  ER <- excess_returns[[i]]
+  
+  # Fit CAPM model with period-specific betas and intercepts (interaction terms)
+  capm_model <- lm(ER ~ excess_returns$Market)
+  
+  # Extract coefficients, p-values, and statistics
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["excess_returns$Market"]
+  
+  r_squared <- summary(capm_model)$r.squared
+  adj_r_squared <- summary(capm_model)$adj.r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["excess_returns$Market", "Std. Error"]
+  
+  # Extract p-values
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["excess_returns$Market", "Pr(>|t|)"]
+  
+  # Store results in data frame
+  results2 <- rbind(
+    results2,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      R2 = r_squared,
+      adj_R2 = adj_r_squared,
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta
+    )
+  )
+}
+
+# Display results using kable
+rownames(results2) <- NULL
+sum(results$R2>results2$R2)
+sum(results$adj_R2>results2$adj_R2)
+```
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
