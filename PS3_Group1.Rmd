@@ -610,6 +610,50 @@ Use the data set `portfolio_m` analyzed in the previous section. In the followin
 
 ## 1. Write R code to implement the First Pass regression which computes the cross-section of market betas, and save them together with the period-specific excess returns. Apply the code to compute the betas for the 100 size-book-to-market portfolios. Using the results to analyze the following issues:
 
+```{r, echo=F}
+FirstPass <- function(mZ, vZm){
+  iT = nrow(mZ)
+  iN = ncol(mZ)
+  
+  # First Pass
+  mX = cbind(1,vZm)
+  pars = chol2inv(chol(crossprod(mX)))%*%crossprod(mX,mZ)
+  alpha = c(pars[1,])
+  # estimated betas
+  beta = c(pars[2,])
+  # sample mean of each excess return
+  mu = apply(mZ,2,mean)
+  # sample mean of the market excess return
+  mum = mean(vZm)
+  # variance of the market excess return
+  sigm2 = c(crossprod(vZm-mum))/iT
+  # residuals
+  me = mZ-mX%*%pars
+  # covariance matrix of the residuals
+  Sigma = crossprod(me)/iT
+  #predicted values
+  mZ_hat <- mX%*%pars
+  #residuals
+  mResiduals <- mZ - mZ_hat
+  #vector to store R^2 values for each portfolio
+  R2 = numeric(iN)
+  
+  for (j in 1:iN) {
+    # Residual Sum of Squares for portfolio j
+    RSS_j = sum(mResiduals[, j]^2)
+    # Total Sum of Squares for portfolio j
+    TSS_j = sum((mZ[, j] - mean(mZ[, j]))^2)
+    # R-squared for portfolio j
+    R2[j] = 1 - RSS_j / TSS_j
+  }
+  
+  
+  
+  return(list(alpha=alpha,beta=beta,R2=R2,mu=mu))
+}
+fp_reg <- FirstPass(mZ,vZm)
+```
+
 ### (a) Evaluate the cross-sectional distribution of the estimated betas. Test whether the average betas are significantly different from one. Interpret your findings.
 
 ```{r, echo=F}
