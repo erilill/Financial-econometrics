@@ -612,6 +612,79 @@ Use the data set `portfolio_m` analyzed in the previous section. In the followin
 
 ### (a) Evaluate the cross-sectional distribution of the estimated betas. Test whether the average betas are significantly different from one. Interpret your findings.
 
+```{r, echo=F}
+# Divide data into sub-periods, 314 time-points in each
+subsample1 <- 1:314
+subsample2 <- 315:628
+subsample3 <- 629:942
+subsamples <- list(subsample1,subsample2,subsample3)
+
+means <- numeric(length(subsamples))
+tstats <- numeric(length(subsamples))
+pvals <- numeric(length(subsamples))
+tcheck <- list()
+
+betas_list <- list()
+
+for (i in 1:length(subsamples)){
+  mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
+  Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
+  Rm = as.matrix(portfolio_m[subsamples[[i]],'Market'])
+  mZ = sweep(mR,1,Rf)
+  mR - c(Rf)
+
+  vZm = Rm - Rf
+
+  tmp = EstCAPM(mZ, vZm)
+  betas <- tmp$beta
+  betas_list[[i]] <- betas
+  means[i] <- mean(betas)
+
+  Tstat <- (mean(betas)-1)/(sd(betas)/sqrt(length(betas)))
+  pval <- 2*pt(abs(Tstat), df=length(betas)-1,lower.tail=FALSE)
+  
+  tstats[i] <- Tstat
+  pvals[i] <- pval
+  tcheck[[i]] <- t.test(betas,mu=1)
+}
+```
+
+```{r, echo=F}
+hist(betas_list[[1]])
+hist(betas_list[[2]])
+hist(betas_list[[3]])
+```
+
+We test on a 5% significance level
+$$
+\begin{aligned}
+H_0:\mu_{\hat{\beta}}=1\\
+H_a:\mu_{\hat{\beta}}\neq1
+\end{aligned}
+$$
+So we can use the test statistic
+
+$$
+T=\frac{\hat{\mu}_{\hat{\beta}}-1}{\hat{\sigma}_{\hat{\beta}}/\sqrt{n}} \sim t_{n-1}
+$$
+
+```{r}
+data <- data.frame(
+  Metric = c("sample mean", "t-stat", "p-value"),
+  Period_1 = c(round(means[1],4), round(tstats[1],4), round(pvals[1],4)),
+  Period_2 = c(round(means[2],4), round(tstats[2],4), round(pvals[2],4)),
+  Period_3 = c(round(means[3],4), round(tstats[3],4), round(pvals[3],4))
+)
+
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "period specific t-test for average beta =1"
+)
+```
+
+We can see that for period 1 and period 2, we strongly reject the null, i.e. the average beta in both periods is significantly different from one. Although in period 3, the p-value is really high at 0.96, so for period 3 we definitely do not reject the null, so accept the alternative that the average beta in period 3 is 1.
+
 ### (b) Evaluate the cross-sectional distribution of the computed (time series) \(R^2\)'s. What can you learn from this analysis?
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
