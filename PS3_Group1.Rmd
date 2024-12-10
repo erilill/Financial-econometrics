@@ -62,6 +62,7 @@ The next step is the fit the following regression equation:
 $$
 Z_{it}=\alpha_i + \beta_i Z_{mt} + \epsilon_{it}
 $$
+
 Implementing in `R` using a simple `for`-loop:
 
 ```{r}
@@ -266,6 +267,28 @@ kable(J1_results, caption = "F-test Results for Joint Significance of Intercepts
 In table \ref{tab:Ftest} we see the results from the F-test. We see in the table that the p-value is very close to zero, so we can see that we reject the null of $\alpha=$ on a 5% (also 1%) significance level. The interpretation is that we have strong evidence that at least 1 of the intercept terms $\alpha_i$ in the intercept vector $\alpha$ is significantly different from zero. So we can on the basis of this test conclude that CAPM does not seem to hold, when we estimate it jointly for all the portfolios.
 
 ## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
+
+We chose to divide the sample into three even sub-periods. In order to include period-specific betas and intercept terms, we computed dummy variables for periods two and three. These dummy variables will act as our period specific intercepts, we did not include a dummy for the first period as this will cause multi-collinearity. The period specific intercepts are then given by:
+
+$$
+\begin{aligned}
+\alpha_{Period\;1} &=\alpha \\
+\alpha_{Period\;2} &=\alpha+\beta*Preriod\;2 \\
+\alpha_{Period\;3} &=\alpha +\beta*Preriod\;3\\
+\end{aligned}
+$$
+With $\beta$ denoting the corresponding coefficients, and the \emph{Period} variables are the dummy variables for the different periods. 
+
+In order to include period-specific betas, we include interaction terms between the period dummies and the market excess:
+
+$$
+\beta(Preriod\;2*Z_{m}) \quad and \quad \beta(Preriod\;3*Z_m)
+$$
+Such that the CAPM model is:
+
+$$
+Z_{t}=\alpha_t+\beta_1*Z_{mt}+\beta_2*Preriod\;2+\beta_3*Preriod\;3+\beta_4(Preriod\;2*Z_{m}) + \beta_4(Preriod\;3*Z_m)+\epsilon_{t}
+$$
 
 ```{r}
 
@@ -488,6 +511,15 @@ For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha_1=\
 
 
 ### (b) Analyze wether the inclusion of period-specific effects does increase the model's goodnes-of-fit.
+
+In order to answer this question, we will look at the coefficient of determination ($R^2$) of the extended CAPM and the CAPM without period-specific effects. This is calculated as:
+
+$$
+R^2 = 1-\frac{SS_{res}}{SS_{tot}}
+$$
+Where SS denotes the sum of squares of the residuals and the total sum of squares. As including more variables always increase $R^2$, we will also investigate the adjusted $R^2$ which penalizes based on number of coefficients.
+
+
 ```{r}
 results2 <- data.frame(
   Portfolio = character(),
@@ -543,6 +575,8 @@ rownames(results2) <- NULL
 sum(results$R2>results2$R2)
 sum(results$adj_R2>results2$adj_R2)
 ```
+
+Looking at the example where we subset the data into three time-periods, 
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
