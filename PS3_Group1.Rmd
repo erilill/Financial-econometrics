@@ -585,7 +585,7 @@ This is a clear indication that the inclusion of period-specific effects increas
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
-```{r}
+```{r, echo=F}
 # En lösning, tror det kan vara vettigt?
 
 beta_period1 <- results$Beta
@@ -597,13 +597,58 @@ rownames(betas) <- colnames(excess_returns)[2:101]
 # Calculate variance of betas across periods
 beta_variation <- apply(betas, 1, var)
 
-variation_threshold <- quantile(beta_variation, 0.9)
-high_variation <- beta_variation > variation_threshold
+# Extract size and book-to-market deciles from portfolio names
+portfolio_names <- colnames(excess_returns)[2:101]
 
-# Print flagged portfolios
-cbind(betas,beta_variation)[high_variation,]
+# Function to extract size and book-to-market deciles
+extract_deciles <- function(name) {
+  # Extract size decile
+  if (substr(name, 2, 3) == "10") {
+    size_decile <- 10  # For size 10 decile
+  } else {
+    size_decile <- as.numeric(substr(name, 2, 2))  # Otherwise, take the second character
+  }
+  
+  # Extract book-to-market decile
+  if (substr(name, 4, 5) == "10" || substr(name, 3, 4) == "10") {
+    book_to_market_decile <- 10  # For book-to-market 10 decile
+  } else {
+      if (is.na(as.numeric(substr(name, 4, 4)))){
+        book_to_market_decile <- as.numeric(substr(name, 3, 3))
+      } else{
+    book_to_market_decile <- as.numeric(substr(name, 4, 4))
+        }
+    }
+                                      
+  return(c(size_decile, book_to_market_decile))
+}
+
+# Apply function to all portfolio names
+deciles <- t(sapply(portfolio_names, extract_deciles))
+size_decile <- deciles[, 1]
+book_to_market_decile <- deciles[, 2]
+
+# Combine beta variation with size and book-to-market deciles
+beta_variation_df <- data.frame(
+  Portfolio = portfolio_names,
+  Size = size_decile,
+  BookToMarket = book_to_market_decile,
+  BetaVariation = beta_variation
+)
+
+# Alternatively, create a heatmap
+ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Heatmap of Beta Variation by Size and Book-to-Market",
+       x = "Size Decile",
+       y = "Book-to-Market Decile",
+       fill = "Beta Variation") +
+  theme_minimal()
 ```
-In the output above we have printed the 10 portfolios which have the largest variation in betas between the time periods. Here we see that portfolios with higher book-to-market ratio generally have higher variation between the time periods. Size seems to matter less as we have examples from the 1-7th deciles in the output above. There are however some exceptions, namely R21 and R41 which both have lower book-to-market ratio.
+Above we have plotted the variation in betas between time periods against the Size decile and book-to-market ratios. The pattern we see is that the portfolios consisting of larger size firms seem to have less variation in betas between the time periods. Portfolios with lower book-to-market ratios also have smaller variance in the betas between time periods. 
+
+Based on this plot, it seems that high book-to-market portfolios are most volatile over time as the variation in beta is high for almost all portfolios with high book-to-market. There also seem to be a relationship between size and time variation, however this relationship does not seem to be as strong based on the above plot. In contrast, larger portfolios with low book-to-market is least volatile.
 
 # B. Cross-sectional regressions
 Use the data set `portfolio_m` analyzed in the previous section. In the following you have to analyze the cross-sectional implications of the CAPM
