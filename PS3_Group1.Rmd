@@ -427,22 +427,7 @@ where $S_C$ is the sum of squared residuals from the full data sample, $S_1$ be 
 ```{r}
 # Chow test
 
-#divide the data into 2 groups, first half and second half
-t1 <- 1:471
-t2 <- 472:942
-
-# full sample data
-excess_returnsMarket <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill)
-excess_returnsR11 <- as.matrix(portfolio_m[,25]-portfolio_m$Tbill) #example R11, column 25
-
-# Split the excess returns into two groups based on indices t1 and t2
-excess_returnsMarket_t1 <- excess_returnsMarket[t1]
-excess_returnsMarket_t2 <- excess_returnsMarket[t2]
-
-excess_returnsR11_t1 <- excess_returnsR11[t1]
-excess_returnsR11_t2 <- excess_returnsR11[t2]
-
-### chow test function ###
+# chow test function
 my.chow.test <- function(y1,x1,y2,x2){
   
   full_sample_fit <- lm(c(y1,y2)~c(x1,x2))
@@ -466,24 +451,11 @@ my.chow.test <- function(y1,x1,y2,x2){
   return(c(Fstat=Chow_test_stat, df1=k,df2=N_1+N_2-2*k, pvalue=pval))
 }
 
-
-#install.packages("gap")
-library(gap)
-y1 <- excess_returnsR11_t1
-y2 <- excess_returnsR11_t2
-x1 <- excess_returnsMarket_t1
-x2 <- excess_returnsMarket_t2
-
-my.chow.test(y1,x1,y2,x2)
-chow.test(y1,x1,y2,x2) #same results as the package
-
-
-### now try for all ###
 #divide the data into 2 groups, first half and second half
 t1 <- 1:471
 t2 <- 472:942
 
-ER_M <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill) #full sample
+ER_M <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill) #full sample market excess returns
 x1 <- ER_M[t1] #period 1
 x2 <- ER_M[t2] #period 2
 
@@ -491,12 +463,13 @@ x2 <- ER_M[t2] #period 2
 pvals <- numeric(length(25:124))
 
 for (i in 25:124){
-  ER <- as.matrix(portfolio_m[,i]-portfolio_m$Tbill)
-  y1 <- ER[t1]
-  y2 <- ER[t2]
+  ER <- as.matrix(portfolio_m[,i]-portfolio_m$Tbill) #portfolio excess returns
+  y1 <- ER[t1] #period 1
+  y2 <- ER[t2] #period 2
   pvals[i-24] <- my.chow.test(y1,x1,y2,x2)[4] #p-value
 }
 
+#plot the p-values
 library(ggplot2)
 pvalsdf <- data.frame(pvals)
 plot <- ggplot(pvalsdf, aes(x=pvals)) + 
