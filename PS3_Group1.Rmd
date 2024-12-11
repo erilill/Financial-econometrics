@@ -914,6 +914,10 @@ pval_avg_gamma0_v <- numeric(length(subsamples))
 Tstat_list_gamma1_v <- numeric(length(subsamples))
 pval_avg_gamma1_v <- numeric(length(subsamples))
 
+gamma1test <- list()
+
+ttests <- list()
+
 for (i in 1:length(subsamples)){
   mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
   Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
@@ -924,6 +928,7 @@ for (i in 1:length(subsamples)){
   FPreg <- FirstPass(mZ, vZm)
   SPreg <- SecondPass(FPreg$beta, mZ)
   
+  gamma1test[[i]] <- SPreg$mrprem
   iT <- SPreg$iT
   
   # a)
@@ -944,6 +949,7 @@ for (i in 1:length(subsamples)){
   Tstat <- (mean(gamma1)-0)/(sd(gamma1)/sqrt(length(gamma1)))
   Tstat_list_gamma1_v[i] <- Tstat
   pval_avg_gamma1_v[i] <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
+  ttests[[1]] <- t.test(gamma1, alternative=c("less"),mu=0)
 }
 ```
 
