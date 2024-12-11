@@ -855,6 +855,8 @@ SecondPass <- function(beta, mZ){
   tss = sum((mZ - overall_mean)^2)   
   rss = sum(residuals^2)     
   r_squared = 1 - (rss / tss) 
+  adj_r_squared = 1 - ((1-r_squared)*(100-1)/(100-1-1))
+  
   # gamma0 and market risk premia
   gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
   mrprem = c(gamma[,2]); prsd = c(gamsd[,2])
@@ -865,7 +867,7 @@ SecondPass <- function(beta, mZ){
   wgamma0 = mean(gamma0)/sqrt(sum((gamma0-mean(gamma0))**2)/iT/(iT-1))
   wgamma1 = mean(mrprem)/sqrt(sum((mrprem-mean(mrprem))**2)/iT/(iT-1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT, r_squared=r_squared))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT, r_squared=r_squared, adj_r_squared=adj_r_squared))
 }
 ```
 
@@ -1079,6 +1081,7 @@ SecondPass_2 <- function(beta, mZ, size, bm){
   tss = sum((mZ - overall_mean)^2)   
   rss = sum(residuals^2)     
   r_squared = 1 - (rss / tss) 
+  adj_r_squared = 1 - ((1-r_squared)*(100-1)/(100-3-1))
   
   # gamma0 and market risk premia
   gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
@@ -1095,7 +1098,7 @@ SecondPass_2 <- function(beta, mZ, size, bm){
   wgamma_size = mean(gamma_size) / sqrt(sum((gamma_size - mean(gamma_size))**2) / iT / (iT - 1))
   wgamma_bm = mean(gamma_bm) / sqrt(sum((gamma_bm - mean(gamma_bm))**2) / iT / (iT - 1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,gamma_size=gamma_size, gamma_bm=gamma_bm,  prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,wgamma_size=wgamma_size,wgamma_bm=wgamma_bm, iT=iT, r_squared=r_squared))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,gamma_size=gamma_size, gamma_bm=gamma_bm,  prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,wgamma_size=wgamma_size,wgamma_bm=wgamma_bm, iT=iT, r_squared=r_squared, adj_r_squared=adj_r_squared))
 }
 
 mR = as.matrix(portfolio_m[,25:124])
@@ -1109,8 +1112,9 @@ beta <- FirstPass(mZ, vZm)$beta
 ret = SecondPass_2(beta=beta, mZ=mZ, log(size_decile), log(book_to_market_decile))
 re = SecondPass(beta=beta, mZ=mZ)
 
-r2 <- data.frame(`Original model`=re$r_squared,
-                 `Augmented model`=ret$r_squared)
+r2 <- data.frame(`Original model`=c(re$r_squared, re$adj_r_squared),
+                 `Augmented model`=c(ret$r_squared, ret$adj_r_squared),
+                 row.names = c("R2", "adj.R2"))
 kable(r2, digits=4, caption="Comparison of R Squared between the original second pass regression and the regression including the log transformed Size and Book-to-Market deciles.")
 
 wgamma_size <- ret$wgamma_size
