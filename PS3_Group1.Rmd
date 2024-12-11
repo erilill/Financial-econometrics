@@ -777,12 +777,14 @@ rownames(descriptive_stats) <- "R^2"
 kable(descriptive_stats, digits = 3)
 ```
 
-We can see that is quite heavily left skewed. Also bla bla etc.
+We can see that is quite heavily left skewed. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative skewness of -0.817 also indicates that the tail on the lower end is longer. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
 
 ```{r}
 hist(fpreg$R2)
+lines(density(fpreg$R2), col = "blue", lwd = 2)
+abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. 
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior. Lastly, the thin tails indicate that the models are quite consistent in the explanatory power across the sample and thus is relatively stable. 
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -874,8 +876,6 @@ SecondPass <- function(beta, mZ){
 }
 ```
 
-### (a) Test whether \(\gamma_{0t}=0\) for all t
-
 We again split up the data in the 3 periods, and do the tests for each period, to see how robust the results are over time.
 ```{r}
 # Divide data into sub-periods, 314 time-points in each
@@ -884,17 +884,22 @@ subsample2 <- 315:628
 subsample3 <- 629:942
 subsamples <- list(subsample1,subsample2,subsample3)
 
-means <- numeric(length(subsamples))
-tstats <- numeric(length(subsamples))
-pvals <- numeric(length(subsamples))
-tcheck <- list()
+pval_wgamma0_v <- numeric(length(subsamples))
+wgamma0_v <- numeric(length(subsamples))
 
-betas_list <- list()
+pval_wgamma1_v <- numeric(length(subsamples))
+wgamma1_v <- numeric(length(subsamples))
+
+Tstat_list_gamma0_v <- numeric(length(subsamples))
+pval_avg_gamma0_v <- numeric(length(subsamples))
+
+Tstat_list_gamma1_v <- numeric(length(subsamples))
+pval_avg_gamma1_v <- numeric(length(subsamples))
 
 for (i in 1:length(subsamples)){
   mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
-  Rf = as.matrix(portfolio_m[subsample[[i]],'Tbill'])
-  Rm = as.matrix(portfolio_m[subsample[[i]],'Market'])
+  Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
+  Rm = as.matrix(portfolio_m[subsamples[[i]],'Market'])
   mZ = sweep(mR,1,Rf)
   vZm = Rm - Rf
   
@@ -905,30 +910,60 @@ for (i in 1:length(subsamples)){
   
   # a)
   wgamma0 <- SPreg$wgamma0
-  pval_wgamma0[[i]] <- pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE)
-  wgamma0_list[[i]] <- wgamma0
+  pval_wgamma0_v[i] <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE)
+  wgamma0_v[i] <- wgamma0
   # b)
   wgamma1 <- SPreg$wgamma1
-  pval_wgamma1 <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
-  wgamma1_list[[i]] <- wgamma1
-  # c)
-  (Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0))))
-  (wgamma0)
-
-  p <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE))
+  pval_wgamma1_v[i] <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
+  wgamma1_v[i] <- wgamma1
+  # c) 1. gamma0
+  gamma0 <- SPreg$gamma0
+  Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0)))
+  Tstat_list_gamma0_v[i] <- Tstat
+  pval_avg_gamma0_v[i] <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE)
+  # c) 2. gamma1
+  gamma1 <- SPreg$mrprem
+  Tstat <- (mean(gamma1)-0)/(sd(gamma1)/sqrt(length(gamma1)))
+  Tstat_list_gamma1_v[i] <- Tstat
+  pval_avg_gamma1_v[i] <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
 }
 ```
 
+### (a) Test whether \(\gamma_{0t}=0\) for all t
+
 ```{r}
-iT <- spreg$iT
-(wgamma0 <- spreg$wgamma0)
-(pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
+data <- data.frame(
+  Metric = c("wgamma0", "p-value"),
+  Period_1 = c(round(wgamma0_v[1],4), round(pval_wgamma0_v[1],4)),
+  Period_2 = c(round(wgamma0_v[2],4), round(pval_wgamma0_v[2],4)),
+  Period_3 = c(round(wgamma0_v[3],4), round(pval_wgamma0_v[3],4))
+)
+
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "Test for gamma_0t=0"
+)
 ```
+
 Our p-value is 0.79 so we do not reject the null that $\gamma_{0t}=0$ for all t.
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
 
 ```{r}
+data <- data.frame(
+  Metric = c("wgamma1", "p-value"),
+  Period_1 = c(round(wgamma1_v[1],4), round(pval_wgamma1_v[1],4)),
+  Period_2 = c(round(wgamma1_v[2],4), round(pval_wgamma1_v[2],4)),
+  Period_3 = c(round(wgamma1_v[3],4), round(pval_wgamma1_v[3],4))
+)
+
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "Test for gamma_1t>0"
+)
+
 (wgamma1 <- spreg$wgamma1)
 (pval <- pt(wgamma1, df=iT-1, lower.tail=FALSE))
 ```
@@ -950,9 +985,8 @@ Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
 gamma1 <- spreg$mrprem
 
 (Tstat <- (mean(gamma1)-0)/(sd(gamma1)/sqrt(length(gamma1))))
-(wgamma1)
 
-(pval <- pt(wgamma1, df=iT-1, lower.tail=FALSE))
+(pval <- pt(Tstat, df=iT-1, lower.tail=FALSE))
 ```
 We assuem the gammas are i.d.d. This is a strong assumption and not realistic. But still, if we assume, we can do it.
 
@@ -1123,3 +1157,21 @@ rownames(results) <- NULL
 rownames(results_extended) <- NULL
 ```
 
+asda
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf)
+
+vZm = Rm - Rf
+
+FPreg <- FirstPass(mZ, vZm)
+spreg <- SecondPass(FPreg$beta, mZ)
+gamma0 <- spreg$gamma0
+
+iT <- spreg$iT
+(wgamma0 <- spreg$wgamma0)
+(pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
+```
