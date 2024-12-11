@@ -937,7 +937,6 @@ for (i in 1:length(subsamples)){
   FPreg <- FirstPass(mZ, vZm)
   SPreg <- SecondPass(FPreg$beta, mZ)
   
-  gamma1test[[i]] <- SPreg$mrprem
   iT <- SPreg$iT
   
   # a)
