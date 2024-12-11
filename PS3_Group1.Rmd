@@ -802,7 +802,7 @@ We can see that is quite heavily left skewed. Also bla bla etc.
 ```{r}
 hist(fpreg$R2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is really high/good/, i.e. the CAPM model captures a lot of variation in the data. 
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. 
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -812,7 +812,7 @@ Now the economic theory says that the CAPM implies
 $$
 E[Z_{it}]=\beta_iE[Z_{mt}]
 $$
-Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e.
+Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e. does the following equation approximately hold?
 
 $$
 T^{-1}\sum_{t=1}^TZ_{it}=\beta_iT^{-1}\sum_{t=1}^TZ_{mt}
