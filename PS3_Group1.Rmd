@@ -812,7 +812,12 @@ Now the economic theory says that the CAPM implies
 $$
 E[Z_{it}]=\beta_iE[Z_{mt}]
 $$
-Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds.
+Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e.
+
+$$
+T^{-1}\sum_{t=1}^TZ_{it}=\beta_iT^{-1}\sum_{t=1}^TZ_{mt}
+$$
+Set up the equation in the code
 
 ```{r}
 # sample mean of each excess return
@@ -853,16 +858,14 @@ $$
 Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_m + \eta_t
 $$
 
-where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\tims 1$ vector of pre-estimated CAPM betas. Test whether:
-
-### (a) \(\gamma_{0t}=0\) for all t
+where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\tims 1$ vector of pre-estimated CAPM betas.
 
 Lets first set up the Second Pass
 
 ```{r}
-SecondPass <- function(beta){
-  iT = 942
-  iN = 100
+SecondPass <- function(beta, mZ){
+  iT = nrow(mZ)
+  iN = ncol(mZ)
   mX = cbind(1,beta)
   xxinv = chol2inv(chol(crossprod(mX)))
   xxinvx = tcrossprod(xxinv,mX)
@@ -887,14 +890,55 @@ SecondPass <- function(beta){
   wgamma0 = mean(gamma0)/sqrt(sum((gamma0-mean(gamma0))**2)/iT/(iT-1))
   wgamma1 = mean(mrprem)/sqrt(sum((mrprem-mean(mrprem))**2)/iT/(iT-1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT))
 }
 
-spreg <- SecondPass(fpreg$beta)
+spreg <- SecondPass(fpreg$beta, mZ)
 ```
 
-### (b) \(\gamma_{1t}>0\) for all t
-### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\ganmma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\ganmma}_{0t} = 0\)
+### (a) Test whether \(\gamma_{0t}=0\) for all t
+
+```{r}
+iT <- spreg$iT
+
+(wgamma0 <- spreg$wgamma0)
+(pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
+```
+Our p-value is 0.79 so we do not reject the null that $\gamma_{0t}=0$ for all t.
+
+### (b) Test whether \(\gamma_{1t}>0\) for all t
+
+```{r}
+(wgamma1 <- spreg$wgamma1)
+(pval <- pt(wgamma1, df=iT-1, lower.tail=FALSE))
+```
+Our p-value is $<0.01$ so we reject the null at a 1% significance level that $\gamma_{1t}>0$ for all t.
+
+### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
+
+First we test $\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0$.
+```{r}
+gamma0 <- spreg$gamma0
+
+(Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0))))
+(wgamma0)
+
+(pval <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE))
+```
+Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
+```{r}
+gamma1 <- spreg$mrprem
+
+(Tstat <- (mean(gamma1)-0)/(sd(gamma1)/sqrt(length(gamma1))))
+(wgamma1)
+
+(pval <- pt(wgamma1, df=iT-1, lower.tail=FALSE))
+```
+We assuem the gammas are i.d.d. This is a strong assumption and not realistic. But still, if we assume, we can do it.
+
+theory says we should reject gamma1t is zero, rule out case where it is negative.
+
+It is exactly the same test statistics and p-values...
 
 and evaluate the goodness-of-fit. How robust are your results over time?
 
