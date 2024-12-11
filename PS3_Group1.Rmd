@@ -1059,6 +1059,8 @@ We use the log transformed deciles for two reasons: The exercise states that we 
 
 Both of these problems are solved by using log transformed deciles rather than dummy variables.
 
+In order to analyze wether they have explanatory power or not, we will compute the $R^2$ and adjusted $R^2$, as well as a Wald-test of $H_0: \gamma \leq 0$ vs. $H_1: \gamma > 0$.
+
 ```{r,echo=F}
 SecondPass_2 <- function(beta, mZ, size, bm){
   iT = nrow(mZ)
@@ -1116,7 +1118,13 @@ r2 <- data.frame(`Original model`=c(re$r_squared, re$adj_r_squared),
                  `Augmented model`=c(ret$r_squared, ret$adj_r_squared),
                  row.names = c("R2", "adj.R2"))
 kable(r2, digits=4, caption="Comparison of R Squared between the original second pass regression and the regression including the log transformed Size and Book-to-Market deciles.")
+```
+We see in the table above that $R^2$ increases somewhat when we include the log transformed size and book-to-market deciles. Since we increase the number of coefficients in the model we also include the adjusted $R^2$ which penalizes based on the number of coefficients. We see that the adjusted $R^2$ is also slightly larger in the augmented model compared to the original model. 
 
+Based on this, we come to the conclusion that the log transformed size and book-to-market deciles have some explanatory power.
+
+
+```{r, echo=F}
 wgamma_size <- ret$wgamma_size
 pval_wgamma_s <- pt(wgamma_size, df=nrow(mZ)-1, lower.tail=FALSE)
 wgamma_bm <- ret$wgamma_bm
@@ -1128,7 +1136,7 @@ results <- data.frame(Size=c(wgamma_size, pval_wgamma_s),
 )
 kable(results, digits=4, caption = "Test (separately) whether gamma_{2t}>0 and gamma_{2t}>0 for all t")
 ```
-In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. 
+In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. It is likely that the inclusion of book-to-market in the model is the reason for the increased $R^2$.
 
 
 
