@@ -131,31 +131,6 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
 
-```{r, include=F}
-# Tror att detta är fel men lämnar det sålänge, se nästa chunk.
-
-
-# Stack data for joint estimation
-portfolio_returns <- portfolio_m[, 5:124] #tror det ska vara alla 124 alltså 5:124
-excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
-market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
-portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
-
-# Create a data frame for pooled regression
-pooled_data <- data.frame(
-  excess_returns = excess_returns,
-  market_excess = market_excess,
-  portfolio = factor(portfolio_labels)
-)
-
-# Fit a pooled regression with portfolio dummy variables
-pooled_model <- lm(excess_returns ~ market_excess + portfolio, data = pooled_data)
-
-# Test joint significance of intercepts
-f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", names(coef(pooled_model)), value = TRUE))
-print(f_test)
-
-```
 In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test. So we test the following for the vector of intercept terms
 
 $$
