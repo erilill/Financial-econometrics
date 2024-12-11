@@ -951,7 +951,7 @@ kable(
 )
 ```
 
-Our p-value is 0.79 so we do not reject the null that $\gamma_{0t}=0$ for all t.
+According to theory CAPM predicts that the intercept $\gamma_{0t}$ is zero. If it is not equal to zero then the test implies that some returns are not explained by the market beta and thus there is model misspecification. In period 1 the p-value is 0.7921 so we fail to reject the null hypothesis that $\gamma_{0t}=0$ for all t. For period 2 the p-value is 0.1616 and once again we fail to reject the null. For the last period the obtained p-value is less than 0.05 and therefore we reject the null that $\gamma_{0t}=0$ which contradicts CAPM. This means that for this period, the CAPM does not fully explain the returns. This can occur if there are some structural breaks in the data, market anomalies or some macroeconomic events which affect returns. 
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
 
@@ -971,8 +971,7 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-
-We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually.
+Theory says we should reject $\gamma_{1t}$ is zero. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This contradicts the theory that investors holding systematic risk are not rewarded. 
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
@@ -1006,9 +1005,7 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-We assume the gammas are i.d.d. This is a strong assumption and not realistic. But still, if we assume, we can do it.
-
-theory says we should reject gamma1t is zero, rule out case where it is negative.
+We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
 
 It is exactly the same test statistics and p-values...
 
