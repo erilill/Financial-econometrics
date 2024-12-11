@@ -132,31 +132,6 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
 
-```{r, include=F}
-# Tror att detta är fel men lämnar det sålänge, se nästa chunk.
-
-
-# Stack data for joint estimation
-portfolio_returns <- portfolio_m[, 5:124] #tror det ska vara alla 124 alltså 5:124
-excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
-market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
-portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
-
-# Create a data frame for pooled regression
-pooled_data <- data.frame(
-  excess_returns = excess_returns,
-  market_excess = market_excess,
-  portfolio = factor(portfolio_labels)
-)
-
-# Fit a pooled regression with portfolio dummy variables
-pooled_model <- lm(excess_returns ~ market_excess + portfolio, data = pooled_data)
-
-# Test joint significance of intercepts
-f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", names(coef(pooled_model)), value = TRUE))
-print(f_test)
-
-```
 In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test. So we test the following for the vector of intercept terms
 
 $$
@@ -292,10 +267,6 @@ Z_{t}=\alpha_t+\beta_1Z_{mt}+\gamma_2+\gamma_3+\delta_4(D_2*Z_{mt}) + \delta_5(D
 $$
 
 ```{r}
-
-# Vet inte om det här är rätt metod
-
-
 # Divide data into sub-periods, 314 time-points in each
 subsample1 <- 1:314
 subsample2 <- 315:628
@@ -550,8 +521,6 @@ This is a clear indication that the inclusion of period-specific effects increas
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
 ```{r, echo=F}
-# En lösning, tror det kan vara vettigt?
-
 beta_period1 <- results$Beta
 beta_period2 <- beta_period1 + results$InteractionPeriod2Market
 beta_period3 <- beta_period1 + results$InteractionPeriod3Market
@@ -1141,118 +1110,6 @@ In the table above you see the Wald-test statistics and their corresponding p-va
 
 
 
-
-
-```{r, include=F}
-### Spar denna liten stund
-### Alternativ model för A3, jag föredrar dock den med dummies/Erik
-
-extended_CAPM <- function(y1, x1, y2, x2, y3, x3) {
-  # Fit models
-  full_sample_fit <- lm(c(y1, y2, y3) ~ c(x1, x2, x3))
-  group_1_fit <- lm(y1 ~ x1)
-  group_2_fit <- lm(y2 ~ x2)
-  group_3_fit <- lm(y3 ~ x3)
-  
-  results <- list(
-    full_sample = full_sample_fit,
-    period_1 = group_1_fit,
-    period_2 = group_2_fit,
-    period_3 = group_3_fit
-  )
-  
-  return(results)
-}
-
-
-# Divide data into time periods
-t1 <- 1:314
-t2 <- 315:628
-t3 <- 629:942
-
-# Market excess returns
-ER_M <- as.matrix(portfolio_m[, 3] - portfolio_m$Tbill)
-x1 <- ER_M[t1]
-x2 <- ER_M[t2]
-x3 <- ER_M[t3]
-
-# Initialize data frames for results
-results <- data.frame(
-  Portfolio = integer(),
-  Alpha = numeric(),
-  Beta = numeric(),
-  R2 = numeric(),
-  AdjR2 = numeric(),
-  StdErrAlpha = numeric(),
-  StdErrBeta = numeric(),
-  PValueAlpha = numeric(),
-  PValueBeta = numeric()
-)
-
-results_extended <- data.frame(
-  Portfolio = integer(),
-  Period = character(),
-  Alpha = numeric(),
-  Beta = numeric(),
-  R2 = numeric(),
-  AdjR2 = numeric(),
-  StdErrAlpha = numeric(),
-  StdErrBeta = numeric(),
-  PValueAlpha = numeric(),
-  PValueBeta = numeric()
-)
-
-# Loop through portfolios
-for (i in 25:124) {
-  # Portfolio excess returns
-  ER <- as.matrix(portfolio_m[, i] - portfolio_m$Tbill)
-  y1 <- ER[t1]
-  y2 <- ER[t2]
-  y3 <- ER[t3]
-  
-  # Run the CAPM
-  capm_results <- extended_CAPM(y1, x1, y2, x2, y3, x3)
-  
-  # Extract results for the full sample
-  full_sample_summary <- capm_results[["full_sample"]]
-  results <- rbind(
-    results,
-    data.frame(
-      Portfolio = i,
-      Alpha = coef(full_sample_summary)[1],  # Intercept
-      Beta = coef(full_sample_summary)[2],   # Slope
-      R2 = summary(full_sample_summary)$r.squared,
-      AdjR2 = summary(full_sample_summary)$adj.r.squared,
-      StdErrAlpha = coef(summary(full_sample_summary))[1, 2],
-      StdErrBeta = coef(summary(full_sample_summary))[2, 2],
-      PValueAlpha = coef(summary(full_sample_summary))[1, 4],
-      PValueBeta = coef(summary(full_sample_summary))[2, 4]
-    )
-  )
-  
-  # Extract results for sub-periods
-  for (period in c("period_1", "period_2", "period_3")) {
-    period_summary <- capm_results[[period]]
-    results_extended <- rbind(
-      results_extended,
-      data.frame(
-        Portfolio = i,
-        Period = period,
-        Alpha = coef(period_summary)[1],  # Intercept
-        Beta = coef(period_summary)[2],   # Slope
-        R2 = summary(period_summary)$r.squared,
-        AdjR2 = summary(period_summary)$adj.r.squared,
-        StdErrAlpha = coef(summary(period_summary))[1, 2],
-        StdErrBeta = coef(summary(period_summary))[2, 2],
-        PValueAlpha = coef(summary(period_summary))[1, 4],
-        PValueBeta = coef(summary(period_summary))[2, 4]
-      )
-    )
-  }
-}
-rownames(results) <- NULL
-rownames(results_extended) <- NULL
-```
 
 ```{r}
 iT <- nrow(mZ)
