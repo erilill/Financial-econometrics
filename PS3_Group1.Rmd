@@ -1030,7 +1030,7 @@ gamma1 <- spreg$mrprem
 
 (pval <- pt(Tstat, df=iT-1, lower.tail=FALSE))
 ```
-We assuem the gammas are i.d.d. This is a strong assumption and not realistic. But still, if we assume, we can do it.
+We assume the gammas are i.d.d. This is a strong assumption and not realistic. But still, if we assume, we can do it.
 
 theory says we should reject gamma1t is zero, rule out case where it is negative.
 
@@ -1040,10 +1040,9 @@ and evaluate the goodness-of-fit. How robust are your results over time?
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
 
-<<<<<<< HEAD
+
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
 
-=======
 We start by generating two factor variables for size and book-to-market which we will use to plot the average returns.
 
 ```{r}
