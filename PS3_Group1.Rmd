@@ -17,6 +17,7 @@ header-includes:
   - \usepackage{caption}
   - \usepackage{subcaption}
   - \usepackage{adjustbox}
+  - \usepackage{hyperref}
 toc: false
 ---
 
@@ -115,13 +116,13 @@ kable(results, digits = 3, caption = "Estimated CAPM for the portfolios", label 
 
 What we will be inspecting in order to answer this question is $\alpha$ and the corresponding p-value. In CAPM, $\alpha$ represents the excess return not explained by the market. For CAPM to hold, $\alpha$ should be statistically insignificant i.e. close to zero/we can not reject that it is 0, and $\beta$ should capture the cross-sectional variation of expected excess returns.
 
-In table \ref{tab:capm1} we see that $\alpha$ is only statistically significant at 10\% for MEBE5 and MEBE8, with only MEBE8 being significant at 5\%. We see that we can not reject $\alpha$ being zero for all other portfolios, however we do see that the estimates although insignificant are higher for smaller portfolios and for higher book-to-market portfolios. Based on these results it seems that CAPM is valid for most of the portfolios, however it holds better for portfolios of larger firms and lower book-to-market portfolios. #spelar storleken på estimatet någon roll om vi ändå inte kan rejecta att den är 0?
+In table 2 we see that $\alpha$ is only statistically significant at 10\% for MEBE5 and MEBE8, with only MEBE8 being significant at 5\%. We see that we can not reject $\alpha$ being zero for all other portfolios, however we do see that the estimates although insignificant are higher for smaller portfolios and for higher book-to-market portfolios. Based on these results it seems that CAPM is valid for most of the portfolios, however it holds better for portfolios of larger firms and lower book-to-market portfolios. #spelar storleken på estimatet någon roll om vi ändå inte kan rejecta att den är 0?
 
 ### (b) Is there a systematic relation between the estimated market beta and size as well as the book-to-market ratio? Interpret your findings.
 
-Looking at the $\beta$'s in table \raf{tab:capm1}, we see that the portfolios of smaller firms tend to have higher $\beta$'s while the portfolios of larger firms have lower $\beta$'s. This indicates that the returns of smaller firms are more volatile than the returns of larger firms. Also ME10 has a $\beta<1$, which indicates that the largest firms have returns less volatile than the market. The rest of the ME have $\beta >1$, meaning they have returns more volatile than the market. We also see that $\beta$'s are higher for highest book-to-market portfolios compared to lower book-to-market portfolios. This indicates that the higher book-to-market portfolios have more volatile returns than the lower book-to-market portfolios. For the ME portfolios some have $\beta<1$ and some $\beta>1$ so some are more volatile than the market and some are less volatile.
+Looking at the $\beta$'s in table 2, we see that the portfolios of smaller firms tend to have higher $\beta$'s while the portfolios of larger firms have lower $\beta$'s. This indicates that the returns of smaller firms are more volatile than the returns of larger firms. Also ME10 has a $\beta<1$, which indicates that the largest firms have returns less volatile than the market. The rest of the ME have $\beta >1$, meaning they have returns more volatile than the market. We also see that $\beta$'s are higher for highest book-to-market portfolios compared to lower book-to-market portfolios. This indicates that the higher book-to-market portfolios have more volatile returns than the lower book-to-market portfolios. For the ME portfolios some have $\beta<1$ and some $\beta>1$ so some are more volatile than the market and some are less volatile.
 
-### (c) Is there a systematic relation between the \($R^2\) and market capitalization as well as book-to-market ratio? What does this mean?
+### (c) Is there a systematic relation between the \(R^2\) and market capitalization as well as book-to-market ratio? What does this mean?
 
 Looking at the $R^2$'s, we see that it is lower for the lower market capitalization portfolios compared to the higher market capitalization portfolios, This suggests that CAPM captures most of the variation in excess return for the higher market capitalization portfolios while the explanatory power is weaker for the smaller portfolios. 
 
@@ -264,7 +265,7 @@ J1_results <- data.frame(
 )
 kable(J1_results, caption = "F-test Results for Joint Significance of Intercepts", label="tab:Ftest")
 ```
-In table \ref{tab:Ftest} we see the results from the F-test. We see in the table that the p-value is very close to zero, so we can see that we reject the null of $\alpha=$ on a 5% (also 1%) significance level. The interpretation is that we have strong evidence that at least 1 of the intercept terms $\alpha_i$ in the intercept vector $\alpha$ is significantly different from zero. So we can on the basis of this test conclude that CAPM does not seem to hold, when we estimate it jointly for all the portfolios.
+In table 3 we see the results from the F-test. We see in the table that the p-value is very close to zero, so we can see that we reject the null of $\alpha=$ on a 5% (also 1%) significance level. The interpretation is that we have strong evidence that at least 1 of the intercept terms $\alpha_i$ in the intercept vector $\alpha$ is significantly different from zero. So we can on the basis of this test conclude that CAPM does not seem to hold, when we estimate it jointly for all the portfolios.
 
 ## 4. Use the 100 portfolios built on the intersections of size and book-to-market deciles and divide the sample in appropriate sub-periods. Specify a CAPM which allows for period-specific betas and intercept terms. Estimate the model for these portfolios.
 
@@ -387,19 +388,9 @@ for (i in portfolios) {
   )
 }
 
-# Display results using kable
 rownames(results) <- NULL
-
-period_spec <- as.data.frame( cbind(results$Period2Coef, results$PValuePeriod2, results$Period3Coef, results$PValuePeriod3, results$InteractionPeriod2Market, results$PValueInteractionPeriod2Market, results$InteractionPeriod3Market, results$PValueInteractionPeriod3Market))
-
-colnames(period_spec) <- c("Period2", "PValue_Period2", "Period3", "PValue_Period3", 
-                           "Period2&Market", "PValue_Period26Market", 
-                           "Period3&Market", "PValue_Period3&Market")
-rownames(period_spec) <- colnames(excess_returns)[2:101]
-
-kable(head(period_spec), digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm3")
 ```
-In the table above, you see the coefficients and their corresponding p-values for the first few portfolios.
+
 
 
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
@@ -407,17 +398,17 @@ In the table above, you see the coefficients and their corresponding p-values fo
 We can perform the Chow Test. We estimate the full sample CAPM as
 
 $$
-Z_{t}=\alpha + \beta Z_{mt} + \epsilon_{t}
+Z_{it}=\alpha + \beta Z_{mt} + \epsilon_{it}
 $$
 We can split up the data into two groups, i.e. the first half of the data and the second half like
 
 $$
 \begin{aligned}
-Z_{t}=\alpha_1 + \beta_1 Z_{mt} + \epsilon_{t}\\
-Z_{t}=\alpha_2 + \beta_2 Z_{mt} + \epsilon_{t}
+Z_{it}=\alpha^{(1)} + \beta^{(1)} Z_{mt} + \epsilon_{it}\\
+Z_{it}=\alpha^{(2)} + \beta^{(2)} Z_{mt} + \epsilon_{it}
 \end{aligned}
 $$
-The null of the Chow test asserts that $\alpha_1=\alpha_2,\beta_1=\beta_2$, under the assumption that $\epsilon_t \overset{\mathrm{iid}}{\sim} N(0,\sigma^2)$. Then we have the Chow test statistic
+The null of the Chow test asserts that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(2)}$, under the assumption that $\epsilon_{it} \overset{\mathrm{iid}}{\sim} N(0,\sigma^2)$. Then we have the Chow test statistic
 
 $$
 \frac{(S_C-(S_1+S_2))/k}{(S_1+S_2)/(N_1+N_2-2k)} \sim F_{k,N_1+N_2-2k}
@@ -427,22 +418,7 @@ where $S_C$ is the sum of squared residuals from the full data sample, $S_1$ be 
 ```{r}
 # Chow test
 
-#divide the data into 2 groups, first half and second half
-t1 <- 1:471
-t2 <- 472:942
-
-# full sample data
-excess_returnsMarket <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill)
-excess_returnsR11 <- as.matrix(portfolio_m[,25]-portfolio_m$Tbill) #example R11, column 25
-
-# Split the excess returns into two groups based on indices t1 and t2
-excess_returnsMarket_t1 <- excess_returnsMarket[t1]
-excess_returnsMarket_t2 <- excess_returnsMarket[t2]
-
-excess_returnsR11_t1 <- excess_returnsR11[t1]
-excess_returnsR11_t2 <- excess_returnsR11[t2]
-
-### chow test function ###
+# chow test function
 my.chow.test <- function(y1,x1,y2,x2){
   
   full_sample_fit <- lm(c(y1,y2)~c(x1,x2))
@@ -466,24 +442,11 @@ my.chow.test <- function(y1,x1,y2,x2){
   return(c(Fstat=Chow_test_stat, df1=k,df2=N_1+N_2-2*k, pvalue=pval))
 }
 
-
-#install.packages("gap")
-library(gap)
-y1 <- excess_returnsR11_t1
-y2 <- excess_returnsR11_t2
-x1 <- excess_returnsMarket_t1
-x2 <- excess_returnsMarket_t2
-
-my.chow.test(y1,x1,y2,x2)
-chow.test(y1,x1,y2,x2) #same results as the package
-
-
-### now try for all ###
 #divide the data into 2 groups, first half and second half
 t1 <- 1:471
 t2 <- 472:942
 
-ER_M <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill) #full sample
+ER_M <- as.matrix(portfolio_m[,3]-portfolio_m$Tbill) #full sample market excess returns
 x1 <- ER_M[t1] #period 1
 x2 <- ER_M[t2] #period 2
 
@@ -491,12 +454,13 @@ x2 <- ER_M[t2] #period 2
 pvals <- numeric(length(25:124))
 
 for (i in 25:124){
-  ER <- as.matrix(portfolio_m[,i]-portfolio_m$Tbill)
-  y1 <- ER[t1]
-  y2 <- ER[t2]
+  ER <- as.matrix(portfolio_m[,i]-portfolio_m$Tbill) #portfolio excess returns
+  y1 <- ER[t1] #period 1
+  y2 <- ER[t2] #period 2
   pvals[i-24] <- my.chow.test(y1,x1,y2,x2)[4] #p-value
 }
 
+#plot the p-values
 library(ggplot2)
 pvalsdf <- data.frame(pvals)
 plot <- ggplot(pvalsdf, aes(x=pvals)) + 
@@ -509,7 +473,7 @@ length(pvals)
 sum(pvals<0.05)
 ```
 
-For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha_1=\alpha_2,\beta_1=\beta_2$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
+For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(1)}$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
 
 
 ### (b) Analyze wether the inclusion of period-specific effects does increase the model's goodnes-of-fit.
@@ -655,7 +619,7 @@ Use the data set `portfolio_m` analyzed in the previous section. In the followin
 
 ## 1. Write R code to implement the First Pass regression which computes the cross-section of market betas, and save them together with the period-specific excess returns. Apply the code to compute the betas for the 100 size-book-to-market portfolios. Using the results to analyze the following issues:
 
-```{r, echo=F}
+```{r, echo=T}
 FirstPass <- function(mZ, vZm){
   iT = nrow(mZ)
   iN = ncol(mZ)
@@ -865,7 +829,7 @@ $$
 Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_m + \eta_t
 $$
 
-where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\tims 1$ vector of pre-estimated CAPM betas.
+where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\times 1$ vector of pre-estimated CAPM betas.
 
 Lets first set up the Second Pass
 
@@ -1051,19 +1015,12 @@ and evaluate the goodness-of-fit. How robust are your results over time?
 We start by generating two factor variables for size and book-to-market which we will use to plot the average returns.
 
 ```{r}
-mR = as.matrix(portfolio_m[,25:124])
-Rf = as.matrix(portfolio_m[,'Tbill'])
-Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf)
-vZm = Rm - Rf
-  
-reg <- FamaMacbeth0(mZ, vZm)
+# The factor variables where computed in A.4 (c).
 
-avg_ret <- mean(reg$gamma0) + mean(reg$mrprem)%*%(reg$beta)
 avg_ret_df <- data.frame(
   Size = as.factor(size_decile),
   BookToMarket = as.factor(book_to_market_decile),
-  avg_ret = t(avg_ret)
+  avg_ret = colMeans(portfolio_m[,25:124])
 )
 ```
 
@@ -1079,9 +1036,9 @@ ggplot(avg_ret_df, aes(x = Size, y = BookToMarket, fill = avg_ret)) +
        fill = "Average Returns") +
   theme_minimal()
 ```
-In the figure above we have plotted a heat map of average returns against size and book to market. What we see is that smaller size and larger book-to-market generally have higher average returns compared to portfolios of larger size and lower book to market. This pattern is quite clear but we do see some exceptions, for example R13 and R14 which are of small size but still have quite low returns, similarly R1010 has low returns even though the book-to-market is high. The size and book-to-market ratio seem to affect the average returns but does not seem to explain all of the variation.
+In the figure above we have plotted a heat map of average returns against size and book to market. What we see is that smaller size and larger book-to-market generally have higher average returns compared to portfolios of larger size and lower book to market. However smaller size and and lower book-to-market seems to yield lower average returns, so the relationship is not entirely clear. Based on this plot it seems like book-to-market more strongly affect average returns compared to size.
 
-Based on this we believe that size and book-to-market effects will have explanatory power in the cross-sectional equation (1).
+Based on this we believe that book-to-market effects will have explanatory power in the cross-sectional equation (1). Size could also have explanatory power, we are however less certain about this hypothesis.
 
 
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
@@ -1090,10 +1047,8 @@ For this task we will log transform the size and book-to-market deciles:
 
 
 $$
-Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_{1m} + \gamma_{2t}\hat{\beta}_{2m}+\gamma_{3t}\hat{\beta}_{3m} + \eta_t
+Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_{m} + \gamma_{2t}log(Size)+\gamma_{3t}log(BtM) + \eta_t
 $$
-Where $\hat{\beta}_{2m}$ and $\hat{\beta}_{3m}$ are the estimated coefficients for $log(Size)$ and $log(book-to-market)$ respectively for each portfolio $m$.
-
 We use the log transformed deciles for two reasons: The exercise states that we should generate \textbf{two} variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section. This rules out using the constructed factors as is since this would require us to generate 18 dummy variables. The next reason is that we can not employ the variables as continuous as this would imply a linear relationship between the deciles and returns which is likely not true. It is more likely that there is a diminishing effect of size and book-to-market on returns, i.e. moving from size decile 1 to 2 might have a greater impact on returns compared to decile 9-10, and similarly for book-to-market. 
 
 Both of these problems are solved by using log transformed deciles rather than dummy variables.
@@ -1153,9 +1108,9 @@ results <- data.frame(Size=c(wgamma_size, pval_wgamma_s),
                       Book_to_Market = c(wgamma_bm, pval_wgamma_bm),
                       row.names = c("Test statistic", "P-value")
 )
-kable(results)
+kable(results, digits=4, caption = "Test (separately) whether gamma_{2t}>0 and gamma_{2t}>0 for all t")
 ```
-
+In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. 
 
 
 
@@ -1273,21 +1228,11 @@ rownames(results) <- NULL
 rownames(results_extended) <- NULL
 ```
 
-asda
-
 ```{r}
-mR = as.matrix(portfolio_m[,25:124])
-Rf = as.matrix(portfolio_m[,'Tbill'])
-Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf)
-
-vZm = Rm - Rf
-
-FPreg <- FirstPass(mZ, vZm)
-spreg <- SecondPass(FPreg$beta, mZ)
-gamma0 <- spreg$gamma0
-
-iT <- spreg$iT
-(wgamma0 <- spreg$wgamma0)
-(pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
+iT <- nrow(mZ)
+R2 <- numeric(nrow(mZ))
+for (iter in 1:iT){
+  fit <- lm(formula = mZ[iter, ] ~ log(tmp$beta))
+  R2[iter] <- summary(fit)$r.squared
+}
 ```
