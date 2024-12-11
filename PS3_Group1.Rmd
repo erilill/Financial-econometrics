@@ -915,15 +915,17 @@ wgamma0_v <- numeric(length(subsamples))
 pval_wgamma1_v <- numeric(length(subsamples))
 wgamma1_v <- numeric(length(subsamples))
 
-Tstat_list_gamma0_v <- numeric(length(subsamples))
+Tstat_gamma0_v <- numeric(length(subsamples))
 pval_avg_gamma0_v <- numeric(length(subsamples))
 
-Tstat_list_gamma1_v <- numeric(length(subsamples))
+Tstat_gamma1_v <- numeric(length(subsamples))
 pval_avg_gamma1_v <- numeric(length(subsamples))
 
-gamma1test <- list()
+vgamma0 <- list()
+vgamma1 <- list()
 
-ttests <- list()
+ttestsg0 <- list()
+ttestsg1 <- list()
 
 for (i in 1:length(subsamples)){
   mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
@@ -949,18 +951,23 @@ for (i in 1:length(subsamples)){
   # c) 1. gamma0
   gamma0 <- SPreg$gamma0
   Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0)))
-  Tstat_list_gamma0_v[i] <- Tstat
+  Tstat_gamma0_v[i] <- Tstat
   pval_avg_gamma0_v[i] <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE)
+  ttestsg0[[i]] <- t.test(gamma0, alternative=c("two.sided"),mu=0)
+  vgamma0[[i]] <- gamma0
   # c) 2. gamma1
   gamma1 <- SPreg$mrprem
   Tstat <- (mean(gamma1)-0)/(sd(gamma1)/sqrt(length(gamma1)))
-  Tstat_list_gamma1_v[i] <- Tstat
+  Tstat_gamma1_v[i] <- Tstat
   pval_avg_gamma1_v[i] <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
-  ttests[[1]] <- t.test(gamma1, alternative=c("less"),mu=0)
+  ttestsg1[[i]] <- t.test(gamma1, alternative=c("greater"),mu=0)
+  vgamma1[[i]] <- gamma1
 }
 ```
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
+
+This is a two tailed t-test.
 
 ```{r}
 data <- data.frame(
@@ -975,20 +982,13 @@ kable(
   col.names = c("", "Period 1", "Period 2", "Period 3"),
   caption = "Test for gamma_0t=0"
 )
-
-subsample = 501:700
-mR = as.matrix(portfolio_m[subsample,25:124])
-Rf = as.matrix(portfolio_m[subsample,'Tbill'])
-Rm = as.matrix(portfolio_m[subsample,'Market'])
-mZ = sweep(mR,1,Rf)
-mR - c(Rf)
-
-vZm = Rm - Rf
 ```
 
 Our p-value is 0.79 so we do not reject the null that $\gamma_{0t}=0$ for all t.
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
+
+Now we actually test the null in the other direction $\gamma_{1t}\le0$ because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$
 
 ```{r}
 data <- data.frame(
@@ -1001,47 +1001,43 @@ data <- data.frame(
 kable(
   data,
   col.names = c("", "Period 1", "Period 2", "Period 3"),
-  caption = "Test for gamma_1t0"
+  caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
-
-subsample1 <- 1:314
-subsample2 <- 315:628
-subsample3 <- 629:942
-
-  mR = as.matrix(portfolio_m[subsample3,25:124])
-  Rf = as.matrix(portfolio_m[subsample3,'Tbill'])
-  Rm = as.matrix(portfolio_m[subsample3,'Market'])
-  mZ = sweep(mR,1,Rf)
-  vZm = Rm - Rf
-  
-  FPreg <- FirstPass(mZ, vZm)
-  SPreg <- SecondPass(FPreg$beta, mZ)
-  
-  iT <- SPreg$iT
-
-(wgamma1 <- SPreg$wgamma1)
-(pval <- pt(wgamma1, df=iT-1, lower.tail=FALSE))
 ```
-Our p-value is $<0.01$ so we reject the null at a 1% significance level that $\gamma_{1t}>0$ for all t.
+
+We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually.
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
 First we test $\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0$.
 ```{r}
-gamma0 <- spreg$gamma0
+data <- data.frame(
+  Metric = c("sample mean", "t-stat", "p-value"),
+  Period_1 = c(round(mean(vgamma0[[1]]),4), round(Tstat_gamma0_v[1],4), round(pval_avg_gamma0_v[1],4)),
+  Period_2 = c(round(mean(vgamma0[[2]]),4), round(Tstat_gamma0_v[2],4), round(pval_avg_gamma0_v[2],4)),
+  Period_3 = c(round(mean(vgamma0[[3]]),4), round(Tstat_gamma0_v[3],4), round(pval_avg_gamma0_v[3],4))
+)
 
-(Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0))))
-(wgamma0)
-
-(pval <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE))
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "Test for gamma_0t=0"
+)
 ```
 Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
 ```{r}
-gamma1 <- spreg$mrprem
+data <- data.frame(
+  Metric = c("sample mean", "t-stat", "p-value"),
+  Period_1 = c(round(mean(vgamma1[[1]]),4), round(Tstat_gamma1_v[1],4), round(pval_avg_gamma1_v[1],4)),
+  Period_2 = c(round(mean(vgamma1[[2]]),4), round(Tstat_gamma1_v[2],4), round(pval_avg_gamma1_v[2],4)),
+  Period_3 = c(round(mean(vgamma1[[3]]),4), round(Tstat_gamma1_v[3],4), round(pval_avg_gamma1_v[3],4))
+)
 
-(Tstat <- (mean(gamma1)-0)/(sd(gamma1)/sqrt(length(gamma1))))
-
-(pval <- pt(Tstat, df=iT-1, lower.tail=FALSE))
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
+)
 ```
 We assume the gammas are i.d.d. This is a strong assumption and not realistic. But still, if we assume, we can do it.
 
