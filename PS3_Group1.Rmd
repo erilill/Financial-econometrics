@@ -840,7 +840,7 @@ SecondPass <- function(beta, mZ){
   mX = cbind(1,beta)
   xxinv = chol2inv(chol(crossprod(mX)))
   xxinvx = tcrossprod(xxinv,mX)
-  gamma = NULL; gamsd = NULL
+  gamma = NULL; gamsd = NULL; residuals = NULL
   for(iter in 1:iT){
     vy = mZ[iter,]
     tmp = xxinvx%*%vy
@@ -849,8 +849,12 @@ SecondPass <- function(beta, mZ){
     s2 = c(crossprod(vy - mX%*%tmp))/iN
     # gammas' standard error
     gamsd = rbind(gamsd, sqrt(diag(s2 * xxinv)))
+    residuals = rbind(residuals, vy - mX %*% tmp)
   }
-  
+  overall_mean = apply(mZ, 2, mean)  
+  tss = sum((mZ - overall_mean)^2)   
+  rss = sum(residuals^2)     
+  r_squared = 1 - (rss / tss) 
   # gamma0 and market risk premia
   gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
   mrprem = c(gamma[,2]); prsd = c(gamsd[,2])
@@ -861,7 +865,7 @@ SecondPass <- function(beta, mZ){
   wgamma0 = mean(gamma0)/sqrt(sum((gamma0-mean(gamma0))**2)/iT/(iT-1))
   wgamma1 = mean(mrprem)/sqrt(sum((mrprem-mean(mrprem))**2)/iT/(iT-1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT, r_squared=r_squared))
 }
 ```
 
@@ -1063,7 +1067,7 @@ SecondPass_2 <- function(beta, mZ, size, bm){
   mX = cbind(1,beta, size, bm)
   xxinv = chol2inv(chol(crossprod(mX)))
   xxinvx = tcrossprod(xxinv,mX)
-  gamma = NULL; gamsd = NULL
+  gamma = NULL; gamsd = NULL; residuals = NULL
   for(iter in 1:iT){
     vy = mZ[iter,]
     tmp = xxinvx%*%vy
@@ -1072,7 +1076,12 @@ SecondPass_2 <- function(beta, mZ, size, bm){
     s2 = c(crossprod(vy - mX%*%tmp))/iN
     # gammas' standard error
     gamsd = rbind(gamsd, sqrt(diag(s2 * xxinv)))
+    residuals = rbind(residuals, vy - mX %*% tmp)
   }
+  overall_mean = apply(mZ, 2, mean)  
+  tss = sum((mZ - overall_mean)^2)   
+  rss = sum(residuals^2)     
+  r_squared = 1 - (rss / tss) 
   
   # gamma0 and market risk premia
   gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
@@ -1089,7 +1098,7 @@ SecondPass_2 <- function(beta, mZ, size, bm){
   wgamma_size = mean(gamma_size) / sqrt(sum((gamma_size - mean(gamma_size))**2) / iT / (iT - 1))
   wgamma_bm = mean(gamma_bm) / sqrt(sum((gamma_bm - mean(gamma_bm))**2) / iT / (iT - 1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,gamma_size=gamma_size, gamma_bm=gamma_bm,  prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,wgamma_size=wgamma_size,wgamma_bm=wgamma_bm, iT=iT))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,gamma_size=gamma_size, gamma_bm=gamma_bm,  prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,wgamma_size=wgamma_size,wgamma_bm=wgamma_bm, iT=iT, r_squared=r_squared))
 }
 
 mR = as.matrix(portfolio_m[,25:124])
@@ -1101,6 +1110,11 @@ vZm = Rm - Rf
 
 beta <- FirstPass(mZ, vZm)$beta
 ret = SecondPass_2(beta=beta, mZ=mZ, log(size_decile), log(book_to_market_decile))
+re = SecondPass(beta=beta, mZ=mZ)
+
+
+ret$r_squared
+re$r_squared
 
 wgamma_size <- ret$wgamma_size
 pval_wgamma_s <- pt(wgamma_size, df=nrow(mZ)-1, lower.tail=FALSE)
@@ -1235,7 +1249,7 @@ rownames(results_extended) <- NULL
 iT <- nrow(mZ)
 R2 <- numeric(nrow(mZ))
 for (iter in 1:iT){
-  fit <- lm(formula = mZ[iter, ] ~ log(tmp$beta))
+  fit <- lm(formula = mZ[iter, ] ~ (tmp$beta))
   R2[iter] <- summary(fit)$r.squared
 }
 ```
