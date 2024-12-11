@@ -639,7 +639,7 @@ beta_variation_df <- data.frame(
 # Alternatively, create a heatmap
 ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation)) +
   geom_tile() +
-  scale_fill_gradient(low = "blue", high = "red") +
+  scale_fill_gradient(low = "white", high = "darkblue") +
   labs(title = "Heatmap of Beta Variation by Size and Book-to-Market",
        x = "Size Decile",
        y = "Book-to-Market Decile",
@@ -1081,10 +1081,20 @@ Based on this we believe that size and book-to-market effects will have explanat
 
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
 
+For this task we will log transform the size and book-to-market deciles:
 
 
+$$
+Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_m + + \gamma_{2t}log(Size)+\gamma_{3t}log(BtM) + \eta_t
+$$
 
+We use the log transformed deciles for two reasons: The exercise states that we should generate \textbf{two} variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section. This rules out using the constructed factors as is since this would require us to generate 18 dummy variables. The next reason is that we can not employ the variables as continuous as this would imply a linear relationship between the deciles and returns which is likely not true. It is more likely that there is a diminishing effect of size and book-to-market on returns, i.e. moving from size decile 1 to 2 might have a greater impact on returns compared to decile 9-10, and similarly for book-to-market. 
 
+Both of these problems are solved by using log transformed deciles rather than dummy variables.
+
+```{r}
+
+```
 
 
 
