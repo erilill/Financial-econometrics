@@ -1275,22 +1275,3 @@ for (i in 25:124) {
 rownames(results) <- NULL
 rownames(results_extended) <- NULL
 ```
-
-asda
-
-```{r}
-mR = as.matrix(portfolio_m[,25:124])
-Rf = as.matrix(portfolio_m[,'Tbill'])
-Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf)
-
-vZm = Rm - Rf
-
-FPreg <- FirstPass(mZ, vZm)
-spreg <- SecondPass(FPreg$beta, mZ)
-gamma0 <- spreg$gamma0
-
-iT <- spreg$iT
-(wgamma0 <- spreg$wgamma0)
-(pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
-```
