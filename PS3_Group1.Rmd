@@ -579,14 +579,14 @@ portfolio_names <- colnames(excess_returns)[2:101]
 extract_deciles <- function(name) {
   # Extract size decile
   if (substr(name, 2, 3) == "10") {
-    size_decile <- 10  # For size 10 decile
+    size_decile <- 10  
   } else {
-    size_decile <- as.numeric(substr(name, 2, 2))  # Otherwise, take the second character
+    size_decile <- as.numeric(substr(name, 2, 2)) 
   }
   
   # Extract book-to-market decile
   if (substr(name, 4, 5) == "10" || substr(name, 3, 4) == "10") {
-    book_to_market_decile <- 10  # For book-to-market 10 decile
+    book_to_market_decile <- 10  
   } else {
       if (is.na(as.numeric(substr(name, 4, 4)))){
         book_to_market_decile <- as.numeric(substr(name, 3, 3))
@@ -611,7 +611,6 @@ beta_variation_df <- data.frame(
   BetaVariation = beta_variation
 )
 
-# Alternatively, create a heatmap
 ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation)) +
   geom_tile() +
   scale_fill_gradient(low = "blue", high = "red") +
@@ -958,6 +957,25 @@ It is exactly the same test statistics and p-values...
 and evaluate the goodness-of-fit. How robust are your results over time?
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf)
+vZm = Rm - Rf
+  
+reg <- FamaMacbeth0(mZ, vZm)
+
+avg_ret <- mean(reg$gamma0) + mean(reg$mrprem)%*%(reg$beta)
+avg_ret_df <- data.frame(
+  Size = size_decile,
+  BookToMarket = book_to_market_decile,
+  avg_ret = t(avg_ret)
+)
+
+
+```
 
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
 
