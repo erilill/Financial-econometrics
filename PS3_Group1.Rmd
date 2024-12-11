@@ -418,7 +418,7 @@ Z_{it}=\alpha^{(1)} + \beta^{(1)} Z_{mt} + \epsilon_{it}\\
 Z_{it}=\alpha^{(2)} + \beta^{(2)} Z_{mt} + \epsilon_{it}
 \end{aligned}
 $$
-The null of the Chow test asserts that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(2)}$, under the assumption that $\epsilon_t \overset{\mathrm{iid}}{\sim} N(0,\sigma^2)$. Then we have the Chow test statistic
+The null of the Chow test asserts that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(2)}$, under the assumption that $\epsilon_{it} \overset{\mathrm{iid}}{\sim} N(0,\sigma^2)$. Then we have the Chow test statistic
 
 $$
 \frac{(S_C-(S_1+S_2))/k}{(S_1+S_2)/(N_1+N_2-2k)} \sim F_{k,N_1+N_2-2k}
