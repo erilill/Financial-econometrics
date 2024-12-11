@@ -478,7 +478,7 @@ plot <- ggplot(pvalsdf, aes(x=pvals)) +
   geom_histogram()
 
 plot + geom_vline(aes(xintercept=0.05),
-            color="blue", linetype="dashed", size=1)
+            color="blue", linetype="dashed", linewidth=1)
 
 length(pvals)
 sum(pvals<0.05)
@@ -687,13 +687,19 @@ rownames(descriptive_stats) <- "beta"
 kable(descriptive_stats, digits = 3)
 ```
 
-We can see that... it is left skewed,
+We can see that the mean is 1.171 and median is also 1.171 which means that these portfolios points towards slightly higher systematic risk compared to the market where the expectation of beta would be 1. 
+The standard deviation of 0.18 is quite low which is interpreted as that most portfolios are clustered around the mean and therefore would indicate a well diversified portfolio. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market. Furthermore, the distribution is quite flat with a kurtosis of 0.422 and showing quite thin tails since most of the data is around the mean. The min and max show the asymmetry and points also towards slightly negative data with a longer lower tail. 
 
-Now lets plot the histogram of the betas
+Now lets plot the histogram of the betas and plot the QQ-plot to see these findings visually. 
 ```{r}
-hist(fpreg$beta)
+hist(fpreg$beta) 
+lines(density(fpreg$beta), col = "blue", lwd = 2)
+abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
+qqnorm(fpreg$beta)
+qqline(fpreg$beta, col = "red")
 ```
-It does not look like a normal distribution. Etc.
+The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows some heavier left tails and also some thinner right tails. The bulk of the data follows a normal distribution quite good but this still points towards that the data is not normally distributed. 
+
 
 Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
 
