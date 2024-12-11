@@ -1001,7 +1001,7 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0}$ we reject the test in the first period. 
+We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
 
 It is exactly the same test statistics and p-values...
 
