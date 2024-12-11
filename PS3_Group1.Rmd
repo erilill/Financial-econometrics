@@ -131,31 +131,6 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
 
-```{r, include=F}
-# Tror att detta är fel men lämnar det sålänge, se nästa chunk.
-
-
-# Stack data for joint estimation
-portfolio_returns <- portfolio_m[, 5:124] #tror det ska vara alla 124 alltså 5:124
-excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
-market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
-portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
-
-# Create a data frame for pooled regression
-pooled_data <- data.frame(
-  excess_returns = excess_returns,
-  market_excess = market_excess,
-  portfolio = factor(portfolio_labels)
-)
-
-# Fit a pooled regression with portfolio dummy variables
-pooled_model <- lm(excess_returns ~ market_excess + portfolio, data = pooled_data)
-
-# Test joint significance of intercepts
-f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", names(coef(pooled_model)), value = TRUE))
-print(f_test)
-
-```
 In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test. So we test the following for the vector of intercept terms
 
 $$
@@ -808,7 +783,7 @@ We can see that is quite heavily left skewed. Also bla bla etc.
 ```{r}
 hist(fpreg$R2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is really high/good/, i.e. the CAPM model captures a lot of variation in the data. 
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. 
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -818,7 +793,7 @@ Now the economic theory says that the CAPM implies
 $$
 E[Z_{it}]=\beta_iE[Z_{mt}]
 $$
-Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e.
+Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e. does the following equation approximately hold?
 
 $$
 T^{-1}\sum_{t=1}^TZ_{it}=\beta_iT^{-1}\sum_{t=1}^TZ_{mt}
@@ -898,15 +873,55 @@ SecondPass <- function(beta, mZ){
   
   return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT))
 }
-
-spreg <- SecondPass(fpreg$beta, mZ)
 ```
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
 
+We again split up the data in the 3 periods, and do the tests for each period, to see how robust the results are over time.
+```{r}
+# Divide data into sub-periods, 314 time-points in each
+subsample1 <- 1:314
+subsample2 <- 315:628
+subsample3 <- 629:942
+subsamples <- list(subsample1,subsample2,subsample3)
+
+means <- numeric(length(subsamples))
+tstats <- numeric(length(subsamples))
+pvals <- numeric(length(subsamples))
+tcheck <- list()
+
+betas_list <- list()
+
+for (i in 1:length(subsamples)){
+  mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
+  Rf = as.matrix(portfolio_m[subsample[[i]],'Tbill'])
+  Rm = as.matrix(portfolio_m[subsample[[i]],'Market'])
+  mZ = sweep(mR,1,Rf)
+  vZm = Rm - Rf
+  
+  FPreg <- FirstPass(mZ, vZm)
+  SPreg <- SecondPass(FPreg$beta, mZ)
+  
+  iT <- SPreg$iT
+  
+  # a)
+  wgamma0 <- SPreg$wgamma0
+  pval_wgamma0[[i]] <- pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE)
+  wgamma0_list[[i]] <- wgamma0
+  # b)
+  wgamma1 <- SPreg$wgamma1
+  pval_wgamma1 <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
+  wgamma1_list[[i]] <- wgamma1
+  # c)
+  (Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0))))
+  (wgamma0)
+
+  p <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE))
+}
+```
+
 ```{r}
 iT <- spreg$iT
-
 (wgamma0 <- spreg$wgamma0)
 (pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
 ```
