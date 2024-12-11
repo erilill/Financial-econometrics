@@ -777,7 +777,7 @@ We can see that is quite heavily left skewed. Also bla bla etc.
 ```{r}
 hist(fpreg$R2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is really high/good/, i.e. the CAPM model captures a lot of variation in the data. 
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. 
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -787,7 +787,7 @@ Now the economic theory says that the CAPM implies
 $$
 E[Z_{it}]=\beta_iE[Z_{mt}]
 $$
-Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e.
+Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds, i.e. does the following equation approximately hold?
 
 $$
 T^{-1}\sum_{t=1}^TZ_{it}=\beta_iT^{-1}\sum_{t=1}^TZ_{mt}
@@ -867,15 +867,55 @@ SecondPass <- function(beta, mZ){
   
   return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT))
 }
-
-spreg <- SecondPass(fpreg$beta, mZ)
 ```
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
 
+We again split up the data in the 3 periods, and do the tests for each period, to see how robust the results are over time.
+```{r}
+# Divide data into sub-periods, 314 time-points in each
+subsample1 <- 1:314
+subsample2 <- 315:628
+subsample3 <- 629:942
+subsamples <- list(subsample1,subsample2,subsample3)
+
+means <- numeric(length(subsamples))
+tstats <- numeric(length(subsamples))
+pvals <- numeric(length(subsamples))
+tcheck <- list()
+
+betas_list <- list()
+
+for (i in 1:length(subsamples)){
+  mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
+  Rf = as.matrix(portfolio_m[subsample[[i]],'Tbill'])
+  Rm = as.matrix(portfolio_m[subsample[[i]],'Market'])
+  mZ = sweep(mR,1,Rf)
+  vZm = Rm - Rf
+  
+  FPreg <- FirstPass(mZ, vZm)
+  SPreg <- SecondPass(FPreg$beta, mZ)
+  
+  iT <- SPreg$iT
+  
+  # a)
+  wgamma0 <- SPreg$wgamma0
+  pval_wgamma0[[i]] <- pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE)
+  wgamma0_list[[i]] <- wgamma0
+  # b)
+  wgamma1 <- SPreg$wgamma1
+  pval_wgamma1 <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
+  wgamma1_list[[i]] <- wgamma1
+  # c)
+  (Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0))))
+  (wgamma0)
+
+  p <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE))
+}
+```
+
 ```{r}
 iT <- spreg$iT
-
 (wgamma0 <- spreg$wgamma0)
 (pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
 ```
