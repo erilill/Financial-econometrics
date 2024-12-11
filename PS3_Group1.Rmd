@@ -1057,7 +1057,7 @@ We use the log transformed deciles for two reasons: The exercise states that we 
 
 Both of these problems are solved by using log transformed deciles rather than dummy variables.
 
-```{r}
+```{r,echo=F}
 SecondPass_2 <- function(beta, mZ, size, bm){
   iT = nrow(mZ)
   iN = ncol(mZ)
@@ -1109,9 +1109,9 @@ beta <- FirstPass(mZ, vZm)$beta
 ret = SecondPass_2(beta=beta, mZ=mZ, log(size_decile), log(book_to_market_decile))
 re = SecondPass(beta=beta, mZ=mZ)
 
-
-ret$r_squared
-re$r_squared
+r2 <- data.frame(`Original model`=re$r_squared,
+                 `Augmented model`=ret$r_squared)
+kable(r2, digits=4, caption="Comparison of R Squared between the original second pass regression and the regression including the log transformed Size and Book-to-Market deciles.")
 
 wgamma_size <- ret$wgamma_size
 pval_wgamma_s <- pt(wgamma_size, df=nrow(mZ)-1, lower.tail=FALSE)
