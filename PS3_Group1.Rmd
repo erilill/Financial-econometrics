@@ -691,57 +691,44 @@ FirstPass <- function(mZ, vZm){
     # R-squared for portfolio j
     R2[j] = 1 - RSS_j / TSS_j
   }
-  
-  
-  
-  return(list(alpha=alpha,beta=beta,R2=R2,mu=mu))
+  return(list(alpha=alpha,beta=beta,R2=R2,mu=mu,mum=mum))
 }
-fp_reg <- FirstPass(mZ,vZm)
+
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf)
+vZm = Rm - Rf
+
+fpreg <- FirstPass(mZ, vZm)
 ```
 
 ### (a) Evaluate the cross-sectional distribution of the estimated betas. Test whether the average betas are significantly different from one. Interpret your findings.
 
-```{r, echo=F}
+First we evaluate the cross-sectional distribution of the estimated betas.
+
+```{r}
+descriptive_stats <- describe(fpreg$beta)[,c("mean","median", "sd", "skew", "kurtosis", "min", "max")]
+rownames(descriptive_stats) <- "beta"
+kable(descriptive_stats, digits = 3)
+```
+
+We can see that... it is left skewed,
+
+Now lets plot the histogram of the betas
+```{r}
+hist(fpreg$beta)
+```
+It does not look like a normal distribution. Etc.
+
+Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
+
+```{r}
 # Divide data into sub-periods, 314 time-points in each
 subsample1 <- 1:314
 subsample2 <- 315:628
 subsample3 <- 629:942
 subsamples <- list(subsample1,subsample2,subsample3)
-
-means <- numeric(length(subsamples))
-tstats <- numeric(length(subsamples))
-pvals <- numeric(length(subsamples))
-tcheck <- list()
-
-betas_list <- list()
-
-for (i in 1:length(subsamples)){
-  mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
-  Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
-  Rm = as.matrix(portfolio_m[subsamples[[i]],'Market'])
-  mZ = sweep(mR,1,Rf)
-  mR - c(Rf)
-
-  vZm = Rm - Rf
-
-  tmp = EstCAPM(mZ, vZm)
-  betas <- tmp$beta
-  betas_list[[i]] <- betas
-  means[i] <- mean(betas)
-
-  Tstat <- (mean(betas)-1)/(sd(betas)/sqrt(length(betas)))
-  pval <- 2*pt(abs(Tstat), df=length(betas)-1,lower.tail=FALSE)
-  
-  tstats[i] <- Tstat
-  pvals[i] <- pval
-  tcheck[[i]] <- t.test(betas,mu=1)
-}
-```
-
-```{r, echo=F}
-hist(betas_list[[1]])
-hist(betas_list[[2]])
-hist(betas_list[[3]])
 ```
 
 We test on a 5% significance level
@@ -756,8 +743,36 @@ So we can use the test statistic
 $$
 T=\frac{\hat{\mu}_{\hat{\beta}}-1}{\hat{\sigma}_{\hat{\beta}}/\sqrt{n}} \sim t_{n-1}
 $$
+Note that we do this test under the assumption that the $\hat{\beta}$'s are i.i.d. which may not be very realistic. But still we assume this. Lets implement it in code and do the test for each period
 
 ```{r}
+means <- numeric(length(subsamples))
+tstats <- numeric(length(subsamples))
+pvals <- numeric(length(subsamples))
+tcheck <- list()
+
+betas_list <- list()
+
+for (i in 1:length(subsamples)){
+  mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
+  Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
+  Rm = as.matrix(portfolio_m[subsamples[[i]],'Market'])
+  mZ = sweep(mR,1,Rf)
+  vZm = Rm - Rf
+
+  tmp = FirstPass(mZ, vZm)
+  betas <- tmp$beta
+  betas_list[[i]] <- betas
+  means[i] <- mean(betas)
+
+  Tstat <- (mean(betas)-1)/(sd(betas)/sqrt(length(betas)))
+  pval <- 2*pt(abs(Tstat), df=length(betas)-1,lower.tail=FALSE)
+  
+  tstats[i] <- Tstat
+  pvals[i] <- pval
+  tcheck[[i]] <- t.test(betas,mu=1)
+}
+
 data <- data.frame(
   Metric = c("sample mean", "t-stat", "p-value"),
   Period_1 = c(round(means[1],4), round(tstats[1],4), round(pvals[1],4)),
@@ -776,8 +791,61 @@ We can see that for period 1 and period 2, we strongly reject the null, i.e. the
 
 ### (b) Evaluate the cross-sectional distribution of the computed (time series) \(R^2\)'s. What can you learn from this analysis?
 
+```{r}
+descriptive_stats <- describe(fpreg$R2)[,c("mean", "median", "sd", "skew", "kurtosis", "min", "max")]
+rownames(descriptive_stats) <- "R^2"
+kable(descriptive_stats, digits = 3)
+```
+
+We can see that is quite heavily left skewed. Also bla bla etc.
+
+```{r}
+hist(fpreg$R2)
+```
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is really high/good/, i.e. the CAPM model captures a lot of variation in the data. 
+
+
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
 
+Now the economic theory says that the CAPM implies
+
+$$
+E[Z_{it}]=\beta_iE[Z_{mt}]
+$$
+Now we want to verify to what extent this is correct. We do not have the expectations, so a (not so mathematically rigorous) compromise is to use the averages, and see if it holds.
+
+```{r}
+# sample mean of each excess return
+mu <- fpreg$mu
+# sample mean of the market excess return
+mum <- fpreg$mum
+# betas
+beta <- fpreg$beta
+
+lhs <- mu # left hand side of equation
+rhs <- beta * mum # right hand side of equation
+```
+
+Now if we plot a scatterplot with the left hand side against the right hand side against the equation, if it holds perfectly, we should see that all points lie on a 45 degree line, i.e. the economic theory prediction (CAPM) is the 45 degree line. Lets try it
+
+```{r}
+library(ggplot2)
+
+# Create a data frame for visualization
+data <- data.frame(lhs = lhs, rhs = rhs)
+
+# Scatter plot with a 45-degree reference line
+ggplot(data, aes(x = rhs, y = lhs)) +
+  geom_point(color = "blue", size = 2) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(
+    title = "CAPM Predictions (red line) vs. empirical reality (blue points)",
+    x = "Beta * average Market Excess Return",
+    y = "Average Portfolio Excess Return"
+  ) +
+  theme_minimal()
+```
+We can see that it seems to hold relatively well for some portfolios, but not for others. Some are really really close on the line, so for these portfolios the CAPM prediction from economic theory holds really well.
 
 ## 2 Estimate the following cross-sectional model for individual periods t in Second Pass:
 
@@ -788,6 +856,43 @@ $$
 where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\tims 1$ vector of pre-estimated CAPM betas. Test whether:
 
 ### (a) \(\gamma_{0t}=0\) for all t
+
+Lets first set up the Second Pass
+
+```{r}
+SecondPass <- function(beta){
+  iT = 942
+  iN = 100
+  mX = cbind(1,beta)
+  xxinv = chol2inv(chol(crossprod(mX)))
+  xxinvx = tcrossprod(xxinv,mX)
+  gamma = NULL; gamsd = NULL
+  for(iter in 1:iT){
+    vy = mZ[iter,]
+    tmp = xxinvx%*%vy
+    # gamma
+    gamma = rbind(gamma, c(tmp))
+    s2 = c(crossprod(vy - mX%*%tmp))/iN
+    # gammas' standard error
+    gamsd = rbind(gamsd, sqrt(diag(s2 * xxinv)))
+  }
+  
+  # gamma0 and market risk premia
+  gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
+  mrprem = c(gamma[,2]); prsd = c(gamsd[,2])
+  
+  # w tests on pp.30 in slides for lecture 4
+  # should be compared with student t with T-1 degrees of freedom
+  # or with standard normal if T is large
+  wgamma0 = mean(gamma0)/sqrt(sum((gamma0-mean(gamma0))**2)/iT/(iT-1))
+  wgamma1 = mean(mrprem)/sqrt(sum((mrprem-mean(mrprem))**2)/iT/(iT-1))
+  
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1))
+}
+
+spreg <- SecondPass(fpreg$beta)
+```
+
 ### (b) \(\gamma_{1t}>0\) for all t
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\ganmma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\ganmma}_{0t} = 0\)
 
