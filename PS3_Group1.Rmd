@@ -606,8 +606,8 @@ book_to_market_decile <- deciles[, 2]
 # Combine beta variation with size and book-to-market deciles
 beta_variation_df <- data.frame(
   Portfolio = portfolio_names,
-  Size = size_decile,
-  BookToMarket = book_to_market_decile,
+  Size = as.factor(size_decile),
+  BookToMarket = as.factor(book_to_market_decile),
   BetaVariation = beta_variation
 )
 
@@ -964,6 +964,8 @@ and evaluate the goodness-of-fit. How robust are your results over time?
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
 
+We start by generating two factor variables for size and book-to-market which we will use to plot the average returns.
+
 ```{r}
 mR = as.matrix(portfolio_m[,25:124])
 Rf = as.matrix(portfolio_m[,'Tbill'])
@@ -975,8 +977,8 @@ reg <- FamaMacbeth0(mZ, vZm)
 
 avg_ret <- mean(reg$gamma0) + mean(reg$mrprem)%*%(reg$beta)
 avg_ret_df <- data.frame(
-  Size = size_decile,
-  BookToMarket = book_to_market_decile,
+  Size = as.factor(size_decile),
+  BookToMarket = as.factor(book_to_market_decile),
   avg_ret = t(avg_ret)
 )
 ```
@@ -993,6 +995,9 @@ ggplot(avg_ret_df, aes(x = Size, y = BookToMarket, fill = avg_ret)) +
        fill = "Average Returns") +
   theme_minimal()
 ```
+In the figure above we have plotted a heat map of average returns against size and book to market. What we see is that smaller size and larger book-to-market generally have higher average returns compared to portfolios of larger size and lower book to market. This pattern is quite clear but we do see some exceptions, for example R13 and R14 which are of small size but still have quite low returns, similarly R1010 has low returns even though the book-to-market is high. The size and book-to-market ratio seem to affect the average returns but does not seem to explain all of the variation.
+
+Based on this we believe that size and book-to-market effects will have explanatory power in the cross-sectional equation (1).
 
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
 
