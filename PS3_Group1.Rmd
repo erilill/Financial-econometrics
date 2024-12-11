@@ -388,19 +388,9 @@ for (i in portfolios) {
   )
 }
 
-# Display results using kable
 rownames(results) <- NULL
-
-period_spec <- as.data.frame( cbind(results$Period2Coef, results$PValuePeriod2, results$Period3Coef, results$PValuePeriod3, results$InteractionPeriod2Market, results$PValueInteractionPeriod2Market, results$InteractionPeriod3Market, results$PValueInteractionPeriod3Market))
-
-colnames(period_spec) <- c("Period2", "PValue_Period2", "Period3", "PValue_Period3", 
-                           "Period2&Market", "PValue_Period26Market", 
-                           "Period3&Market", "PValue_Period3&Market")
-rownames(period_spec) <- colnames(excess_returns)[2:101]
-
-kable(head(period_spec), digits = 3, caption = "Estimated CAPM for the portfolios", label = "tab:capm3")
 ```
-In the table above, you see the coefficients and their corresponding p-values for the first few portfolios.
+
 
 
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
