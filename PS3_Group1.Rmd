@@ -892,15 +892,55 @@ SecondPass <- function(beta, mZ){
   
   return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT))
 }
-
-spreg <- SecondPass(fpreg$beta, mZ)
 ```
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
 
+We again split up the data in the 3 periods, and do the tests for each period, to see how robust the results are over time.
+```{r}
+# Divide data into sub-periods, 314 time-points in each
+subsample1 <- 1:314
+subsample2 <- 315:628
+subsample3 <- 629:942
+subsamples <- list(subsample1,subsample2,subsample3)
+
+means <- numeric(length(subsamples))
+tstats <- numeric(length(subsamples))
+pvals <- numeric(length(subsamples))
+tcheck <- list()
+
+betas_list <- list()
+
+for (i in 1:length(subsamples)){
+  mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
+  Rf = as.matrix(portfolio_m[subsample[[i]],'Tbill'])
+  Rm = as.matrix(portfolio_m[subsample[[i]],'Market'])
+  mZ = sweep(mR,1,Rf)
+  vZm = Rm - Rf
+  
+  FPreg <- FirstPass(mZ, vZm)
+  SPreg <- SecondPass(FPreg$beta, mZ)
+  
+  iT <- SPreg$iT
+  
+  # a)
+  wgamma0 <- SPreg$wgamma0
+  pval_wgamma0[[i]] <- pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE)
+  wgamma0_list[[i]] <- wgamma0
+  # b)
+  wgamma1 <- SPreg$wgamma1
+  pval_wgamma1 <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
+  wgamma1_list[[i]] <- wgamma1
+  # c)
+  (Tstat <- (mean(gamma0)-0)/(sd(gamma0)/sqrt(length(gamma0))))
+  (wgamma0)
+
+  p <- 2*pt(abs(Tstat), df=length(gamma0)-1,lower.tail=FALSE))
+}
+```
+
 ```{r}
 iT <- spreg$iT
-
 (wgamma0 <- spreg$wgamma0)
 (pval <- 2*pt(abs(wgamma0), df=iT-1,lower.tail=FALSE))
 ```
