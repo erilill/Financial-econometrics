@@ -1230,3 +1230,12 @@ for (i in 25:124) {
 rownames(results) <- NULL
 rownames(results_extended) <- NULL
 ```
+
+```{r}
+iT <- nrow(mZ)
+R2 <- numeric(nrow(mZ))
+for (iter in 1:iT){
+  fit <- lm(formula = mZ[iter, ] ~ log(tmp$beta))
+  R2[iter] <- summary(fit)$r.squared
+}
+```
