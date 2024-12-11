@@ -119,9 +119,9 @@ In table \ref{tab:capm1} we see that $\alpha$ is only statistically significant 
 
 ### (b) Is there a systematic relation between the estimated market beta and size as well as the book-to-market ratio? Interpret your findings.
 
-Looking at the $\beta$'s in table \raf{tab:capm1}, we see that the portfolios of smaller firms tend to have higher $\beta$'s while the portfolios of larger firms have lower $\beta$'s. This indicates that the returns of smaller firms are more volatile than the returns of larger firms. Also ME10 has a $\beta<1$, which indicates that the largest firms have returns less volatile than the market. The rest of the ME have $\beta >1$, meaning they have returns more volatile than the market. We also see that $\beta$'s are higher for highest book-to-market portfolios compared to lower book-to-market portfolios. This indicates that the higher book-to-market portfolios have more volatile returns than the lower book-to-market portfolios. For the ME portfolios some have $\beta<1$ and some $\beta>1$ so some are more volatile than the market and some are less volatile.
+Looking at the $\beta$'s in table \ref{tab:capm1}, we see that the portfolios of smaller firms tend to have higher $\beta$'s while the portfolios of larger firms have lower $\beta$'s. This indicates that the returns of smaller firms are more volatile than the returns of larger firms. Also ME10 has a $\beta<1$, which indicates that the largest firms have returns less volatile than the market. The rest of the ME have $\beta >1$, meaning they have returns more volatile than the market. We also see that $\beta$'s are higher for highest book-to-market portfolios compared to lower book-to-market portfolios. This indicates that the higher book-to-market portfolios have more volatile returns than the lower book-to-market portfolios. For the ME portfolios some have $\beta<1$ and some $\beta>1$ so some are more volatile than the market and some are less volatile.
 
-### (c) Is there a systematic relation between the \($R^2\) and market capitalization as well as book-to-market ratio? What does this mean?
+### (c) Is there a systematic relation between the \(R^2\) and market capitalization as well as book-to-market ratio? What does this mean?
 
 Looking at the $R^2$'s, we see that it is lower for the lower market capitalization portfolios compared to the higher market capitalization portfolios, This suggests that CAPM captures most of the variation in excess return for the higher market capitalization portfolios while the explanatory power is weaker for the smaller portfolios. 
 
@@ -865,7 +865,7 @@ $$
 Z_t = \gamma_{0t} \iota + \gamma_{1t}\hat{\beta}_m + \eta_t
 $$
 
-where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\tims 1$ vector of pre-estimated CAPM betas.
+where $Z_t$ is an $N\times 1$ vector of excess asset returns for time period t, $\iota$ is an $N\times 1$ vector of ones, and $\hat{\beta}_m$ is the $N\times 1$ vector of pre-estimated CAPM betas.
 
 Lets first set up the Second Pass
 
