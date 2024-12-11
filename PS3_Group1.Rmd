@@ -1078,7 +1078,7 @@ In the figure above we have plotted a heat map of average returns against size a
 
 Based on this we believe that size and book-to-market effects will have explanatory power in the cross-sectional equation (1).
 
->>>>>>> 71a7e616311882bb0abf47d5dd76e90bcfafcecc
+
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
 
 
