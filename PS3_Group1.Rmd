@@ -613,7 +613,7 @@ beta_variation_df <- data.frame(
 
 ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation)) +
   geom_tile() +
-  scale_fill_gradient(low = "blue", high = "red") +
+  scale_fill_gradient(low = "white", high = "darkblue") +
   labs(title = "Heatmap of Beta Variation by Size and Book-to-Market",
        x = "Size Decile",
        y = "Book-to-Market Decile",
@@ -622,7 +622,7 @@ ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation))
 ```
 Above we have plotted the variation in betas between time periods against the Size decile and book-to-market ratios. The pattern we see is that the portfolios consisting of larger size firms seem to have less variation in betas between the time periods. Portfolios with lower book-to-market ratios also have smaller variance in the betas between time periods. 
 
-Based on this plot, it seems that high book-to-market portfolios are most volatile over time as the variation in beta is high for almost all portfolios with high book-to-market. There also seem to be a relationship between size and time variation, however this relationship does not seem to be as strong based on the above plot. In contrast, larger portfolios with low book-to-market is least volatile.
+Based on this plot, it seems that high book-to-market portfolios are most volatile over time as the variation in beta is high for most portfolios with high book-to-market. There also seem to be a relationship between size and time variation, as those of smaller size seem to have larger variation. In contrast, larger portfolios with low book-to-market are the least volatile.
 
 # B. Cross-sectional regressions
 Use the data set `portfolio_m` analyzed in the previous section. In the following you have to analyze the cross-sectional implications of the CAPM
@@ -979,11 +979,20 @@ avg_ret_df <- data.frame(
   BookToMarket = book_to_market_decile,
   avg_ret = t(avg_ret)
 )
-
-
 ```
 
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
+
+```{r}
+ggplot(avg_ret_df, aes(x = Size, y = BookToMarket, fill = avg_ret)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "darkblue") +
+  labs(title = "Heatmap of Average Returns by Size and Book-to-Market",
+       x = "Size Decile",
+       y = "Book-to-Market Decile",
+       fill = "Average Returns") +
+  theme_minimal()
+```
 
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
 
