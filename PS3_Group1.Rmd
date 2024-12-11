@@ -131,6 +131,31 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
 
+```{r, include=F}
+# Tror att detta är fel men lämnar det sålänge, se nästa chunk.
+
+
+# Stack data for joint estimation
+portfolio_returns <- portfolio_m[, 5:124] #tror det ska vara alla 124 alltså 5:124
+excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
+market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
+portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
+
+# Create a data frame for pooled regression
+pooled_data <- data.frame(
+  excess_returns = excess_returns,
+  market_excess = market_excess,
+  portfolio = factor(portfolio_labels)
+)
+
+# Fit a pooled regression with portfolio dummy variables
+pooled_model <- lm(excess_returns ~ market_excess + portfolio, data = pooled_data)
+
+# Test joint significance of intercepts
+f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", names(coef(pooled_model)), value = TRUE))
+print(f_test)
+
+```
 In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test. So we test the following for the vector of intercept terms
 
 $$
@@ -478,7 +503,7 @@ plot <- ggplot(pvalsdf, aes(x=pvals)) +
   geom_histogram()
 
 plot + geom_vline(aes(xintercept=0.05),
-            color="blue", linetype="dashed", linewidth=1)
+            color="blue", linetype="dashed", size=1)
 
 length(pvals)
 sum(pvals<0.05)
@@ -579,14 +604,14 @@ portfolio_names <- colnames(excess_returns)[2:101]
 extract_deciles <- function(name) {
   # Extract size decile
   if (substr(name, 2, 3) == "10") {
-    size_decile <- 10  
+    size_decile <- 10  # For size 10 decile
   } else {
-    size_decile <- as.numeric(substr(name, 2, 2)) 
+    size_decile <- as.numeric(substr(name, 2, 2))  # Otherwise, take the second character
   }
   
   # Extract book-to-market decile
   if (substr(name, 4, 5) == "10" || substr(name, 3, 4) == "10") {
-    book_to_market_decile <- 10  
+    book_to_market_decile <- 10  # For book-to-market 10 decile
   } else {
       if (is.na(as.numeric(substr(name, 4, 4)))){
         book_to_market_decile <- as.numeric(substr(name, 3, 3))
@@ -611,9 +636,10 @@ beta_variation_df <- data.frame(
   BetaVariation = beta_variation
 )
 
+# Alternatively, create a heatmap
 ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation)) +
   geom_tile() +
-  scale_fill_gradient(low = "white", high = "darkblue") +
+  scale_fill_gradient(low = "blue", high = "red") +
   labs(title = "Heatmap of Beta Variation by Size and Book-to-Market",
        x = "Size Decile",
        y = "Book-to-Market Decile",
@@ -622,7 +648,7 @@ ggplot(beta_variation_df, aes(x = Size, y = BookToMarket, fill = BetaVariation))
 ```
 Above we have plotted the variation in betas between time periods against the Size decile and book-to-market ratios. The pattern we see is that the portfolios consisting of larger size firms seem to have less variation in betas between the time periods. Portfolios with lower book-to-market ratios also have smaller variance in the betas between time periods. 
 
-Based on this plot, it seems that high book-to-market portfolios are most volatile over time as the variation in beta is high for most portfolios with high book-to-market. There also seem to be a relationship between size and time variation, as those of smaller size seem to have larger variation. In contrast, larger portfolios with low book-to-market are the least volatile.
+Based on this plot, it seems that high book-to-market portfolios are most volatile over time as the variation in beta is high for almost all portfolios with high book-to-market. There also seem to be a relationship between size and time variation, however this relationship does not seem to be as strong based on the above plot. In contrast, larger portfolios with low book-to-market is least volatile.
 
 # B. Cross-sectional regressions
 Use the data set `portfolio_m` analyzed in the previous section. In the following you have to analyze the cross-sectional implications of the CAPM
@@ -687,19 +713,13 @@ rownames(descriptive_stats) <- "beta"
 kable(descriptive_stats, digits = 3)
 ```
 
-We can see that the mean is 1.171 and median is also 1.171 which means that these portfolios points towards slightly higher systematic risk compared to the market where the expectation of beta would be 1. 
-The standard deviation of 0.18 is quite low which is interpreted as that most portfolios are clustered around the mean and therefore would indicate a well diversified portfolio. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market. Furthermore, the distribution is quite flat with a kurtosis of 0.422 and showing quite thin tails since most of the data is around the mean. The min and max show the asymmetry and points also towards slightly negative data with a longer lower tail. 
+We can see that... it is left skewed,
 
-Now lets plot the histogram of the betas and plot the QQ-plot to see these findings visually. 
+Now lets plot the histogram of the betas
 ```{r}
-hist(fpreg$beta) 
-lines(density(fpreg$beta), col = "blue", lwd = 2)
-abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
-qqnorm(fpreg$beta)
-qqline(fpreg$beta, col = "red")
+hist(fpreg$beta)
 ```
-The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows some heavier left tails and also some thinner right tails. The bulk of the data follows a normal distribution quite good but this still points towards that the data is not normally distributed. 
-
+It does not look like a normal distribution. Etc.
 
 Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
 
@@ -777,14 +797,12 @@ rownames(descriptive_stats) <- "R^2"
 kable(descriptive_stats, digits = 3)
 ```
 
-We can see that is quite heavily left skewed. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative skewness of -0.817 also indicates that the tail on the lower end is longer. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
+We can see that is quite heavily left skewed. Also bla bla etc.
 
 ```{r}
 hist(fpreg$R2)
-lines(density(fpreg$R2), col = "blue", lwd = 2)
-abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior. Lastly, the thin tails indicate that the models are quite consistent in the explanatory power across the sample and thus is relatively stable. 
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. 
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -944,6 +962,15 @@ kable(
   col.names = c("", "Period 1", "Period 2", "Period 3"),
   caption = "Test for gamma_0t=0"
 )
+
+subsample = 501:700
+mR = as.matrix(portfolio_m[subsample,25:124])
+Rf = as.matrix(portfolio_m[subsample,'Tbill'])
+Rm = as.matrix(portfolio_m[subsample,'Market'])
+mZ = sweep(mR,1,Rf)
+mR - c(Rf)
+
+vZm = Rm - Rf
 ```
 
 Our p-value is 0.79 so we do not reject the null that $\gamma_{0t}=0$ for all t.
@@ -961,10 +988,25 @@ data <- data.frame(
 kable(
   data,
   col.names = c("", "Period 1", "Period 2", "Period 3"),
-  caption = "Test for gamma_1t>0"
+  caption = "Test for gamma_1t0"
 )
 
-(wgamma1 <- spreg$wgamma1)
+subsample1 <- 1:314
+subsample2 <- 315:628
+subsample3 <- 629:942
+
+  mR = as.matrix(portfolio_m[subsample3,25:124])
+  Rf = as.matrix(portfolio_m[subsample3,'Tbill'])
+  Rm = as.matrix(portfolio_m[subsample3,'Market'])
+  mZ = sweep(mR,1,Rf)
+  vZm = Rm - Rf
+  
+  FPreg <- FirstPass(mZ, vZm)
+  SPreg <- SecondPass(FPreg$beta, mZ)
+  
+  iT <- SPreg$iT
+
+(wgamma1 <- SPreg$wgamma1)
 (pval <- pt(wgamma1, df=iT-1, lower.tail=FALSE))
 ```
 Our p-value is $<0.01$ so we reject the null at a 1% significance level that $\gamma_{1t}>0$ for all t.
@@ -998,35 +1040,7 @@ and evaluate the goodness-of-fit. How robust are your results over time?
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
 
-```{r}
-mR = as.matrix(portfolio_m[,25:124])
-Rf = as.matrix(portfolio_m[,'Tbill'])
-Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf)
-vZm = Rm - Rf
-  
-reg <- FamaMacbeth0(mZ, vZm)
-
-avg_ret <- mean(reg$gamma0) + mean(reg$mrprem)%*%(reg$beta)
-avg_ret_df <- data.frame(
-  Size = size_decile,
-  BookToMarket = book_to_market_decile,
-  avg_ret = t(avg_ret)
-)
-```
-
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
-
-```{r}
-ggplot(avg_ret_df, aes(x = Size, y = BookToMarket, fill = avg_ret)) +
-  geom_tile() +
-  scale_fill_gradient(low = "white", high = "darkblue") +
-  labs(title = "Heatmap of Average Returns by Size and Book-to-Market",
-       x = "Size Decile",
-       y = "Book-to-Market Decile",
-       fill = "Average Returns") +
-  theme_minimal()
-```
 
 ### (b) Augment equation (1) by these two variables and analyze whether they have explanatory power beyond the CAPM betas. Interpret your findings.
 
