@@ -647,7 +647,7 @@ kable(descriptive_stats, digits = 3)
 ```
 
 We can see that the mean is 1.171 and median is also 1.171 which means that these portfolios points towards slightly higher systematic risk compared to the market where the expectation of beta would be 1. 
-The standard deviation of 0.18 is quite low which is interpreted as that most portfolios are clustered around the mean and therefore would indicate a well diversified portfolio. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market. Furthermore, the distribution is quite flat with a kurtosis of 0.422 and showing quite thin tails since most of the data is around the mean. The min and max show the asymmetry and points also towards slightly negative data with a longer lower tail. 
+The standard deviation of 0.18 so overall a quite low spread of the betas across the portfolios. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market, but that most portfolios have high betas. Furthermore, the distribution is quite thin tailed considering a kurtosis of 0.422. The difference of the absolute values of the min and max show the asymmetry/skewness.
 
 Now lets plot the histogram of the betas and plot the QQ-plot to see these findings visually.
 ```{r}
@@ -657,7 +657,7 @@ abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 qqnorm(fpreg$beta)
 qqline(fpreg$beta, col = "red")
 ```
-The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows some heavier left tails and also some thinner right tails. The bulk of the data follows a normal distribution quite good but this still points towards that the data is not normally distributed.
+The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows that the tails of the empircal distribution is not quite as the theoretical normal. The bulk of the data looks to approximately follow a normal distribution quite good but this still points towards that the data is not quite normally distributed. Although since we use OLS, under certain assumptions, in large samples, OLS estimator of beta is normal, so if we would have a larger sample, perhaps we would see it to be more normally distributed.
 
 Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
 
