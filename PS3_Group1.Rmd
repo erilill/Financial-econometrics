@@ -42,7 +42,7 @@ Use the data set `portfolio_m` consisting of returns of U.S. stock portfolios bu
 
 ```{r descriptive, echo=F}
 descriptive_stats <- describe(portfolio_m[,5:24])[,c("mean", "sd", "skew", "kurtosis", "min", "max")]
-kable(descriptive_stats, digits = 3) # Har jag tolkat rätt att det är ME1-ME10 och MEBE1-MEBE10 som är portfolios?
+kable(descriptive_stats, digits = 3)
 ```
 What we see in the table above is that the smaller firms (ME1-ME3) have higher average returns (larger means) and volatility (larger standard deviations) than the larger firms (e.g. ME10). Looking at the book-to-market effect, the higher book-to-market (e.g. MEBE10) portfolios exhibit higher average returns (larger means) and volatility (larger standard deviations) compared to the lower book-to-market (MEBE1) portfolios. For the ME portfolios we see positive skewness that is decreasing with the size, i.e. smaller firms are more positively skewed, indicating occasional extreme positive returns, and this seems to decrease with size. For MEBE portfolios, they seem to be more symmetric for the smaller book-to-market portfolios with some slightly negative skewness. But then from the 4th decile and up, instead it seems that skewness increases (positive) with larger book-to-market size. The smaller firms and higher book-to-market portfolios have high kurtosis, suggesting heavy-tailed return distributions. Looking at the minimum and maximum values we also see that for the smaller firms and higher book-to-market portfolios there are extreme returns. From the descriptive statistics we see evidence of both the size effect and the value effect.
 
