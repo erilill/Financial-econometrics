@@ -455,7 +455,7 @@ length(pvals)
 sum(pvals<0.05)
 ```
 
-For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(1)}$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
+For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(2)}$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
 
 
 ### (b) Analyze wether the inclusion of period-specific effects does increase the model's goodnes-of-fit.
@@ -681,7 +681,7 @@ kable(descriptive_stats, digits = 3)
 ```
 
 We can see that the mean is 1.171 and median is also 1.171 which means that these portfolios points towards slightly higher systematic risk compared to the market where the expectation of beta would be 1. 
-The standard deviation of 0.18 is quite low which is interpreted as that most portfolios are clustered around the mean and therefore would indicate a well diversified portfolio. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market. Furthermore, the distribution is quite flat with a kurtosis of 0.422 and showing quite thin tails since most of the data is around the mean. The min and max show the asymmetry and points also towards slightly negative data with a longer lower tail. 
+The standard deviation of 0.18 so overall a quite low spread of the betas across the portfolios. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market, but that most portfolios have high betas. Furthermore, the distribution is quite thin tailed considering a kurtosis of 0.422. The difference of the absolute values of the min and max show the asymmetry/skewness.
 
 Now lets plot the histogram of the betas and plot the QQ-plot to see these findings visually.
 ```{r}
@@ -691,9 +691,9 @@ abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 qqnorm(fpreg$beta)
 qqline(fpreg$beta, col = "red")
 ```
-The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows some heavier left tails and also some thinner right tails. The bulk of the data follows a normal distribution quite good but this still points towards that the data is not normally distributed.
+The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows that the tails of the empircal distribution is not quite as the theoretical normal. The bulk of the data looks to approximately follow a normal distribution quite good but this still points towards that the data is not quite normally distributed. Although since we use OLS, under certain assumptions, in large samples, OLS estimator of beta is normal, so if we would have a larger sample, perhaps we would see it to be more normally distributed.
 
-Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
+Now to test whether the average beta is significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
 
 ```{r}
 # Divide data into sub-periods, 314 time-points in each
@@ -715,7 +715,7 @@ So we can use the test statistic
 $$
 T=\frac{\hat{\mu}_{\hat{\beta}}-1}{\hat{\sigma}_{\hat{\beta}}/\sqrt{n}} \sim t_{n-1}
 $$
-Note that we do this test under the assumption that the $\hat{\beta}$'s are i.i.d. which may not be very realistic. But still we assume this. Lets implement it in code and do the test for each period
+Note that we do this test under the assumption that the $\hat{\beta}$'s are i.i.d. which may not be very realistic. Lets implement it in code and do the test for each period
 
 ```{r}
 means <- numeric(length(subsamples))
@@ -769,14 +769,14 @@ rownames(descriptive_stats) <- "R^2"
 kable(descriptive_stats, digits = 3)
 ```
 
-We can see that is quite heavily left skewed. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative skewness of -0.817 also indicates that the tail on the lower end is longer. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
+We can see that is quite heavily left skewed with skewnewss of -0.817. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
 
 ```{r}
 hist(fpreg$R2)
 lines(density(fpreg$R2), col = "blue", lwd = 2)
 abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior. Lastly, the thin tails indicate that the models are quite consistent in the explanatory power across the sample and thus is relatively stable.
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior.
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -824,7 +824,7 @@ ggplot(data, aes(x = rhs, y = lhs)) +
   ) +
   theme_minimal()
 ```
-We can see that it seems to hold relatively well for some portfolios, but not for others. Some are really really close on the line, so for these portfolios the CAPM prediction from economic theory holds really well.
+We can see that it seems to hold relatively well for some portfolios, but not for others. Some are really really close on the line, so for these portfolios the CAPM prediction from economic theory holds really well. But for other portfolios, CAPM does not hold very well.
 
 ## 2 Estimate the following cross-sectional model for individual periods t in Second Pass:
 
@@ -900,6 +900,9 @@ vgamma1 <- list()
 ttestsg0 <- list()
 ttestsg1 <- list()
 
+r2 <- numeric(length(subsamples))
+adj_r2 <- numeric(length(subsamples))
+
 for (i in 1:length(subsamples)){
   mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
   Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
@@ -934,12 +937,15 @@ for (i in 1:length(subsamples)){
   pval_avg_gamma1_v[i] <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
   ttestsg1[[i]] <- t.test(gamma1, alternative=c("greater"),mu=0)
   vgamma1[[i]] <- gamma1
+  #goodness of fit
+  r2[i] <- SPreg$r_squared
+  adj_r2[i] <- SPreg$adj_r_squared
 }
 ```
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
 
-This is a two tailed t-test.
+This is a two tailed t-test at 5% level. 
 
 ```{r}
 data <- data.frame(
@@ -960,7 +966,7 @@ According to theory CAPM predicts that the intercept $\gamma_{0t}$ is zero. If i
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
 
-Now we actually test the null in the other direction $\gamma_{1t}\le0$ because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$
+Now we actually test the null in the other direction $\gamma_{1t}\le0$ because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$. Here we conduct a one-sided t-test. 
 
 ```{r}
 data <- data.frame(
@@ -976,7 +982,7 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-Theory says we should reject $\gamma_{1t}$ is zero. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This contradicts the theory that investors holding systematic risk are not rewarded. 
+Theory says we should reject $\gamma_{1t}$ is zero or less, because we believe it to be positive. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This contradicts the theory that investors holding systematic risk are not rewarded. 
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
@@ -1012,12 +1018,26 @@ kable(
 ```
 We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
 
-It is exactly the same test statistics and p-values...
+Now we evaluate the goodness-of-fit.
+```{r}
+data <- data.frame(
+  Metric = c("R^2", "adj. R^2"),
+  Period_1 = c(round(r2[1],4), round(adj_r2[1],4)),
+  Period_2 = c(round(r2[2],4), round(adj_r2[2],4)),
+  Period_3 = c(round(r2[3],4), round(adj_r2[3],4))
+)
 
-and evaluate the goodness-of-fit. How robust are your results over time?
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "Goodness of fit"
+)
+```
+Goodness-of-fit provide evidence that for period 1 the model explains around 68\% of the variability. For period 2 we see a higher $R^2$ around 73\% and for period 3 we observe $R^2$ around 75\%. We see very similar results for the adjusted $R^2$ to the standard $R^2$.
+
+We observe that the results from the hypothesis testing fluctuates over time and in some periods contradict the theory of CAPM. Given the findings that the results fluctuate there seems to be evidence that the relationship is sensitive to market conditions or that there might be some omitted variables. 
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
-
 
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
 
@@ -1137,7 +1157,7 @@ results <- data.frame(Size=c(wgamma_size, pval_wgamma_s),
                       Book_to_Market = c(wgamma_bm, pval_wgamma_bm),
                       row.names = c("Test statistic", "P-value")
 )
-kable(results, digits=4, caption = "Test (separately) whether gamma_{2t}>0 and gamma_{2t}>0 for all t")
+kable(results, digits=4, caption = "Test (separately) whether $gamma_{2t}>0$ and $gamma_{2t}>0$ for all t")
 ```
 In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. It is likely that the inclusion of book-to-market in the model is the reason for the increased $R^2$.
 
