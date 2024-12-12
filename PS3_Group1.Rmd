@@ -948,6 +948,12 @@ for (i in 1:length(subsamples)){
 
 Note that we do the  assume that $\gamma_{0t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
 
+The test statistic is
+$$
+w(\hat{\gamma}_0)=\frac{\hat{\gamma}_0}{\hat{\sigma}_{\gamma_0}} \sim t_{T-1}
+$$
+where $\hat{\gamma}_0=\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{0t}$ and $\hat{\sigma}_{\gamma_0}=\frac{1}{T(T-1)}(\hat{\gamma}_{0t}-\hat{\gamma}_{0})^2$.
+
 This is a two tailed t-test at 5% level. 
 
 ```{r}
@@ -969,7 +975,15 @@ According to theory $\gamma_{0t}$ is zero. In period 1 the p-value is 0.7921 so 
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
 
-So $\gamma_1$ is the risk premia and according to theory it is positive, i.e. we should reject that it is zero or less. So we test the null $\gamma_{1t}\le0$ for all t because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$. Here we conduct a one-sided t-test. Note that we do the  assume that $\gamma_{1t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
+So $\gamma_1$ is the risk premia and according to theory it is positive, i.e. we should reject that it is zero or less. It should be positive, because the investor should get some positive return in excess of the risk-free rate, as a reward for taking on more risk. So we test the null $\gamma_{1t}\le0$ for all t because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$.
+
+Here we conduct a one-sided t-test. Note that we do the  assume that $\gamma_{1t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
+
+The test statistic is
+$$
+w(\hat{\gamma}_1)=\frac{\hat{\gamma}_1}{\hat{\sigma}_{\gamma_1}} \sim t_{T-1}
+$$
+where $\hat{\gamma}_1=\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{1t}$ and $\hat{\sigma}_{\gamma_1}=\frac{1}{T(T-1)}(\hat{\gamma}_{1t}-\hat{\gamma}_{1})^2$.
 
 ```{r}
 data <- data.frame(
@@ -986,9 +1000,7 @@ kable(
 )
 ```
 
-
-Theory says we should reject $\gamma_{1t}$ is zero or less, because theory says it should be positive, because the investor should get some positive return in excess of the risk-free rate, as a reward for taking on more risk. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. So period 1 is according to theory. For period 2 and 3, we accept the null that the risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This finding in period 2 and 3 of the risk premia contradicts the theory.
-
+We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. So period 1 is according to theory. For period 2 and 3, we accept the null that the risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This finding in period 2 and 3 of the risk premia contradicts the theory.
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
@@ -1007,7 +1019,12 @@ kable(
   caption = "Test for gamma_0t=0"
 )
 ```
-Wee see that we reject, some are not zero.
+Note that we get exactly the same results as before. This is because now we calculate the t-statistic another way by
+
+$$
+\frac{\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{0t}-0}{\hat{\sigma}_{\hat{\gamma}_{0}}/\sqrt{T}} \sim t_{T-1}
+$$
+but it is the same actually.
 
 Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
 
@@ -1026,7 +1043,15 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
+
+Note that we get exactly the same results as before. This is because now we calculate the t-statistic another way by
+
+$$
+\frac{\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{1t}-0}{\hat{\sigma}_{\hat{\gamma}_{1}}/\sqrt{T}} \sim t_{T-1}
+$$
+but it is the same actually.
+
+We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
 
 Now we evaluate the goodness-of-fit.
 ```{r}
