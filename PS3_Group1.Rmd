@@ -866,6 +866,9 @@ vgamma1 <- list()
 ttestsg0 <- list()
 ttestsg1 <- list()
 
+r2 <- numeric(length(subsamples))
+adj_r2 <- numeric(length(subsamples))
+
 for (i in 1:length(subsamples)){
   mR = as.matrix(portfolio_m[subsamples[[i]],25:124])
   Rf = as.matrix(portfolio_m[subsamples[[i]],'Tbill'])
@@ -900,6 +903,9 @@ for (i in 1:length(subsamples)){
   pval_avg_gamma1_v[i] <- pt(wgamma1, df=iT-1, lower.tail=FALSE)
   ttestsg1[[i]] <- t.test(gamma1, alternative=c("greater"),mu=0)
   vgamma1[[i]] <- gamma1
+  #goodness of fit
+  r2[i] <- SPreg$r_squared
+  adj_r2[i] <- SPreg$adj_r_squared
 }
 ```
 
@@ -978,9 +984,24 @@ kable(
 ```
 We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
 
-It is exactly the same test statistics and p-values...
 
-and evaluate the goodness-of-fit. How robust are your results over time?
+
+Now we evaluate the goodness-of-fit.
+```{r}
+data <- data.frame(
+  Metric = c("R^2", "adj. R^2"),
+  Period_1 = c(round(r2[1],4), round(adj_r2[1],4)),
+  Period_2 = c(round(r2[2],4), round(adj_r2[2],4)),
+  Period_3 = c(round(r2[3],4), round(adj_r2[3],4))
+)
+
+kable(
+  data,
+  col.names = c("", "Period 1", "Period 2", "Period 3"),
+  caption = "Goodness of fit"
+)
+```
+
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
 
