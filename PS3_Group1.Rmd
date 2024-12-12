@@ -986,11 +986,10 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-<<<<<<< HEAD
-Theory says we should reject $\gamma_{1t}$ is zero. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This finding in period 2 and 3 of the estimated market risk premia contradicts the theory that investors holding systematic risk should be awarded higher.  
-=======
-Theory says we should reject $\gamma_{1t}$ is zero or less, because we believe it to be positive. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This contradicts the theory that investors holding systematic risk are not rewarded. 
->>>>>>> 8974e619ff78e30459e9a6d270f2df2435884a80
+
+
+Theory says we should reject $\gamma_{1t}$ is zero or less, because we believe it to be positive. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This finding in period 2 and 3 of the estimated market risk premia contradicts the theory that investors holding systematic risk should be awarded higher.  
+
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
