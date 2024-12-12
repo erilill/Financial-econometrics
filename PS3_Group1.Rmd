@@ -624,6 +624,12 @@ Use the data set `portfolio_m` analyzed in the previous section. In the followin
 
 ## 1. Write R code to implement the First Pass regression which computes the cross-section of market betas, and save them together with the period-specific excess returns. Apply the code to compute the betas for the 100 size-book-to-market portfolios. Using the results to analyze the following issues:
 
+So we implement the regression
+
+$$
+Z_{it}=\alpha_i + \beta_i Z_{mt} + \epsilon_{it}
+$$
+
 ```{r, echo=T}
 FirstPass <- function(mZ, vZm){
   iT = nrow(mZ)
