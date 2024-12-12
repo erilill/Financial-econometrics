@@ -58,7 +58,7 @@ $$
 ```{r}
 excess_returns <- portfolio_m[,c(3,5:24)]-portfolio_m$Tbill
 ```
-The next step is the fit the following regression equation:
+The next step is to fit the following regression equation:
 
 $$
 Z_{it}=\alpha_i + \beta_i Z_{mt} + \epsilon_{it}
