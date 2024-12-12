@@ -543,7 +543,7 @@ r222 <- rbind(num_higher_r2, num_higher_adj_r2)
 rownames(r222) <- c("Number of portfolios where R² is higher with period-specific terms:", "Number of portfolios where adjusted R² is higher with period-specific terms:")
 kable(r222, caption = "Comparison of models with and without period-specific terms")
 ```
-Looking at the CAPM where we include period-specific effects, we see that all individual $R^2$ are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger. However, this is not necessarily an indication that goodness-of-fit drastically improves. Not included here for brevity, but looking at the difference between these individual $R^2$, we see that the differences are very small between the two CAPM models. 
+Looking at the CAPM where we include period-specific effects, we see that all individual $R^2$ are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger. However, this is not necessarily an indication that goodness-of-fit drastically improves. Not included in the report, but looking at the difference between these individual $R^2$, we see that the differences are very small between the two CAPM models. 
 
 In the table below, you see the global $R^2$ for the two models.
 
