@@ -776,7 +776,7 @@ hist(fpreg$R2)
 lines(density(fpreg$R2), col = "blue", lwd = 2)
 abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of the variation in the portfolio excess returns. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior.
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the market excess returns explains quite a lot of the variation in the portfolio excess returns. These findings indicate that for most portfolios, the CAPM holds quite well/is a decent model of the data. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior.
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
