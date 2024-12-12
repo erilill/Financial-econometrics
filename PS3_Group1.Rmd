@@ -731,12 +731,12 @@ for (i in 1:length(subsamples)){
   Rm = as.matrix(portfolio_m[subsamples[[i]],'Market'])
   mZ = sweep(mR,1,Rf)
   vZm = Rm - Rf
-
+  
   tmp = FirstPass(mZ, vZm)
   betas <- tmp$beta
   betas_list[[i]] <- betas
   means[i] <- mean(betas)
-
+  
   Tstat <- (mean(betas)-1)/(sd(betas)/sqrt(length(betas)))
   pval <- 2*pt(abs(Tstat), df=length(betas)-1,lower.tail=FALSE)
   
