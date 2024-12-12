@@ -769,11 +769,8 @@ rownames(descriptive_stats) <- "R^2"
 kable(descriptive_stats, digits = 3)
 ```
 
-<<<<<<< HEAD
-We can see that is quite heavily left skewed. First of all the mean is slightly lower than the median indicating that there are some $R^2$ on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative skewness of -0.817 also indicates that the tail on the lower end is longer. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for $R^2$. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
-=======
-We can see that is quite heavily left skewed with skewnewss of -0.817. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
->>>>>>> 8974e619ff78e30459e9a6d270f2df2435884a80
+We can see that is quite heavily left skewed with skewnewss of -0.817. First of all the mean is slightly lower than the median indicating that there are some $R^2$ on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for $R^2$. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
+
 
 ```{r}
 hist(fpreg$R2)
