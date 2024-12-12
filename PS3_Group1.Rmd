@@ -444,7 +444,7 @@ length(pvals)
 sum(pvals<0.05)
 ```
 
-For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(1)}$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
+For 80 out of the 100 portfolios, we reject the null hypothesis that $\alpha^{(1)}=\alpha^{(2)},\beta^{(1)}=\beta^{(2)}$ at a 5% level, indicating that the vast majority of the portfolios seems to have time-varying market betas and intercept terms.
 
 
 ### (b) Analyze wether the inclusion of period-specific effects does increase the model's goodnes-of-fit.
