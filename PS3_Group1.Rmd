@@ -946,6 +946,8 @@ for (i in 1:length(subsamples)){
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
 
+Note that we do the  assume that $\gamma_{0t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
+
 This is a two tailed t-test at 5% level. 
 
 ```{r}
@@ -963,11 +965,11 @@ kable(
 )
 ```
 
-According to theory CAPM predicts that the intercept $\gamma_{0t}$ is zero. If it is not equal to zero then the test implies that some returns are not explained by the market beta and thus there is model misspecification. In period 1 the p-value is 0.7921 so we fail to reject the null hypothesis that $\gamma_{0t}=0$ for all t. For period 2 the p-value is 0.1616 and once again we fail to reject the null. For the last period the obtained p-value is less than 0.05 and therefore we reject the null that $\gamma_{0t}=0$. Rejection of $\gamma_{0t}=0$ suggests that the second pass regression indicates unexplained returns. This means that for this period, the CAPM does not fully explain the returns for this period. This can occur if there are some structural breaks in the data, market anomalies or some macroeconomic events which affect returns. 
+According to theory $\gamma_{0t}$ is zero. In period 1 the p-value is 0.7921 so we fail to reject the null hypothesis that $\gamma_{0t}=0$ for all t. For period 2 the p-value is 0.1616 and once again we fail to reject the null. For the last period the obtained p-value is less than 0.05 and therefore we reject the null that $\gamma_{0t}=0$.
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
 
-Now we actually test the null in the other direction $\gamma_{1t}\le0$ because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$. Here we conduct a one-sided t-test. 
+So $\gamma_1$ is the risk premia and according to theory it is positive, i.e. we should reject that it is zero or less. So we test the null $\gamma_{1t}\le0$ for all t because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$. Here we conduct a one-sided t-test. Note that we do the  assume that $\gamma_{1t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
 
 ```{r}
 data <- data.frame(
@@ -990,7 +992,7 @@ Theory says we should reject $\gamma_{1t}$ is zero or less, because we believe i
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
-First we test $\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0$.
+First we test $\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0$. Again we assume that $\gamma_{0t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
 ```{r}
 data <- data.frame(
   Metric = c("sample mean", "t-stat", "p-value"),
@@ -1005,7 +1007,11 @@ kable(
   caption = "Test for gamma_0t=0"
 )
 ```
+Wee see that we reject, some are not zero.
+
 Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
+
+Again we assume that $\gamma_{1t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
 ```{r}
 data <- data.frame(
   Metric = c("sample mean", "t-stat", "p-value"),
