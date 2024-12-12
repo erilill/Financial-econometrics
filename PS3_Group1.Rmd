@@ -531,7 +531,7 @@ for (i in portfolios) {
 rownames(results2) <- NULL
 R2_2 <- 1 - (global_rss / global_tss)
 ```
-We will start by comparing the $R^2$ for each individual portfolio, comparing the model with time specific $\alpha$'s and $\beta$'s to the CAPM with no period specific terms.
+We will start by comparing the $R^2$ for each individual portfolio, comparing the model with time specific $\alpha$'s and $\beta$'s to the CAPM with no period specific terms:
 
 ```{r, echo=F}
 num_higher_r2 <- sum(results$R2 > results2$R2)
