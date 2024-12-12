@@ -303,6 +303,10 @@ results <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Initialize variables for global TSS and RSS
+global_tss <- 0
+global_rss <- 0
+
 portfolios <- colnames(excess_returns)[2:101]
 # Loop through each portfolio
 portfolios <- colnames(excess_returns)[2:101]
@@ -334,6 +338,12 @@ for (i in portfolios) {
   p_value_interaction_period2_market <- coef(summary(capm_model))["excess_returns$Market:portfolio_m$Period2", "Pr(>|t|)"]
   p_value_interaction_period3_market <- coef(summary(capm_model))["excess_returns$Market:portfolio_m$Period3", "Pr(>|t|)"]
   
+  # Update global RSS (Residual Sum of Squares)
+  global_rss <- global_rss + sum(capm_model$residuals^2)
+  
+  # Update global TSS (Total Sum of Squares)
+  global_tss <- global_tss + sum((ER - mean(ER))^2)
+  
   # Store results in data frame
   results <- rbind(
     results,
@@ -359,6 +369,7 @@ for (i in portfolios) {
   )
 }
 
+R2 <- 1 - (global_rss / global_tss)
 rownames(results) <- NULL
 ```
 
@@ -471,6 +482,10 @@ results2 <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Initialize variables for global TSS and RSS
+global_tss <- 0
+global_rss <- 0
+
 for (i in portfolios) {
   ER <- excess_returns[[i]]
   
@@ -490,6 +505,12 @@ for (i in portfolios) {
   p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
   p_value_beta <- coef(summary(capm_model))["excess_returns$Market", "Pr(>|t|)"]
   
+  # Update global RSS (Residual Sum of Squares)
+  global_rss <- global_rss + sum(capm_model$residuals^2)
+  
+  # Update global TSS (Total Sum of Squares)
+  global_tss <- global_tss + sum((ER - mean(ER))^2)
+  
   # Store results in data frame
   results2 <- rbind(
     results2,
@@ -508,15 +529,28 @@ for (i in portfolios) {
 }
 
 rownames(results2) <- NULL
+R2_2 <- 1 - (global_rss / global_tss)
 ```
-```{r}
-sum(results$R2>results2$R2)
-sum(results$adj_R2>results2$adj_R2)
+We will start by comparing the $R^2$ for each individual portfolio, comparing the model with time specific $\alpha$'s and $\beta$'s to the CAPM with no period specific terms:
+
+```{r, echo=F}
+num_higher_r2 <- sum(results$R2 > results2$R2)
+num_higher_adj_r2 <- sum(results$adj_R2 > results2$adj_R2)
+
+cat("Comparison of models with and without period-specific terms:\n")
+cat("- Number of portfolios where R² is higher with period-specific terms:", num_higher_r2, "\n")
+cat("- Number of portfolios where adjusted R² is higher with period-specific terms:", num_higher_adj_r2, "\n")
 ```
+Looking at the CAPM where we include period-specific effects, we see that all individual $R^2$ are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger. However, this is not necessarily an indication that goodness-of-fit drastically improves. Not included here for brevity, but looking at the difference between these individual $R^2$, we see that the differences are very small between the two CAPM models. 
 
-Looking at the example where we subset the data into three time-periods, we see that all $R^2$ for the model including time-specific intercepts and betas are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger.
+In the table below, you see the global $R^2$ for the two models.
 
-This is a clear indication that the inclusion of period-specific effects increases the model's goodness-of-fit.
+```{r, echo=F}
+r22 <- rbind(R2_2, R2)
+rownames(r22) <- c("CAPM without period-specific terms", "CAPM with period-specific terms")
+kable(r22, col.names = "R2")
+```
+In this table we see that the difference in $R^2$ between the two models is very small. Based on this we do not believe that the inclusion of period-specific effects drastically increases the model's goodness-of-fit.
 
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
@@ -746,7 +780,7 @@ hist(fpreg$R2)
 lines(density(fpreg$R2), col = "blue", lwd = 2)
 abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior.
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of the variation in the portfolio excess returns. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior.
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
