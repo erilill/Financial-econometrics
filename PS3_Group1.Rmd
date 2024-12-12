@@ -911,7 +911,7 @@ for (i in 1:length(subsamples)){
 
 ### (a) Test whether \(\gamma_{0t}=0\) for all t
 
-This is a two tailed t-test.
+This is a two tailed t-test at 5% level. 
 
 ```{r}
 data <- data.frame(
@@ -932,7 +932,7 @@ According to theory CAPM predicts that the intercept $\gamma_{0t}$ is zero. If i
 
 ### (b) Test whether \(\gamma_{1t}>0\) for all t
 
-Now we actually test the null in the other direction $\gamma_{1t}\le0$ because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$
+Now we actually test the null in the other direction $\gamma_{1t}\le0$ because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$. Here we conduct a one-sided t-test. 
 
 ```{r}
 data <- data.frame(
@@ -984,8 +984,6 @@ kable(
 ```
 We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
 
-
-
 Now we evaluate the goodness-of-fit.
 ```{r}
 data <- data.frame(
@@ -1001,10 +999,11 @@ kable(
   caption = "Goodness of fit"
 )
 ```
+Goodness-of-fit provide evidence that for period 1 the model explains around 68\% of the variability. For period 2 we see a higher $R^2$ around 73\% and for period 3 we observe $R^2$ around 75\%. The adjusted $R^2$ takes into consideration number of predictors and adjusts the $R^2$ downward. We see that the adjusted $R^2$ is very similar to the standard $R^2$ meaning that it doesn't seem that we overfit the data by adding too many variables. 
 
+We observe that the results from the hypothesis testing fluctuates over time and in some periods contradict the theory of CAPM. Given the findings that the results fluctuate there seems to be evidence that the relationship is sensitive to market conditions or that there might be some omitted variables. 
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
-
 
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
 
