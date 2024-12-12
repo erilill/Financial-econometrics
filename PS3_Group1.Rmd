@@ -790,7 +790,7 @@ ggplot(data, aes(x = rhs, y = lhs)) +
   ) +
   theme_minimal()
 ```
-We can see that it seems to hold relatively well for some portfolios, but not for others. Some are really really close on the line, so for these portfolios the CAPM prediction from economic theory holds really well.
+We can see that it seems to hold relatively well for some portfolios, but not for others. Some are really really close on the line, so for these portfolios the CAPM prediction from economic theory holds really well. But for other portfolios, CAPM does not hold very well.
 
 ## 2 Estimate the following cross-sectional model for individual periods t in Second Pass:
 
