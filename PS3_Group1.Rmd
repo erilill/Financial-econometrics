@@ -539,10 +539,9 @@ We will start by comparing the $R^2$ for each individual portfolio, comparing th
 ```{r, echo=F}
 num_higher_r2 <- sum(results$R2 > results2$R2)
 num_higher_adj_r2 <- sum(results$adj_R2 > results2$adj_R2)
-
-cat("Comparison of models with and without period-specific terms:\n")
-cat("- Number of portfolios where R² is higher with period-specific terms:", num_higher_r2, "\n")
-cat("- Number of portfolios where adjusted R² is higher with period-specific terms:", num_higher_adj_r2, "\n")
+r222 <- rbind(num_higher_r2, num_higher_adj_r2)
+rownames(r222) <- c("Number of portfolios where R² is higher with period-specific terms:", "Number of portfolios where adjusted R² is higher with period-specific terms:")
+kable(r222, caption = "Comparison of models with and without period-specific terms")
 ```
 Looking at the CAPM where we include period-specific effects, we see that all individual $R^2$ are larger compared to the original CAPM. Looking at the adjusted $R^2$, we see that 95/100 $R^2_{adj.}$ are larger. However, this is not necessarily an indication that goodness-of-fit drastically improves. Not included here for brevity, but looking at the difference between these individual $R^2$, we see that the differences are very small between the two CAPM models. 
 
@@ -956,7 +955,7 @@ where $\hat{\gamma}_0=\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{0t}$ and $\hat{\sigm
 
 This is a two tailed t-test at 5% level. 
 
-```{r}
+```{r, echo=F}
 data <- data.frame(
   Metric = c("wgamma0", "p-value"),
   Period_1 = c(round(wgamma0_v[1],4), round(pval_wgamma0_v[1],4)),
