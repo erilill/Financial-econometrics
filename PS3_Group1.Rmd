@@ -681,7 +681,7 @@ So we can use the test statistic
 $$
 T=\frac{\hat{\mu}_{\hat{\beta}}-1}{\hat{\sigma}_{\hat{\beta}}/\sqrt{n}} \sim t_{n-1}
 $$
-Note that we do this test under the assumption that the $\hat{\beta}$'s are i.i.d. which may not be very realistic. But still we assume this. Lets implement it in code and do the test for each period
+Note that we do this test under the assumption that the $\hat{\beta}$'s are i.i.d. which may not be very realistic. Lets implement it in code and do the test for each period
 
 ```{r}
 means <- numeric(length(subsamples))
@@ -1103,7 +1103,7 @@ results <- data.frame(Size=c(wgamma_size, pval_wgamma_s),
                       Book_to_Market = c(wgamma_bm, pval_wgamma_bm),
                       row.names = c("Test statistic", "P-value")
 )
-kable(results, digits=4, caption = "Test (separately) whether gamma_{2t}>0 and gamma_{2t}>0 for all t")
+kable(results, digits=4, caption = "Test (separately) whether $gamma_{2t}>0$ and $gamma_{2t}>0$ for all t")
 ```
 In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. It is likely that the inclusion of book-to-market in the model is the reason for the increased $R^2$.
 
