@@ -657,7 +657,7 @@ abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 qqnorm(fpreg$beta)
 qqline(fpreg$beta, col = "red")
 ```
-The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows some heavier left tails and also some thinner right tails. The bulk of the data follows a normal distribution quite good but this still points towards that the data is not normally distributed.
+The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows that the tails of the empircal distribution is not quite as the theoretical normal. The bulk of the data looks to approximately follow a normal distribution quite good but this still points towards that the data is not quite normally distributed. Although since we use OLS, under certain assumptions, in large samples, OLS estimator of beta is normal, so if we would have a larger sample, perhaps we would see it to be more normally distributed.
 
 Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
 
