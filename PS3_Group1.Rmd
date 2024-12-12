@@ -380,7 +380,7 @@ rownames(results) <- NULL
 
 ### (a) Do you find statistically significant evidence for time-varying market betas and intercept terms?
 
-We can perform the Chow Test. We estimate the full sample CAPM as
+We can perform the Chow Test. We estimate the full sample CAPM for portfolio i as
 
 $$
 Z_{it}=\alpha + \beta Z_{mt} + \epsilon_{it}
