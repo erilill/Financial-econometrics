@@ -647,7 +647,7 @@ kable(descriptive_stats, digits = 3)
 ```
 
 We can see that the mean is 1.171 and median is also 1.171 which means that these portfolios points towards slightly higher systematic risk compared to the market where the expectation of beta would be 1. 
-The standard deviation of 0.18 is quite low which is interpreted as that most portfolios are clustered around the mean and therefore would indicate a well diversified portfolio. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market. Furthermore, the distribution is quite flat with a kurtosis of 0.422 and showing quite thin tails since most of the data is around the mean. The min and max show the asymmetry and points also towards slightly negative data with a longer lower tail. 
+The standard deviation of 0.18 so overall a quite low spread of the betas across the portfolios. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market, but that most portfolios have high betas. Furthermore, the distribution is quite thin tailed considering a kurtosis of 0.422. The difference of the absolute values of the min and max show the asymmetry/skewness.
 
 Now lets plot the histogram of the betas and plot the QQ-plot to see these findings visually.
 ```{r}
