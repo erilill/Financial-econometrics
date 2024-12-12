@@ -533,7 +533,7 @@ R2_2 <- 1 - (global_rss / global_tss)
 ```
 We will start by comparing the $R^2$ for each individual portfolio, comparing the model with time specific $\alpha$'s and $\beta$'s to the CAPM with no period specific terms.
 
-```{r}
+```{r, echo=F}
 num_higher_r2 <- sum(results$R2 > results2$R2)
 num_higher_adj_r2 <- sum(results$adj_R2 > results2$adj_R2)
 
@@ -545,7 +545,7 @@ Looking at the CAPM where we include period-specific effects, we see that all in
 
 In the table below, you see the global $R^2$ for the two models.
 
-```{r}
+```{r, echo=F}
 r22 <- rbind(R2_2, R2)
 rownames(r22) <- c("CAPM without period-specific terms", "CAPM with period-specific terms")
 kable(r22, col.names = "R2")
