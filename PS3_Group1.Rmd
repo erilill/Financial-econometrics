@@ -42,7 +42,7 @@ Use the data set `portfolio_m` consisting of returns of U.S. stock portfolios bu
 
 ```{r descriptive, echo=F}
 descriptive_stats <- describe(portfolio_m[,5:24])[,c("mean", "sd", "skew", "kurtosis", "min", "max")]
-kable(descriptive_stats, digits = 3) # Har jag tolkat rätt att det är ME1-ME10 och MEBE1-MEBE10 som är portfolios?
+kable(descriptive_stats, digits = 3)
 ```
 What we see in the table above is that the smaller firms (ME1-ME3) have higher average returns (larger means) and volatility (larger standard deviations) than the larger firms (e.g. ME10). Looking at the book-to-market effect, the higher book-to-market (e.g. MEBE10) portfolios exhibit higher average returns (larger means) and volatility (larger standard deviations) compared to the lower book-to-market (MEBE1) portfolios. For the ME portfolios we see positive skewness that is decreasing with the size, i.e. smaller firms are more positively skewed, indicating occasional extreme positive returns, and this seems to decrease with size. For MEBE portfolios, they seem to be more symmetric for the smaller book-to-market portfolios with some slightly negative skewness. But then from the 4th decile and up, instead it seems that skewness increases (positive) with larger book-to-market size. The smaller firms and higher book-to-market portfolios have high kurtosis, suggesting heavy-tailed return distributions. Looking at the minimum and maximum values we also see that for the smaller firms and higher book-to-market portfolios there are extreme returns. From the descriptive statistics we see evidence of both the size effect and the value effect.
 
@@ -132,31 +132,6 @@ In conclusion, these results suggests that CAPM performs well for larger stocks 
 
 ## 3. Estimate the CAPM jointly for the complete set of size portfolios, book-to-market portfolios as well as portfolios built on the intersections of size and book-to-market deciles. Test for joint significance of the intercept terms using the F-test.
 
-```{r, include=F}
-# Tror att detta är fel men lämnar det sålänge, se nästa chunk.
-
-
-# Stack data for joint estimation
-portfolio_returns <- portfolio_m[, 5:124] #tror det ska vara alla 124 alltså 5:124
-excess_returns <- as.vector(as.matrix(portfolio_returns - portfolio_m$Tbill))
-market_excess <- rep(portfolio_m$Market - portfolio_m$Tbill, ncol(portfolio_returns))
-portfolio_labels <- rep(colnames(portfolio_returns), each = nrow(portfolio_returns))
-
-# Create a data frame for pooled regression
-pooled_data <- data.frame(
-  excess_returns = excess_returns,
-  market_excess = market_excess,
-  portfolio = factor(portfolio_labels)
-)
-
-# Fit a pooled regression with portfolio dummy variables
-pooled_model <- lm(excess_returns ~ market_excess + portfolio, data = pooled_data)
-
-# Test joint significance of intercepts
-f_test <- linearHypothesis(pooled_model, hypothesis.matrix = grep("^portfolio", names(coef(pooled_model)), value = TRUE))
-print(f_test)
-
-```
 In this question we will use the `FamaMacbeth0()` function which was given in the assignment in order to estimate the joint CAPM and test for joint significance of the intercept terms using the F-test. So we test the following for the vector of intercept terms
 
 $$
@@ -292,10 +267,6 @@ Z_{t}=\alpha_t+\beta_1Z_{mt}+\gamma_2+\gamma_3+\delta_4(D_2*Z_{mt}) + \delta_5(D
 $$
 
 ```{r}
-
-# Vet inte om det här är rätt metod
-
-
 # Divide data into sub-periods, 314 time-points in each
 subsample1 <- 1:314
 subsample2 <- 315:628
@@ -550,8 +521,6 @@ This is a clear indication that the inclusion of period-specific effects increas
 ### (c) Do you find for particular size and book-to-market portfolios stronger time variations in market betas than for other?
 
 ```{r, echo=F}
-# En lösning, tror det kan vara vettigt?
-
 beta_period1 <- results$Beta
 beta_period2 <- beta_period1 + results$InteractionPeriod2Market
 beta_period3 <- beta_period1 + results$InteractionPeriod3Market
@@ -855,6 +824,8 @@ SecondPass <- function(beta, mZ){
   tss = sum((mZ - overall_mean)^2)   
   rss = sum(residuals^2)     
   r_squared = 1 - (rss / tss) 
+  adj_r_squared = 1 - ((1-r_squared)*(100-1)/(100-1-1))
+  
   # gamma0 and market risk premia
   gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
   mrprem = c(gamma[,2]); prsd = c(gamsd[,2])
@@ -865,7 +836,7 @@ SecondPass <- function(beta, mZ){
   wgamma0 = mean(gamma0)/sqrt(sum((gamma0-mean(gamma0))**2)/iT/(iT-1))
   wgamma1 = mean(mrprem)/sqrt(sum((mrprem-mean(mrprem))**2)/iT/(iT-1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT, r_squared=r_squared))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,iT=iT, r_squared=r_squared, adj_r_squared=adj_r_squared))
 }
 ```
 
@@ -1057,7 +1028,9 @@ We use the log transformed deciles for two reasons: The exercise states that we 
 
 Both of these problems are solved by using log transformed deciles rather than dummy variables.
 
-```{r}
+In order to analyze wether they have explanatory power or not, we will compute the $R^2$ and adjusted $R^2$, as well as a Wald-test of $H_0: \gamma \leq 0$ vs. $H_1: \gamma > 0$.
+
+```{r,echo=F}
 SecondPass_2 <- function(beta, mZ, size, bm){
   iT = nrow(mZ)
   iN = ncol(mZ)
@@ -1079,6 +1052,7 @@ SecondPass_2 <- function(beta, mZ, size, bm){
   tss = sum((mZ - overall_mean)^2)   
   rss = sum(residuals^2)     
   r_squared = 1 - (rss / tss) 
+  adj_r_squared = 1 - ((1-r_squared)*(100-1)/(100-3-1))
   
   # gamma0 and market risk premia
   gamma0 = c(gamma[,1]); g0sd = c(gamsd[,1])
@@ -1095,7 +1069,7 @@ SecondPass_2 <- function(beta, mZ, size, bm){
   wgamma_size = mean(gamma_size) / sqrt(sum((gamma_size - mean(gamma_size))**2) / iT / (iT - 1))
   wgamma_bm = mean(gamma_bm) / sqrt(sum((gamma_bm - mean(gamma_bm))**2) / iT / (iT - 1))
   
-  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,gamma_size=gamma_size, gamma_bm=gamma_bm,  prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,wgamma_size=wgamma_size,wgamma_bm=wgamma_bm, iT=iT, r_squared=r_squared))
+  return(list(gamma0=gamma0,g0sd=g0sd,mrprem=mrprem,gamma_size=gamma_size, gamma_bm=gamma_bm,  prsd=prsd,wgamma0=wgamma0,wgamma1=wgamma1,wgamma_size=wgamma_size,wgamma_bm=wgamma_bm, iT=iT, r_squared=r_squared, adj_r_squared=adj_r_squared))
 }
 
 mR = as.matrix(portfolio_m[,25:124])
@@ -1109,10 +1083,17 @@ beta <- FirstPass(mZ, vZm)$beta
 ret = SecondPass_2(beta=beta, mZ=mZ, log(size_decile), log(book_to_market_decile))
 re = SecondPass(beta=beta, mZ=mZ)
 
+r2 <- data.frame(`Original model`=c(re$r_squared, re$adj_r_squared),
+                 `Augmented model`=c(ret$r_squared, ret$adj_r_squared),
+                 row.names = c("R2", "adj.R2"))
+kable(r2, digits=4, caption="Comparison of R Squared between the original second pass regression and the regression including the log transformed Size and Book-to-Market deciles.")
+```
+We see in the table above that $R^2$ increases somewhat when we include the log transformed size and book-to-market deciles. Since we increase the number of coefficients in the model we also include the adjusted $R^2$ which penalizes based on the number of coefficients. We see that the adjusted $R^2$ is also slightly larger in the augmented model compared to the original model. 
 
-ret$r_squared
-re$r_squared
+Based on this, we come to the conclusion that the log transformed size and book-to-market deciles have some explanatory power.
 
+
+```{r, echo=F}
 wgamma_size <- ret$wgamma_size
 pval_wgamma_s <- pt(wgamma_size, df=nrow(mZ)-1, lower.tail=FALSE)
 wgamma_bm <- ret$wgamma_bm
@@ -1124,123 +1105,11 @@ results <- data.frame(Size=c(wgamma_size, pval_wgamma_s),
 )
 kable(results, digits=4, caption = "Test (separately) whether gamma_{2t}>0 and gamma_{2t}>0 for all t")
 ```
-In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. 
+In the table above you see the Wald-test statistics and their corresponding p-values (same test as in B.2 (b)). Here we  test (separately) whether $\gamma_{2t}>0$ and $\gamma_{2t}>0$ for all t. We see that the p-value for log(Size) is large, meaning that we cannot reject the null hypothesis $H_0: \gamma_{2t}\leq 0$. The p-value for log(book-to-market) is very close to zero and we reject the null hypothesis at $\alpha=0.05$. From these results we infer that book-to-market has significant explanatory power while size do not, meaning that book-to-market explains variation in returns that is not explained by market risk premium. It is likely that the inclusion of book-to-market in the model is the reason for the increased $R^2$.
 
 
 
 
-
-
-```{r, include=F}
-### Spar denna liten stund
-### Alternativ model för A3, jag föredrar dock den med dummies/Erik
-
-extended_CAPM <- function(y1, x1, y2, x2, y3, x3) {
-  # Fit models
-  full_sample_fit <- lm(c(y1, y2, y3) ~ c(x1, x2, x3))
-  group_1_fit <- lm(y1 ~ x1)
-  group_2_fit <- lm(y2 ~ x2)
-  group_3_fit <- lm(y3 ~ x3)
-  
-  results <- list(
-    full_sample = full_sample_fit,
-    period_1 = group_1_fit,
-    period_2 = group_2_fit,
-    period_3 = group_3_fit
-  )
-  
-  return(results)
-}
-
-
-# Divide data into time periods
-t1 <- 1:314
-t2 <- 315:628
-t3 <- 629:942
-
-# Market excess returns
-ER_M <- as.matrix(portfolio_m[, 3] - portfolio_m$Tbill)
-x1 <- ER_M[t1]
-x2 <- ER_M[t2]
-x3 <- ER_M[t3]
-
-# Initialize data frames for results
-results <- data.frame(
-  Portfolio = integer(),
-  Alpha = numeric(),
-  Beta = numeric(),
-  R2 = numeric(),
-  AdjR2 = numeric(),
-  StdErrAlpha = numeric(),
-  StdErrBeta = numeric(),
-  PValueAlpha = numeric(),
-  PValueBeta = numeric()
-)
-
-results_extended <- data.frame(
-  Portfolio = integer(),
-  Period = character(),
-  Alpha = numeric(),
-  Beta = numeric(),
-  R2 = numeric(),
-  AdjR2 = numeric(),
-  StdErrAlpha = numeric(),
-  StdErrBeta = numeric(),
-  PValueAlpha = numeric(),
-  PValueBeta = numeric()
-)
-
-# Loop through portfolios
-for (i in 25:124) {
-  # Portfolio excess returns
-  ER <- as.matrix(portfolio_m[, i] - portfolio_m$Tbill)
-  y1 <- ER[t1]
-  y2 <- ER[t2]
-  y3 <- ER[t3]
-  
-  # Run the CAPM
-  capm_results <- extended_CAPM(y1, x1, y2, x2, y3, x3)
-  
-  # Extract results for the full sample
-  full_sample_summary <- capm_results[["full_sample"]]
-  results <- rbind(
-    results,
-    data.frame(
-      Portfolio = i,
-      Alpha = coef(full_sample_summary)[1],  # Intercept
-      Beta = coef(full_sample_summary)[2],   # Slope
-      R2 = summary(full_sample_summary)$r.squared,
-      AdjR2 = summary(full_sample_summary)$adj.r.squared,
-      StdErrAlpha = coef(summary(full_sample_summary))[1, 2],
-      StdErrBeta = coef(summary(full_sample_summary))[2, 2],
-      PValueAlpha = coef(summary(full_sample_summary))[1, 4],
-      PValueBeta = coef(summary(full_sample_summary))[2, 4]
-    )
-  )
-  
-  # Extract results for sub-periods
-  for (period in c("period_1", "period_2", "period_3")) {
-    period_summary <- capm_results[[period]]
-    results_extended <- rbind(
-      results_extended,
-      data.frame(
-        Portfolio = i,
-        Period = period,
-        Alpha = coef(period_summary)[1],  # Intercept
-        Beta = coef(period_summary)[2],   # Slope
-        R2 = summary(period_summary)$r.squared,
-        AdjR2 = summary(period_summary)$adj.r.squared,
-        StdErrAlpha = coef(summary(period_summary))[1, 2],
-        StdErrBeta = coef(summary(period_summary))[2, 2],
-        PValueAlpha = coef(summary(period_summary))[1, 4],
-        PValueBeta = coef(summary(period_summary))[2, 4]
-      )
-    )
-  }
-}
-rownames(results) <- NULL
-rownames(results_extended) <- NULL
-```
 
 ```{r}
 iT <- nrow(mZ)
