@@ -31,6 +31,7 @@ library(patchwork)
 library(kableExtra)
 library(dplyr)
 library(psych)
+library(ggplot2)
 library(car)
 data("portfolio_m")
 ```
@@ -314,8 +315,10 @@ for (i in portfolios) {
   ER <- excess_returns[[i]]
   
   # Fit CAPM model with period-specific betas and intercepts (interaction terms)
-  capm_model <- lm(ER ~ excess_returns$Market + portfolio_m$Period2 + portfolio_m$Period3 + 
-                    portfolio_m$Period2 * excess_returns$Market + portfolio_m$Period3 * excess_returns$Market)
+  capm_model <- lm(ER ~ excess_returns$Market + portfolio_m$Period2 + 
+                     portfolio_m$Period3 + 
+                     portfolio_m$Period2 * excess_returns$Market + 
+                     portfolio_m$Period3 * excess_returns$Market)
   
   # Extract coefficients, p-values, and statistics
   alpha <- coef(capm_model)["(Intercept)"]
@@ -674,7 +677,7 @@ fpreg <- FirstPass(mZ, vZm)
 
 First we evaluate the cross-sectional distribution of the estimated betas.
 
-```{r}
+```{r, echo=F}
 descriptive_stats <- describe(fpreg$beta)[,c("mean","median", "sd", "skew", "kurtosis", "min", "max")]
 rownames(descriptive_stats) <- "beta"
 kable(descriptive_stats, digits = 3)
@@ -684,7 +687,7 @@ We can see that the mean is 1.171 and median is also 1.171 which means that thes
 The standard deviation of 0.18 implies a quite low spread of the betas across the portfolios. The distribution seems to be slightly negatively skewed capturing some portfolios who exhibit low betas, i.e. lower risk compared to market, but that most portfolios have high betas. Furthermore, the distribution is quite thin tailed considering a kurtosis of 0.422. The difference of the absolute values of the min and max show the asymmetry/skewness. 
 
 Now lets plot the histogram of the betas and plot the QQ-plot to see these findings visually.
-```{r}
+```{r, echo=F}
 hist(fpreg$beta)
 lines(density(fpreg$beta), col = "blue", lwd = 2)
 abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
@@ -763,7 +766,7 @@ We can see that for period 1 and period 2, we strongly reject the null, i.e. the
 
 ### (b) Evaluate the cross-sectional distribution of the computed (time series) \(R^2\)'s. What can you learn from this analysis?
 
-```{r}
+```{r, echo=F}
 descriptive_stats <- describe(fpreg$R2)[,c("mean", "median", "sd", "skew", "kurtosis", "min", "max")]
 rownames(descriptive_stats) <- "R^2"
 kable(descriptive_stats, digits = 3)
@@ -772,7 +775,7 @@ kable(descriptive_stats, digits = 3)
 We can see that is quite heavily left skewed with skewnewss of -0.817. First of all the mean is slightly lower than the median indicating that there are some $R^2$ on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for $R^2$. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
 
 
-```{r}
+```{r, echo=F}
 hist(fpreg$R2)
 lines(density(fpreg$R2), col = "blue", lwd = 2)
 abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
@@ -808,10 +811,7 @@ rhs <- beta * mum # right hand side of equation
 
 Now if we plot a scatterplot with the left hand side against the right hand side against the equation, if it holds perfectly, we should see that all points lie on a 45 degree line, i.e. the economic theory prediction (CAPM) is the 45 degree line. Lets try it
 
-```{r}
-library(ggplot2)
-
-# Create a data frame for visualization
+```{r, echo=F}
 data <- data.frame(lhs = lhs, rhs = rhs)
 
 # Scatter plot with a 45-degree reference line
@@ -971,7 +971,7 @@ According to theory $\gamma_{0t}$ is zero. In period 1 the p-value is 0.7921 so 
 
 So $\gamma_1$ is the risk premia and according to theory it is positive, i.e. we should reject that it is zero or less. So we test the null $\gamma_{1t}\le0$ for all t because then we get the alternative that is strictly larger, i.e. $\gamma_{1t}>0$. Here we conduct a one-sided t-test. Note that we do the  assume that $\gamma_{1t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
 
-```{r}
+```{r, echo=F}
 data <- data.frame(
   Metric = c("wgamma1", "p-value"),
   Period_1 = c(round(wgamma1_v[1],4), round(pval_wgamma1_v[1],4)),
@@ -993,7 +993,7 @@ Theory says we should reject $\gamma_{1t}$ is zero or less, because theory says 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
 First we test $\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0$. Again we assume that $\gamma_{0t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
-```{r}
+```{r, echo=F}
 data <- data.frame(
   Metric = c("sample mean", "t-stat", "p-value"),
   Period_1 = c(round(mean(vgamma0[[1]]),4), round(Tstat_gamma0_v[1],4), round(pval_avg_gamma0_v[1],4)),
@@ -1012,7 +1012,7 @@ Wee see that we reject, some are not zero.
 Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
 
 Again we assume that $\gamma_{1t}$ are i.i.d. which is not a realistic assumption but it is a compromise.
-```{r}
+```{r, echo=F}
 data <- data.frame(
   Metric = c("sample mean", "t-stat", "p-value"),
   Period_1 = c(round(mean(vgamma1[[1]]),4), round(Tstat_gamma1_v[1],4), round(pval_avg_gamma1_v[1],4)),
@@ -1029,7 +1029,7 @@ kable(
 We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}\leq0$ we reject the test in the first period. 
 
 Now we evaluate the goodness-of-fit.
-```{r}
+```{r, echo=F}
 data <- data.frame(
   Metric = c("R^2", "adj. R^2"),
   Period_1 = c(round(r2[1],4), round(adj_r2[1],4)),
@@ -1051,9 +1051,8 @@ We observe that the results from the hypothesis testing fluctuates over time and
 
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
 
-We start by generating two factor variables for size and book-to-market which we will use to plot the average returns.
 
-```{r}
+```{r, echo=F}
 # The factor variables where computed in A.4 (c).
 
 avg_ret_df <- data.frame(
@@ -1065,7 +1064,7 @@ avg_ret_df <- data.frame(
 
 ### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
 
-```{r}
+```{r, echo=F}
 ggplot(avg_ret_df, aes(x = Size, y = BookToMarket, fill = avg_ret)) +
   geom_tile() +
   scale_fill_gradient(low = "white", high = "darkblue") +
@@ -1175,11 +1174,3 @@ In the table above you see the Wald-test statistics and their corresponding p-va
 
 
 
-```{r}
-iT <- nrow(mZ)
-R2 <- numeric(nrow(mZ))
-for (iter in 1:iT){
-  fit <- lm(formula = mZ[iter, ] ~ (tmp$beta))
-  R2[iter] <- summary(fit)$r.squared
-}
-```
