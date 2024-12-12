@@ -1073,9 +1073,6 @@ We observe that the results from the hypothesis testing fluctuates over time and
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
 
-### (a) Plot the corresponding size and book-to-market decile numbers against the average returns of the corresponding portfolios. What do you find? Do you expect that size and book-to-market effects have explanatory power in the cross-sectional equation (1)?
-
-
 ```{r, echo=F}
 # The factor variables where computed in A.4 (c).
 
