@@ -659,7 +659,7 @@ qqline(fpreg$beta, col = "red")
 ```
 The blue line is the density line for the betas and the red dashed vertical line is the mean. The QQ-plot shows the data compared to a theoretical normal distribution and we can see that the betas are not quite normally distributed. The QQ-plot shows that the tails of the empircal distribution is not quite as the theoretical normal. The bulk of the data looks to approximately follow a normal distribution quite good but this still points towards that the data is not quite normally distributed. Although since we use OLS, under certain assumptions, in large samples, OLS estimator of beta is normal, so if we would have a larger sample, perhaps we would see it to be more normally distributed.
 
-Now to test whether the average betas are significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
+Now to test whether the average beta is significantly different from one. Let us divide the data in three equally large periods again, first, middle and last part of the data, and to the test for each period.
 
 ```{r}
 # Divide data into sub-periods, 314 time-points in each
@@ -735,14 +735,14 @@ rownames(descriptive_stats) <- "R^2"
 kable(descriptive_stats, digits = 3)
 ```
 
-We can see that is quite heavily left skewed. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative skewness of -0.817 also indicates that the tail on the lower end is longer. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
+We can see that is quite heavily left skewed with skewnewss of -0.817. First of all the mean is slightly lower than the median indicating that there are some R^2 on the lower end pulling the mean down and therefore pointing towards a left skewed data. The negative kurtosis indicates on a platykurtic distribution where most of the values are around the mean. The standard deviation is quite low but relative to this data it describes a moderate variability for R^2. The lowest value is 0.186 and the highest value is 0.873 which shows a fairly high spread and implies that some of the models have low explanatory power but most of them have a high explanatory power since the majority of the data is around the mean and in the range between 0.6 and 0.8. 
 
 ```{r}
 hist(fpreg$R2)
 lines(density(fpreg$R2), col = "blue", lwd = 2)
 abline(v = descriptive_stats$mean, col = "red", lwd = 2, lty = 2)
 ```
-We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior. Lastly, the thin tails indicate that the models are quite consistent in the explanatory power across the sample and thus is relatively stable.
+We clearly see the left skewness, i.e. a lot of higher $R^2$ happens to the right, so in essence in most cases the $R^2$ is high/, i.e. the CAPM model captures a lot of variation in the data. These findings indicate that most of the models explain a high proportion of variance in returns for the majority of assets and therefore a good model fit. The negative skewness indicates that some models have poor explanatory power and this can be due to idiosyncratic or sector-specific behavior.
 
 
 ### (c) Evaluate the relationship between average excess returns and market betas. What would you expect from economic theory and what do you find?
@@ -948,7 +948,7 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-Theory says we should reject $\gamma_{1t}$ is zero. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This contradicts the theory that investors holding systematic risk are not rewarded. 
+Theory says we should reject $\gamma_{1t}$ is zero or less, because we believe it to be positive. We can see that for period 1, we reject the null of $\gamma_{1t}\le0$ for all t at a 5% significance level, so we accept the alternative of $\gamma_{1t}>0$. For period 2 and 3, we accept the null that the market risk premia is less than or equal to zero $\gamma_{1t}\le0$ actually. This contradicts the theory that investors holding systematic risk are not rewarded. 
 
 ### (c) Test whether \(\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0\) and \(\bar{\gamma}_0 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{0t} = 0\)
 
