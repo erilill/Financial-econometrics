@@ -952,6 +952,7 @@ The test statistic is
 $$
 w(\hat{\gamma}_0)=\frac{\hat{\gamma}_0}{\hat{\sigma}_{\gamma_0}} \sim t_{T-1}
 $$
+
 where $\hat{\gamma}_0=\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{0t}$ and $\hat{\sigma}_{\gamma_0}=\frac{1}{T(T-1)}(\hat{\gamma}_{0t}-\hat{\gamma}_{0})^2$.
 
 This is a two tailed t-test at 5% level. 
@@ -983,6 +984,7 @@ The test statistic is
 $$
 w(\hat{\gamma}_1)=\frac{\hat{\gamma}_1}{\hat{\sigma}_{\gamma_1}} \sim t_{T-1}
 $$
+
 where $\hat{\gamma}_1=\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{1t}$ and $\hat{\sigma}_{\gamma_1}=\frac{1}{T(T-1)}(\hat{\gamma}_{1t}-\hat{\gamma}_{1})^2$.
 
 ```{r, echo=F}
@@ -1019,11 +1021,12 @@ kable(
   caption = "Test for gamma_0t=0"
 )
 ```
-Note that we get exactly the same results as before. This is because now we calculate the t-statistic another way by
+Note that we get exactly the same results as before, so no need to interpret again. This is because now we calculate the t-statistic another way by
 
 $$
 \frac{\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{0t}-0}{\hat{\sigma}_{\hat{\gamma}_{0}}/\sqrt{T}} \sim t_{T-1}
 $$
+
 but it is the same actually.
 
 Now we test $\bar{\gamma}_1 = T^{-1}\sum_{t=1}^T \hat{\gamma}_{1t} > 0$.
@@ -1043,19 +1046,12 @@ kable(
   caption = "Test for gamma_1t>0 (H_0:gamma_1t<=0)"
 )
 ```
-<<<<<<< HEAD
 
-Note that we get exactly the same results as before. This is because now we calculate the t-statistic another way by
+Note that we again get exactly the same results as before, so no need to interpret. This is because now we calculate the t-statistic another way by
 
 $$
 \frac{\frac{1}{T}\sum_{t=1}^T \hat{\gamma}_{1t}-0}{\hat{\sigma}_{\hat{\gamma}_{1}}/\sqrt{T}} \sim t_{T-1}
 $$
-but it is the same actually.
-
-We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}<=0$ we reject the test in the first period. 
-=======
-We assume the gammas are i.i.d. which is a strong assumption and not realistic. Even when we average the t-statistics for all the periods we observe the same findings as when we checked the assumption for each period individually. We reject the null when we test if $\gamma_{0t}=0$ for period 3. When testing for $\gamma_{1t}\leq0$ we reject the test in the first period. 
->>>>>>> af4f014026951868513093d351655de429f4f730
 
 Now we evaluate the goodness-of-fit.
 ```{r, echo=F}
@@ -1072,9 +1068,9 @@ kable(
   caption = "Goodness of fit"
 )
 ```
-Goodness-of-fit provide evidence that for period 1 the model explains around 68\% of the variability. For period 2 we see a higher $R^2$ around 73\% and for period 3 we observe $R^2$ around 75\%. We see very similar results for the adjusted $R^2$ to the standard $R^2$.
+Goodness-of-fit provide evidence that for period 1 the betas explains around 68\% of the variability in the excess returns. For period 2 we see a higher $R^2$ around 73\% and for period 3 we observe $R^2$ around 75\%. We see very similar results for the adjusted $R^2$ to the standard $R^2$.
 
-We observe that the results from the hypothesis testing fluctuates over time and in some periods contradict the theory of CAPM. Given the findings that the results fluctuate there seems to be evidence that the relationship is sensitive to market conditions or that there might be some omitted variables. 
+We observe that the results from the hypothesis testing fluctuates over time and in some periods contradict the theory. Given the findings that the results fluctuate there seems to be evidence that the theory is not so robust over time. 
 
 ## 3. Generate two variables indicating the corresponding underlying size and book-to-market decile for each portfolio over the cross-section.
 
