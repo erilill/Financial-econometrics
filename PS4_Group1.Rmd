@@ -1,0 +1,182 @@
+---
+title: "Report for PS4"
+author:
+- Mark Becker, Erik Lillrank & Vilim Nedic
+date: ''
+output:
+  pdf_document:
+    keep_tex: true
+  df_print: kable
+  html_document:
+    df_print: paged
+  word_document: default
+header-includes:
+  - \usepackage{float}
+  - \usepackage{booktabs}
+  - \usepackage{multirow}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
+  - \usepackage{adjustbox}
+  - \usepackage{hyperref}
+toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(FE)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(ggplot2)
+library(psych)
+data("portfolio_m")
+```
+
+# A. Factor models with portfolios as factors
+
+In this exercise you have to estimate and to test a multi-factor model with portfolios as factors. Ise the data set \texttt{portfolio_m}
+
+## 1. Compute factor portfolios based on principal components using the correlation matrix of returns.
+
+### (a) Create the factor portfolios based on the first 5 principal components using the covariance matrix of the 100 size-book-to-market portfolios and save them. Evaluate how much of the variation of these 100 portfolios can be explained by the principal components.
+
+```{r}
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)  
+
+pc_scores_100 <- pca_res_100$factors
+colnames(pc_scores_100) <- paste0("PC", 1:5)
+
+proportion_variance <- pca_res_100$explained
+cumulative_variance <- cumsum(proportion_variance)
+
+variance_table <- rbind(
+  `Proportion of Variance` = proportion_variance,
+  `Cumulative Proportion` = cumulative_variance
+)
+
+colnames(variance_table) <- paste0("PC", 1:5)
+
+kable(variance_table, caption="The variation of the 100 portfolios that can be explained by the first 5 principal components. In percentages.")
+```
+Approximately $77\%$ of the variance in the 100 size-book-to-market portfolios can be explained y the first 5 principal components.
+
+### (b) Create the factor portfolios based on the first 5 principal components using the covariance matrix of the 20 size and book-to-market portfolios and save them as well. Evaluate how much of the variation of these 20 portfolios can be explained by the principal components.
+
+```{r}
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5)  
+
+pc_scores_20 <- pca_res_20$factors
+colnames(pc_scores_20) <- paste0("PC", 1:5)
+
+proportion_variance <- pca_res_20$explained
+cumulative_variance <- cumsum(proportion_variance)
+
+variance_table <- rbind(
+  `Proportion of Variance` = proportion_variance,
+  `Cumulative Proportion` = cumulative_variance
+)
+
+colnames(variance_table) <- paste0("PC", 1:5)
+
+kable(variance_table, caption="The variation of the 20 portfolios that can be explained by the first 5 principal components. In percentages.")
+```
+
+Approximately $97\%$ of the variance in the 20 size and book-to-market portfolios can be explained by the first 5 principal components.
+
+### (c) Evaluate the distributional properties of the individual factor portfolios. What do you find?
+
+We will start by presenting some key descriptive statistics of the factor portfolios.
+
+```{r}
+descr_100 <- describe(pc_scores_100)[,c("mean", "sd", "skew", "kurtosis", "min", "max")]
+
+rownames(descr_100) <- paste0("PC", 1:5)
+
+kable(descr_100, digits = 3, caption = "Descriptive statistics of the factor portfolios for the 100 size-book-to-market portfolios.")
+```
+In the table above you see the descriptive statistics for the factors of the 100 size-book-to-market portfolios. The first factor portfolio has large negative average return compared the other factors which have average returns closer to  zero. The standard deviations of the factor portfolios is decreasing in the order PC1 to PC5, this is because the first principal component will by design always capture the most of the variability in the data.
+
+The first, third and fourth factors are heavily skewed, with PC1 and PC3 having negative skewness and PC4 having positive skewness. The negative skewness indicates that these portfolios are influenced by large negative returns, and the opposite for the positive skewness. All factor portfolios have high kurtosis indicating fat tails.
+
+```{r}
+descr_20 <- describe(pc_scores_20)[,c("mean", "sd", "skew", "kurtosis", "min", "max")]
+
+rownames(descr_20) <- paste0("PC", 1:5)
+
+kable(descr_20, digits = 3, caption = "Descriptive statistics of the factor portfolios for the 20 size and book-to-market portfolios.")
+```
+In the table above we see the descriptive statistics for the factor portfolios of the 20 size and book-to-market portfolios. Here we see similar patterns as for the factor portfolios of the 100 size-book-to-market portfolios. The average returns are negative for the first factor portfolio and close to zero for the other. PC1 captures most of the variation in the original data. The factor portfolios differ in their skewness and kurtosis, PC1 and PC2 are moderately skewed while the other factors are only slightly skewed, and all factor portfolios have heavy tails.
+
+### (d) How strongly are the two sets of factor portfolios (created under (a) and (b)) correlated with each other? How strongly are the individual factor portfolios correlated with the market portfolio. What can you conclude?
+
+```{r}
+correlation_matrix <- cor(pc_scores_100, pc_scores_20)
+kable(correlation_matrix)
+```
+The rows corresponds to the factor portfolios of the 100 size-book-to-market portfolios, and the collumns to the factor portfolios of the 20 size and book-to-market portfolios. The first factors are very highly correlated with 0.99 correlation. There are also high correlations between the second factors, as well as between the third factors. PC2 and PC3 are also highly correlated between the two sets of factor portfolios.
+
+```{r}
+correlations_with_market <- sapply(colnames(pc_scores_100), function(factor) {
+  cor(pc_scores_100[,factor], portfolio_m[,3])
+})
+
+kable(correlations_with_market, caption = "Correlation of each factor portfolio (of the 100 size-book-to-market) with the market portfolio:")
+
+correlations_with_market_20 <- sapply(colnames(pc_scores_20), function(factor) {
+  cor(pc_scores_20[,factor], portfolio_m[,3])
+})
+
+kable(correlations_with_market_20, caption = "Correlation of each factor portfolio (of the 20 size and book-to-market) with the market portfolio:")
+```
+
+The first factor for each of the sets are most highly correlated with the market, with the second factor having the second highest correlation with the market, and so forth. The first factors likely captures the market-wide risks and movements. Factors 3, 4, and 5 are not correlated with the market indicating that the variability these factors capture is not market wide.
+
+## 2. Compute the excess returns for all portfolios. In the following you have to estimate a multi-factor model where you include either the principal components constructed based on the 100 size-book-to-market portfolios or the principal components constructed based on the 20 size and book-to-market portfolios as factors. Estimate the model for individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
+
+
+### (a) How much of the time series variations of the portfolio returns can be explained by the individual principal components? How strong does the goodness-of-fit increase when we include more than one factor? What is the optimal number of factors according to the Bayes/Schwarz information criterion?
+
+
+### (b) Do you find differences in the explanatory power of the two sets of principal components?
+
+
+### (c) Evaluate the explanatory power of the individual principal components and compare it to that provided by the market risk premium solely. Does the market risk premium have any explanatory power beyond the principal components? What is about the significance of the market risk premium in such a regression? What can you conclude?
+
+
+### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
+
+
+## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
+
+
+## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
+
+
+# B. Fama-French regressions
+Use the data set portfolio_m and compute excess returns. In the following you have to mimic the study by Fama and French (1996) and have to investigate whether the Fama-French factors capture size and book-to-market effects.
+
+
+## 1. Construct the HML and SMB factors according to Fama and French (1993) based on the return differentials of small-cap and large-cap portfolios as well as high-book-to-market and small-book-to-market portfolios.
+
+
+## 2. Estimate the resulting Fama-French three-factor model based on individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
+
+
+### (a) Evaluate the goodness-of-fit of the model for the individual portfolios. How much explanatory power do the HML and SMB factors have beyond the market portfolio?
+
+
+### (b) Compare the estimated coefficients associated with the HML and SMB factors for portfolios in different size and book-to-market deciles. Do you find differences? Interpret your results.
+
+
+### (c) Augment your model by the first two principal components as constructed in Problem A, Part 2. Do the principle components have explanatory power beyond the Fama- French factors? Do the Fama-French factors have explanatory power beyond the principal components? Interpret your findings.
+
+
+## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
+
+### (a) Test jointly for exact factor pricing in all equations.
+
+### (b) Test jointly for the significance of the HML and SMB factors as well as the principal components. What do you find? Using information criteria find the model providing the best goodness-of-fit.
+
+### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
