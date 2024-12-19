@@ -236,7 +236,7 @@ colnames(bic_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 F
 kable(bic_table, caption = "BIC values")
 ```
 
-BIC suggests 5 factors for all models.
+BIC suggests 5 factors for all models, (lowest BIC is best).
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
@@ -311,8 +311,27 @@ r_squared_market <- data.frame(
   )
 )
 
-# Display the R-squared table
-kable(r_squared_market, caption = "R-squared values for the regressions with the market risk premium")
+r_squared_comparison2 <- cbind(r_squared_comparison,r_squared_market[,2])
+colnames(r_squared_comparison2) <- c("Portfolio", "PCA 100 size-book-to-market","PCA 20 size and book-to-market", "Market risk premium")
+kable(r_squared_comparison2, caption = "Comparison of R-squared values")
+
+# Extract t-statistics and p-values for each model
+market_stats <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `Market Risk Premium t-statistic` = c(
+    round(coef(summary(market_1st))["vZm", "t value"], 3),
+    round(coef(summary(market_5th))["vZm", "t value"], 3),
+    round(coef(summary(market_10th))["vZm", "t value"], 3)
+  ),
+  `Market Risk Premium p-value` = c(
+    round(coef(summary(market_1st))["vZm", "Pr(>|t|)"], 3),
+    round(coef(summary(market_5th))["vZm", "Pr(>|t|)"], 3),
+    round(coef(summary(market_10th))["vZm", "Pr(>|t|)"], 3)
+  )
+)
+
+# Display the table of t-statistics and p-values for the market risk premium regressions
+kable(market_stats, caption = "t-statistics and P-values for regressions with only the market risk premium")
 ```
 
 
@@ -346,6 +365,40 @@ where the restricted model is with intercept = 0 and the unrestricted model is t
 
 
 
+First we start by preproccesing the data:
+```{r}
+returns_100 <- as.data.frame(portfolio_m[, 25:124])
+factors_pca <- as.data.frame(pc_scores_20)
+```
+
+```{r}
+# Create the system of equations 
+equations <- list()
+for (i in 1:ncol(returns_100)) {
+  portfolio <- colnames(returns_100)[i]
+  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
+}
+sur_data <- cbind(returns_100, factors_pca)
+
+# Initialize the matrices
+res_mat = matrix(0, nrow = nrow(returns_100), ncol = ncol(returns_100))
+coef_mat = matrix(0, nrow = ncol(factors_pca) + 1, ncol = ncol(returns_100))
+
+
+for (i in 1:ncol(returns_100)) {
+  # Fit OLS for each portfolio
+  model <- lm(returns_100[, i] ~ ., data = factors_pca)
+  res_mat[, i] <- residuals(model)  # Save residuals
+  coef_mat[, i] <- coef(model)  # Save coefficients
+}
+Sigma_hat <- cov(res_mat) # 100x100
+
+
+
+```
+
+
+
 
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
@@ -354,7 +407,6 @@ To estimate a SUR model, the following equations are needed
 ```{r}
 library(systemfit)
 returns_100 <- as.data.frame(portfolio_m[, 25:124])
-
 factors_pca <- as.data.frame(pc_scores_20)
 ```
 
