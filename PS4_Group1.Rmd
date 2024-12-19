@@ -311,8 +311,27 @@ r_squared_market <- data.frame(
   )
 )
 
-# Display the R-squared table
-kable(r_squared_market, caption = "R-squared values for the regressions with the market risk premium")
+r_squared_comparison2 <- cbind(r_squared_comparison,r_squared_market[,2])
+colnames(r_squared_comparison2) <- c("Portfolio", "PCA 100 size-book-to-market","PCA 20 size and book-to-market", "Market risk premium")
+kable(r_squared_comparison2, caption = "Comparison of R-squared values")
+
+# Extract t-statistics and p-values for each model
+market_stats <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `Market Risk Premium t-statistic` = c(
+    round(coef(summary(market_1st))["vZm", "t value"], 3),
+    round(coef(summary(market_5th))["vZm", "t value"], 3),
+    round(coef(summary(market_10th))["vZm", "t value"], 3)
+  ),
+  `Market Risk Premium p-value` = c(
+    round(coef(summary(market_1st))["vZm", "Pr(>|t|)"], 3),
+    round(coef(summary(market_5th))["vZm", "Pr(>|t|)"], 3),
+    round(coef(summary(market_10th))["vZm", "Pr(>|t|)"], 3)
+  )
+)
+
+# Display the table of t-statistics and p-values for the market risk premium regressions
+kable(market_stats, caption = "t-statistics and P-values for regressions with only the market risk premium")
 ```
 
 
