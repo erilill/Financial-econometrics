@@ -236,7 +236,7 @@ colnames(bic_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 F
 kable(bic_table, caption = "BIC values")
 ```
 
-BIC suggests 5 factors for all models.
+BIC suggests 5 factors for all models, (lowest BIC is best).
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
