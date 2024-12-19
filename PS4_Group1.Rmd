@@ -335,8 +335,14 @@ kable(market_stats, caption = "t-statistics and P-values for regressions with on
 ```
 
 
+
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
 
+```{r}
+kable(r_squared_comparison2, caption = "Comparison of R-squared values")
+```
+
+We can see that the best goodness of fit is obtained for the regression for the 5 factor model based on the 20 portfolios for the 10th portfolio. The worst goodness of fit is for the regression for the 1 factor model (market excess returns) for the 5th portfolio.
 
 ## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
 
