@@ -135,8 +135,76 @@ The first factor for each of the sets are most highly correlated with the market
 
 ## 2. Compute the excess returns for all portfolios. In the following you have to estimate a multi-factor model where you include either the principal components constructed based on the 100 size-book-to-market portfolios or the principal components constructed based on the 20 size and book-to-market portfolios as factors. Estimate the model for individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
 
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+#Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+#vZm = Rm - Rf
+
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
+pc_scores_100 <- pca_res_100$factors
+pc_scores_excess <- sweep(pc_scores_100, 1, Rf)
+```
+
 
 ### (a) How much of the time series variations of the portfolio returns can be explained by the individual principal components? How strong does the goodness-of-fit increase when we include more than one factor? What is the optimal number of factors according to the Bayes/Schwarz information criterion?
+
+```{r}
+factor_model_1fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1])
+factor_model_2fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1:2])
+factor_model_3fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1:3])
+factor_model_4fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1:4])
+factor_model_5fac_1st <- lm(mZ[, 1] ~ pc_scores_excess)
+
+factor_model_1fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1])
+factor_model_2fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1:2])
+factor_model_3fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1:3])
+factor_model_4fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1:4])
+factor_model_5fac_5th <- lm(mZ[, 5] ~ pc_scores_excess)
+
+factor_model_1fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1])
+factor_model_2fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1:2])
+factor_model_3fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1:3])
+factor_model_4fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1:4])
+factor_model_5fac_10th <- lm(mZ[, 10] ~ pc_scores_excess)
+
+# Extract R-squared values for each model
+r_squared_table <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `1 Factor` = c(
+    round(summary(factor_model_1fac_1st)$r.squared,2),
+    round(summary(factor_model_1fac_5th)$r.squared,2),
+    round(summary(factor_model_1fac_10th)$r.squared,2)
+  ),
+  `2 Factors` = c(
+    round(summary(factor_model_2fac_1st)$r.squared,2),
+    round(summary(factor_model_2fac_5th)$r.squared,2),
+    round(summary(factor_model_2fac_10th)$r.squared,2)
+  ),
+  `3 Factors` = c(
+    round(summary(factor_model_3fac_1st)$r.squared,2),
+    round(summary(factor_model_3fac_5th)$r.squared,2),
+    round(summary(factor_model_3fac_10th)$r.squared,2)
+  ),
+  `4 Factors` = c(
+    round(summary(factor_model_4fac_1st)$r.squared,2),
+    round(summary(factor_model_4fac_5th)$r.squared,2),
+    round(summary(factor_model_4fac_10th)$r.squared,2)
+  ),
+  `5 Factors` = c(
+    round(summary(factor_model_5fac_1st)$r.squared,2),
+    round(summary(factor_model_5fac_5th)$r.squared,2),
+    round(summary(factor_model_5fac_10th)$r.squared,2)
+  )
+)
+
+
+colnames(r_squared_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
+kable(r_squared_table, caption = "R-squared values for different factor models")
+
+BIC(factor_model_1fac_5th)
+```
 
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
