@@ -138,9 +138,18 @@ The first factor for each of the sets are most highly correlated with the market
 ```{r}
 mR = as.matrix(portfolio_m[,25:124])
 Rf = as.matrix(portfolio_m[,'Tbill'])
-Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf)
-vZm = Rm - Rf
+#Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+#vZm = Rm - Rf
+
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #PC constructed based on the 20 size and book-to-market portfolios
+pc_scores_20 <- pca_res_20$factors
+
+pc_scores_excess <- sweep(pc_scores_20, 1, Rf)
+
+fit_1st <- lm(mZ[, 1] ~ pc_scores_excess)
+fit_5th <- lm(mZ[, 5] ~ pc_scores_excess)
+fit_10th <- lm(mZ[, 10] ~ pc_scores_excess)
 ```
 
 
