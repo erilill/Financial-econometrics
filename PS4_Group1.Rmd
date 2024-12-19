@@ -43,7 +43,7 @@ In this exercise you have to estimate and to test a multi-factor model with port
 ### (a) Create the factor portfolios based on the first 5 principal components using the covariance matrix of the 100 size-book-to-market portfolios and save them. Evaluate how much of the variation of these 100 portfolios can be explained by the principal components.
 
 ```{r}
-pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)  
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)
 
 pc_scores_100 <- pca_res_100$factors
 colnames(pc_scores_100) <- paste0("PC", 1:5)
@@ -113,7 +113,7 @@ In the table above we see the descriptive statistics for the factor portfolios o
 
 ```{r}
 correlation_matrix <- cor(pc_scores_100, pc_scores_20)
-kable(correlation_matrix)
+kable(round(correlation_matrix,2))
 ```
 The rows corresponds to the factor portfolios of the 100 size-book-to-market portfolios, and the collumns to the factor portfolios of the 20 size and book-to-market portfolios. The first factors are very highly correlated with 0.99 correlation. There are also high correlations between the second factors, as well as between the third factors. PC2 and PC3 are also highly correlated between the two sets of factor portfolios.
 
