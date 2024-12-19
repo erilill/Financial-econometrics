@@ -154,6 +154,7 @@ pc_scores_excess <- sweep(pc_scores_100, 1, Rf)
 portfolio <- c(1,5,10)
 factors <- c(1,2,3,4,5)
 mR2 <- matrix(NA,nrow=length(portfolio),ncol=length(factors))
+mBIC <- matrix(NA,nrow=length(portfolio),ncol=length(factors))
 
 # Loop through the portfolio and factors
 for (i in 1:length(portfolio)){
@@ -162,6 +163,7 @@ for (i in 1:length(portfolio)){
     model <- lm(mZ[, portfolio[i]] ~ pc_scores_excess[, 1:j])
     # Extract and store the R-squared value
     mR2[i, j] <- summary(model)$r.squared
+    mBIC[i, j] <- BIC(model)
   }
 }
 
@@ -170,6 +172,12 @@ colnames(R2_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Fa
 kable(R2_table, caption = "R-squared values for different factor models")
 
 #### r scared
+
+BIC_table <- cbind(portfolio,round(mBIC,2))
+colnames(BIC_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
+kable(BIC_table, caption = "BIC values for different factor models")
+
+
 
 bic_1fac_1st <- round(BIC(factor_model_1fac_1st),2)
 bic_2fac_1st <- round(BIC(factor_model_2fac_1st),2)
