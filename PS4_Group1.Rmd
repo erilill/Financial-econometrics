@@ -122,13 +122,13 @@ correlations_with_market <- sapply(colnames(pc_scores_100), function(factor) {
   cor(pc_scores_100[,factor], portfolio_m[,3])
 })
 
-kable(correlations_with_market, caption = "Correlation of each factor portfolio (of the 100 size-book-to-market) with the market portfolio:")
+kable(round(correlations_with_market,2), caption = "Correlation of each factor portfolio (of the 100 size-book-to-market) with the market portfolio:")
 
 correlations_with_market_20 <- sapply(colnames(pc_scores_20), function(factor) {
   cor(pc_scores_20[,factor], portfolio_m[,3])
 })
 
-kable(correlations_with_market_20, caption = "Correlation of each factor portfolio (of the 20 size and book-to-market) with the market portfolio:")
+kable(round(correlations_with_market_20,2), caption = "Correlation of each factor portfolio (of the 20 size and book-to-market) with the market portfolio:")
 ```
 
 The first factor for each of the sets are most highly correlated with the market, with the second factor having the second highest correlation with the market, and so forth. The first factors likely captures the market-wide risks and movements. Factors 3, 4, and 5 are not correlated with the market indicating that the variability these factors capture is not market wide.
