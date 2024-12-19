@@ -147,6 +147,8 @@ pc_scores_20 <- pca_res_20$factors
 
 pc_scores_excess <- sweep(pc_scores_20, 1, Rf)
 
+vZkt <- c(pc_scores_excess)
+
 fit_1st <- lm(mZ[, 1] ~ pc_scores_excess)
 fit_5th <- lm(mZ[, 5] ~ pc_scores_excess)
 fit_10th <- lm(mZ[, 10] ~ pc_scores_excess)
