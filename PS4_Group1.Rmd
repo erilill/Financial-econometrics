@@ -135,14 +135,185 @@ The first factor for each of the sets are most highly correlated with the market
 
 ## 2. Compute the excess returns for all portfolios. In the following you have to estimate a multi-factor model where you include either the principal components constructed based on the 100 size-book-to-market portfolios or the principal components constructed based on the 20 size and book-to-market portfolios as factors. Estimate the model for individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
 
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+vZm = Rm - Rf
+
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
+pc_scores_100 <- pca_res_100$factors
+pc_scores_excess <- sweep(pc_scores_100, 1, Rf)
+```
+
 
 ### (a) How much of the time series variations of the portfolio returns can be explained by the individual principal components? How strong does the goodness-of-fit increase when we include more than one factor? What is the optimal number of factors according to the Bayes/Schwarz information criterion?
 
+```{r}
+factor_model_1fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1])
+factor_model_2fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1:2])
+factor_model_3fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1:3])
+factor_model_4fac_1st <- lm(mZ[, 1] ~ pc_scores_excess[,1:4])
+factor_model_5fac_1st <- lm(mZ[, 1] ~ pc_scores_excess)
+
+factor_model_1fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1])
+factor_model_2fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1:2])
+factor_model_3fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1:3])
+factor_model_4fac_5th <- lm(mZ[, 5] ~ pc_scores_excess[,1:4])
+factor_model_5fac_5th <- lm(mZ[, 5] ~ pc_scores_excess)
+
+factor_model_1fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1])
+factor_model_2fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1:2])
+factor_model_3fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1:3])
+factor_model_4fac_10th <- lm(mZ[, 10] ~ pc_scores_excess[,1:4])
+factor_model_5fac_10th <- lm(mZ[, 10] ~ pc_scores_excess)
+
+# Extract R-squared values for each model
+r_squared_table <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `1 Factor` = c(
+    round(summary(factor_model_1fac_1st)$r.squared,2),
+    round(summary(factor_model_1fac_5th)$r.squared,2),
+    round(summary(factor_model_1fac_10th)$r.squared,2)
+  ),
+  `2 Factors` = c(
+    round(summary(factor_model_2fac_1st)$r.squared,2),
+    round(summary(factor_model_2fac_5th)$r.squared,2),
+    round(summary(factor_model_2fac_10th)$r.squared,2)
+  ),
+  `3 Factors` = c(
+    round(summary(factor_model_3fac_1st)$r.squared,2),
+    round(summary(factor_model_3fac_5th)$r.squared,2),
+    round(summary(factor_model_3fac_10th)$r.squared,2)
+  ),
+  `4 Factors` = c(
+    round(summary(factor_model_4fac_1st)$r.squared,2),
+    round(summary(factor_model_4fac_5th)$r.squared,2),
+    round(summary(factor_model_4fac_10th)$r.squared,2)
+  ),
+  `5 Factors` = c(
+    round(summary(factor_model_5fac_1st)$r.squared,2),
+    round(summary(factor_model_5fac_5th)$r.squared,2),
+    round(summary(factor_model_5fac_10th)$r.squared,2)
+  )
+)
+
+
+colnames(r_squared_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
+kable(r_squared_table, caption = "R-squared values for different factor models")
+
+bic_1fac_1st <- round(BIC(factor_model_1fac_1st),2)
+bic_2fac_1st <- round(BIC(factor_model_2fac_1st),2)
+bic_3fac_1st <- round(BIC(factor_model_3fac_1st),2)
+bic_4fac_1st <- round(BIC(factor_model_4fac_1st),2)
+bic_5fac_1st <- round(BIC(factor_model_5fac_1st),2)
+
+bic_1fac_5th <- round(BIC(factor_model_1fac_5th),2)
+bic_2fac_5th <- round(BIC(factor_model_2fac_5th),2)
+bic_3fac_5th <- round(BIC(factor_model_3fac_5th),2)
+bic_4fac_5th <- round(BIC(factor_model_4fac_5th),2)
+bic_5fac_5th <- round(BIC(factor_model_5fac_5th),2)
+
+bic_1fac_10th <- round(BIC(factor_model_1fac_10th),2)
+bic_2fac_10th <- round(BIC(factor_model_2fac_10th),2)
+bic_3fac_10th <- round(BIC(factor_model_3fac_10th),2)
+bic_4fac_10th <- round(BIC(factor_model_4fac_10th),2)
+bic_5fac_10th <- round(BIC(factor_model_5fac_10th),2)
+
+# Create a table with BIC values
+bic_table <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `1 Factor` = c(bic_1fac_1st, bic_1fac_5th, bic_1fac_10th),
+  `2 Factors` = c(bic_2fac_1st, bic_2fac_5th, bic_2fac_10th),
+  `3 Factors` = c(bic_3fac_1st, bic_3fac_5th, bic_3fac_10th),
+  `4 Factors` = c(bic_4fac_1st, bic_4fac_5th, bic_4fac_10th),
+  `5 Factors` = c(bic_5fac_1st, bic_5fac_5th, bic_5fac_10th)
+)
+
+
+colnames(bic_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
+kable(bic_table, caption = "BIC values")
+```
+
+BIC suggests 5 factors for all models.
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
+```{r}
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
+pc_scores_100 <- pca_res_100$factors
+pc_scores_excess_100 <- sweep(pc_scores_100, 1, Rf)
+
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book
+pc_scores_20 <- pca_res_20$factors
+pc_scores_excess_20 <- sweep(pc_scores_20, 1, Rf)
+
+
+factor_model_5fac_1st_100 <- lm(mZ[, 1] ~ pc_scores_excess_100)
+
+factor_model_5fac_5th_100 <- lm(mZ[, 5] ~ pc_scores_excess_100)
+
+factor_model_5fac_10th_100 <- lm(mZ[, 10] ~ pc_scores_excess_100)
+
+factor_model_5fac_1st_20 <- lm(mZ[, 1] ~ pc_scores_excess_20)
+
+factor_model_5fac_5th_20 <- lm(mZ[, 5] ~ pc_scores_excess_20)
+
+factor_model_5fac_10th_20 <- lm(mZ[, 10] ~ pc_scores_excess_20)
+
+# Extract R-squared values for each model
+r_squared_100 <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `100 Size-Book-to-Market` = c(
+    round(summary(factor_model_5fac_1st_100)$r.squared, 2),
+    round(summary(factor_model_5fac_5th_100)$r.squared, 2),
+    round(summary(factor_model_5fac_10th_100)$r.squared, 2)
+  )
+)
+
+r_squared_20 <- data.frame(
+  `20 Size-Book-to-Market` = c(
+    round(summary(factor_model_5fac_1st_20)$r.squared, 2),
+    round(summary(factor_model_5fac_5th_20)$r.squared, 2),
+    round(summary(factor_model_5fac_10th_20)$r.squared, 2)
+  )
+)
+
+# Combine the R-squared values into one table
+r_squared_comparison <- cbind(r_squared_100, r_squared_20)
+
+colnames(r_squared_comparison) <- c("Portfolio", "PCA based on 100 size-book-to-market","PCA based on 20 size and book-to-market")
+kable(r_squared_comparison, caption = "Comparison of R-squared values")
+
+```
 
 ### (c) Evaluate the explanatory power of the individual principal components and compare it to that provided by the market risk premium solely. Does the market risk premium have any explanatory power beyond the principal components? What is about the significance of the market risk premium in such a regression? What can you conclude?
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+vZm = Rm - Rf
+
+market_1st <- lm(mZ[, 1] ~ vZm)
+market_5th <- lm(mZ[, 5] ~ vZm)
+market_10th <- lm(mZ[, 10] ~ vZm)
+
+# Extract R-squared values for each model
+r_squared_market <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `Market Risk Premium` = c(
+    round(summary(market_1st)$r.squared, 2),
+    round(summary(market_5th)$r.squared, 2),
+    round(summary(market_10th)$r.squared, 2)
+  )
+)
+
+# Display the R-squared table
+kable(r_squared_market, caption = "R-squared values for the regressions with the market risk premium")
+```
 
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
@@ -356,10 +527,18 @@ rownames(results) <- NULL
 ```{r}
 kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
 ```
-In the table above you see a comparison of the $R^2$ between the Fama and French three factor model and the regular CAPM. What we see is that the $R^2$ increases for all portfolios when including SMB and HML in the model, indicating that HML and SMB factors have explanatory power beyond the market portfolio. The increase in explanatory power is largest for the smaller portfolios (R11, R15, and R110)
+In the table above you see a comparison of the $R^2$ between the Fama and French three factor model and the regular CAPM. What we see is that the $R^2$ increases for all portfolios when including SMB and HML in the model, indicating that HML and SMB factors have explanatory power beyond the market portfolio. The increase in explanatory power is largest for the smaller portfolios (R11, R15, and R110), with the smallest increase for the largest portfolios (R101, R105, and R1010). We also see that the change is larger for the portfolios with higher book-to-market deciles (R110, R510, and R110) compared to the lower deciles. 
+
+Based on this it seems that the explanatory power increases most for the more volatile portfolios, indicating that there is variation explained by the factors rather than the market. This reasonable as the lower book-to-market and larger size portfolios are less volatile and follow the market more closely.
 
 ### (b) Compare the estimated coefficients associated with the HML and SMB factors for portfolios in different size and book-to-market deciles. Do you find differences? Interpret your results.
 
+```{r}
+kable(results[,c(1,4:5)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor model between the portfolios", label = "tab:3factor_coeff")
+```
+Looking at the estimated coefficients above, we see that estimated $s_i$ is positive for the small and medium size portfolios (R1x and R5x), and negative for the larger size portfolios (R10x). The Estimated $s_i$ is also largest for the smallest size portfolios, and smaller for the medium and large size portfolios. The estimated $h_i$ are negative for the low book-to-market portfolios and positive for the high and medium (except R15). There is no clear correlation between the magnitude of the h coefficient and book-to-market.
+
+Based on this we conclude that SMB more greatly explain the variation in the smaller size portfolios and that there is a negative correlation between SMB and larger size portfolios. We also conclude that HML seems to be positively correlated with high book-to-market portfolios and negatively correlated with low book-to-market portfolios.
 
 ### (c) Augment your model by the first two principal components as constructed in Problem A, Part 2. Do the principle components have explanatory power beyond the Fama- French factors? Do the Fama-French factors have explanatory power beyond the principal components? Interpret your findings.
 
