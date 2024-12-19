@@ -171,45 +171,9 @@ R2_table <- cbind(portfolio,round(mR2,2))
 colnames(R2_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
 kable(R2_table, caption = "R-squared values for different factor models")
 
-#### r scared
-
 BIC_table <- cbind(portfolio,round(mBIC,2))
 colnames(BIC_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
 kable(BIC_table, caption = "BIC values for different factor models")
-
-
-
-bic_1fac_1st <- round(BIC(factor_model_1fac_1st),2)
-bic_2fac_1st <- round(BIC(factor_model_2fac_1st),2)
-bic_3fac_1st <- round(BIC(factor_model_3fac_1st),2)
-bic_4fac_1st <- round(BIC(factor_model_4fac_1st),2)
-bic_5fac_1st <- round(BIC(factor_model_5fac_1st),2)
-
-bic_1fac_5th <- round(BIC(factor_model_1fac_5th),2)
-bic_2fac_5th <- round(BIC(factor_model_2fac_5th),2)
-bic_3fac_5th <- round(BIC(factor_model_3fac_5th),2)
-bic_4fac_5th <- round(BIC(factor_model_4fac_5th),2)
-bic_5fac_5th <- round(BIC(factor_model_5fac_5th),2)
-
-bic_1fac_10th <- round(BIC(factor_model_1fac_10th),2)
-bic_2fac_10th <- round(BIC(factor_model_2fac_10th),2)
-bic_3fac_10th <- round(BIC(factor_model_3fac_10th),2)
-bic_4fac_10th <- round(BIC(factor_model_4fac_10th),2)
-bic_5fac_10th <- round(BIC(factor_model_5fac_10th),2)
-
-# Create a table with BIC values
-bic_table <- data.frame(
-  Portfolio = c("1st", "5th", "10th"),
-  `1 Factor` = c(bic_1fac_1st, bic_1fac_5th, bic_1fac_10th),
-  `2 Factors` = c(bic_2fac_1st, bic_2fac_5th, bic_2fac_10th),
-  `3 Factors` = c(bic_3fac_1st, bic_3fac_5th, bic_3fac_10th),
-  `4 Factors` = c(bic_4fac_1st, bic_4fac_5th, bic_4fac_10th),
-  `5 Factors` = c(bic_5fac_1st, bic_5fac_5th, bic_5fac_10th)
-)
-
-
-colnames(bic_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
-kable(bic_table, caption = "BIC values")
 ```
 
 BIC suggests 5 factors for all models, (lowest BIC is best).
