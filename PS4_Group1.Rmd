@@ -603,6 +603,23 @@ Above you see a comparison in $R^2$ between three models: The augmented model wi
 
 ## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
 
+```{r}
+excess_portfolio_factors <-portfolio_factors
+excess_portfolio_factors <- excess_portfolio_factors %>%
+  mutate(across(c(3, 25:124), ~ . - Tbill))
+
+cols <- colnames(portfolio_factors[,25:124])
+indep <- c("Market", "SMB", "HML")
+
+eq <- list()
+for (i in cols) {
+  formula <- as.formula(paste(i, "~", paste(indep, collapse = " + ")))
+  eq[[i]] <- formula
+}
+
+sur_model <- systemfit(eq, method = "SUR", data = excess_portfolio_factors)
+```
+
 ### (a) Test jointly for exact factor pricing in all equations.
 
 ### (b) Test jointly for the significance of the HML and SMB factors as well as the principal components. What do you find? Using information criteria find the model providing the best goodness-of-fit.
