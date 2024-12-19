@@ -135,6 +135,14 @@ The first factor for each of the sets are most highly correlated with the market
 
 ## 2. Compute the excess returns for all portfolios. In the following you have to estimate a multi-factor model where you include either the principal components constructed based on the 100 size-book-to-market portfolios or the principal components constructed based on the 20 size and book-to-market portfolios as factors. Estimate the model for individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
 
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf)
+vZm = Rm - Rf
+```
+
 
 ### (a) How much of the time series variations of the portfolio returns can be explained by the individual principal components? How strong does the goodness-of-fit increase when we include more than one factor? What is the optimal number of factors according to the Bayes/Schwarz information criterion?
 
