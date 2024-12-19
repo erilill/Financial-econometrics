@@ -365,6 +365,40 @@ where the restricted model is with intercept = 0 and the unrestricted model is t
 
 
 
+First we start by preproccesing the data:
+```{r}
+returns_100 <- as.data.frame(portfolio_m[, 25:124])
+factors_pca <- as.data.frame(pc_scores_20)
+```
+
+```{r}
+# Create the system of equations 
+equations <- list()
+for (i in 1:ncol(returns_100)) {
+  portfolio <- colnames(returns_100)[i]
+  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
+}
+sur_data <- cbind(returns_100, factors_pca)
+
+# Initialize the matrices
+res_mat = matrix(0, nrow = nrow(returns_100), ncol = ncol(returns_100))
+coef_mat = matrix(0, nrow = ncol(factors_pca) + 1, ncol = ncol(returns_100))
+
+
+for (i in 1:ncol(returns_100)) {
+  # Fit OLS for each portfolio
+  model <- lm(returns_100[, i] ~ ., data = factors_pca)
+  res_mat[, i] <- residuals(model)  # Save residuals
+  coef_mat[, i] <- coef(model)  # Save coefficients
+}
+Sigma_hat <- cov(res_mat) # 100x100
+
+
+
+```
+
+
+
 
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
@@ -373,7 +407,6 @@ To estimate a SUR model, the following equations are needed
 ```{r}
 library(systemfit)
 returns_100 <- as.data.frame(portfolio_m[, 25:124])
-
 factors_pca <- as.data.frame(pc_scores_20)
 ```
 
@@ -513,10 +546,18 @@ rownames(results) <- NULL
 ```{r}
 kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
 ```
-In the table above you see a comparison of the $R^2$ between the Fama and French three factor model and the regular CAPM. What we see is that the $R^2$ increases for all portfolios when including SMB and HML in the model, indicating that HML and SMB factors have explanatory power beyond the market portfolio. The increase in explanatory power is largest for the smaller portfolios (R11, R15, and R110)
+In the table above you see a comparison of the $R^2$ between the Fama and French three factor model and the regular CAPM. What we see is that the $R^2$ increases for all portfolios when including SMB and HML in the model, indicating that HML and SMB factors have explanatory power beyond the market portfolio. The increase in explanatory power is largest for the smaller portfolios (R11, R15, and R110), with the smallest increase for the largest portfolios (R101, R105, and R1010). We also see that the change is larger for the portfolios with higher book-to-market deciles (R110, R510, and R110) compared to the lower deciles. 
+
+Based on this it seems that the explanatory power increases most for the more volatile portfolios, indicating that there is variation explained by the factors rather than the market. This reasonable as the lower book-to-market and larger size portfolios are less volatile and follow the market more closely.
 
 ### (b) Compare the estimated coefficients associated with the HML and SMB factors for portfolios in different size and book-to-market deciles. Do you find differences? Interpret your results.
 
+```{r}
+kable(results[,c(1,4:5)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor model between the portfolios", label = "tab:3factor_coeff")
+```
+Looking at the estimated coefficients above, we see that estimated $s_i$ is positive for the small and medium size portfolios (R1x and R5x), and negative for the larger size portfolios (R10x). The Estimated $s_i$ is also largest for the smallest size portfolios, and smaller for the medium and large size portfolios. The estimated $h_i$ are negative for the low book-to-market portfolios and positive for the high and medium (except R15). There is no clear correlation between the magnitude of the h coefficient and book-to-market.
+
+Based on this we conclude that SMB more greatly explain the variation in the smaller size portfolios and that there is a negative correlation between SMB and larger size portfolios. We also conclude that HML seems to be positively correlated with high book-to-market portfolios and negatively correlated with low book-to-market portfolios.
 
 ### (c) Augment your model by the first two principal components as constructed in Problem A, Part 2. Do the principle components have explanatory power beyond the Fama- French factors? Do the Fama-French factors have explanatory power beyond the principal components? Interpret your findings.
 
