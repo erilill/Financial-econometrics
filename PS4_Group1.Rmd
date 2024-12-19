@@ -43,7 +43,7 @@ In this exercise you have to estimate and to test a multi-factor model with port
 ### (a) Create the factor portfolios based on the first 5 principal components using the covariance matrix of the 100 size-book-to-market portfolios and save them. Evaluate how much of the variation of these 100 portfolios can be explained by the principal components.
 
 ```{r}
-pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)  
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)
 
 pc_scores_100 <- pca_res_100$factors
 colnames(pc_scores_100) <- paste0("PC", 1:5)
@@ -113,7 +113,7 @@ In the table above we see the descriptive statistics for the factor portfolios o
 
 ```{r}
 correlation_matrix <- cor(pc_scores_100, pc_scores_20)
-kable(correlation_matrix)
+kable(round(correlation_matrix,2))
 ```
 The rows corresponds to the factor portfolios of the 100 size-book-to-market portfolios, and the columns to the factor portfolios of the 20 size and book-to-market portfolios. The first factors are very highly correlated with 0.99 correlation. There are also high correlations between the second factors, as well as between the third factors. PC2 and PC3 are also highly correlated between the two sets of factor portfolios.
 
@@ -122,13 +122,13 @@ correlations_with_market <- sapply(colnames(pc_scores_100), function(factor) {
   cor(pc_scores_100[,factor], portfolio_m[,3])
 })
 
-kable(correlations_with_market, caption = "Correlation of each factor portfolio (of the 100 size-book-to-market) with the market portfolio:")
+kable(round(correlations_with_market,2), caption = "Correlation of each factor portfolio (of the 100 size-book-to-market) with the market portfolio:")
 
 correlations_with_market_20 <- sapply(colnames(pc_scores_20), function(factor) {
   cor(pc_scores_20[,factor], portfolio_m[,3])
 })
 
-kable(correlations_with_market_20, caption = "Correlation of each factor portfolio (of the 20 size and book-to-market) with the market portfolio:")
+kable(round(correlations_with_market_20,2), caption = "Correlation of each factor portfolio (of the 20 size and book-to-market) with the market portfolio:")
 ```
 
 The first factor for each of the sets are most highly correlated with the market, with the second factor having the second highest correlation with the market, and so forth. The first factors likely captures the market-wide risks and movements. Factors 3, 4, and 5 are not correlated with the market indicating that the variability these factors capture is not market wide.
@@ -234,12 +234,96 @@ Use the data set portfolio_m and compute excess returns. In the following you ha
 
 ## 1. Construct the HML and SMB factors according to Fama and French (1993) based on the return differentials of small-cap and large-cap portfolios as well as high-book-to-market and small-book-to-market portfolios.
 
+In order to construct the HML and SMB factors, we take the mean of the three highest BtM-portfolios minus the mean of the three smallest BtM portfolios for the HML, and for SMB we take the mean of the smallest three portfolios minus the mean of the three largest portfolios.
+
+```{r}
+HML <- rowMeans(portfolio_m[,22:24])-rowMeans(portfolio_m[,15:17])
+SMB <- rowMeans(portfolio_m[,5:7])-rowMeans(portfolio_m[,12:14])
+
+portfolio_factors <- portfolio_m %>%
+  mutate(HML = HML, SMB = SMB)
+
+head(portfolio_factors[,c(1:4, 125:126)])
+```
 
 ## 2. Estimate the resulting Fama-French three-factor model based on individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
 
+```{r}
+cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
+
+results <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  s = numeric(),
+  h = numeric(),
+  R2 = numeric(),
+  R2_comp = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  StdErr_s = numeric(),
+  StdErr_h = numeric(), 
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  PValue_s = numeric(),
+  Pvalue_h = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in cols){
+  ER <- portfolio_factors[[i]]-portfolio_factors$Tbill
+  market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
+  capm_model <- lm(ER ~ market_excess+portfolio_factors$SMB+portfolio_factors$HML)
+  
+  capm_comp <- lm(ER ~ market_excess)
+  
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["market_excess"]
+  s <- coef(capm_model)["portfolio_factors$SMB"]
+  h <- coef(capm_model)["portfolio_factors$HML"]
+  r_squared <- summary(capm_model)$r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
+  std_err_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"]
+  std_err_h <- coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"]
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
+  p_value_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"]
+  p_value_h <- coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"]
+  
+  r_squared_comp <- summary(capm_comp)$r.squared
+  
+  results <- rbind(
+    results,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      s=s,
+      h=h,
+      R2 = r_squared,
+      R2_comp = r_squared_comp, 
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      StdErr_s = std_err_s,
+      StdErr_h = std_err_h, 
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta,
+      PValue_s = p_value_s,
+      Pvalue_h = p_value_h
+    )
+  )
+}
+
+rownames(results) <- NULL
+```
 
 ### (a) Evaluate the goodness-of-fit of the model for the individual portfolios. How much explanatory power do the HML and SMB factors have beyond the market portfolio?
 
+```{r}
+kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
+```
+In the table above you see a comparison of the $R^2$ between the Fama and French three factor model and the regular CAPM. What we see is that the $R^2$ increases for all portfolios when including SMB and HML in the model, indicating that HML and SMB factors have explanatory power beyond the market portfolio. The increase in explanatory power is largest for the smaller portfolios (R11, R15, and R110)
 
 ### (b) Compare the estimated coefficients associated with the HML and SMB factors for portfolios in different size and book-to-market deciles. Do you find differences? Interpret your results.
 
