@@ -509,6 +509,98 @@ Based on this we conclude that SMB more greatly explain the variation in the sma
 
 ### (c) Augment your model by the first two principal components as constructed in Problem A, Part 2. Do the principle components have explanatory power beyond the Fama- French factors? Do the Fama-French factors have explanatory power beyond the principal components? Interpret your findings.
 
+```{r}
+colnames(pc_scores_excess) <- paste0("Excess_PC", 1:5)
+pc_scores_excess <- as.data.frame(pc_scores_excess)
+cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
+
+resultsb3c <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  s = numeric(),
+  h = numeric(),
+  PC1 = numeric(),
+  PC2 = numeric(),
+  R2 = numeric(),
+  R2_comp = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  StdErr_s = numeric(),
+  StdErr_h = numeric(), 
+  StdErr_PC1 = numeric(),
+  StdErr_PC2 = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  PValue_s = numeric(),
+  Pvalue_h = numeric(),
+  PValue_PC1 = numeric(),
+  PValue_PC2 = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in cols){
+  ER <- portfolio_factors[[i]]-portfolio_factors$Tbill
+  market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
+  capm_model <- lm(ER ~ market_excess + portfolio_factors$SMB + portfolio_factors$HML + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
+  
+  comp <- lm(ER ~market_excess + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
+  
+  
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["market_excess"]
+  s <- coef(capm_model)["portfolio_factors$SMB"]
+  h <- coef(capm_model)["portfolio_factors$HML"]
+  PC1 <- coef(capm_model)["pc_scores_excess$Excess_PC1"]
+  PC2 <- coef(capm_model)["pc_scores_excess$Excess_PC2"]
+  r_squared <- summary(capm_model)$r.squared
+  r_squared_comp <- summary(comp)$r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
+  std_err_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"]
+  std_err_h <- coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"]
+  std_err_PC1 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Std. Error"]
+  std_err_PC2 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Std. Error"]
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
+  p_value_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"]
+  p_value_h <- coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"]
+  p_value_PC1 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Pr(>|t|)"]
+  p_value_PC2 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Pr(>|t|)"]
+  
+  
+  resultsb3c <- rbind(
+    resultsb3c,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      s=s,
+      h=h,
+      PC1 = PC1,
+      PC2 = PC2, 
+      R2 = r_squared,
+      R2_comp = r_squared_comp,
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      StdErr_s = std_err_s,
+      StdErr_h = std_err_h, 
+      StdErr_PC1 = std_err_PC1,
+      StdErr_PC2 = std_err_PC2,
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta,
+      PValue_s = p_value_s,
+      Pvalue_h = p_value_h,
+      PValue_PC1 = p_value_PC1,
+      PValue_PC2 = p_value_PC2
+    )
+  )
+}
+
+rownames(resultsb3c) <- NULL
+kable(cbind(resultsb3c[,c(1,8:9)],results[,6]), digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor", col.names =  c("Portfolio", "R2 (three factor + PCA)", "R2 (PCA)", "R2 (three factors)"))
+```
+
 
 ## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
 
