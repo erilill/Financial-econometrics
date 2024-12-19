@@ -203,14 +203,117 @@ r_squared_table <- data.frame(
 colnames(r_squared_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
 kable(r_squared_table, caption = "R-squared values for different factor models")
 
-BIC(factor_model_1fac_5th)
+bic_1fac_1st <- round(BIC(factor_model_1fac_1st),2)
+bic_2fac_1st <- round(BIC(factor_model_2fac_1st),2)
+bic_3fac_1st <- round(BIC(factor_model_3fac_1st),2)
+bic_4fac_1st <- round(BIC(factor_model_4fac_1st),2)
+bic_5fac_1st <- round(BIC(factor_model_5fac_1st),2)
+
+bic_1fac_5th <- round(BIC(factor_model_1fac_5th),2)
+bic_2fac_5th <- round(BIC(factor_model_2fac_5th),2)
+bic_3fac_5th <- round(BIC(factor_model_3fac_5th),2)
+bic_4fac_5th <- round(BIC(factor_model_4fac_5th),2)
+bic_5fac_5th <- round(BIC(factor_model_5fac_5th),2)
+
+bic_1fac_10th <- round(BIC(factor_model_1fac_10th),2)
+bic_2fac_10th <- round(BIC(factor_model_2fac_10th),2)
+bic_3fac_10th <- round(BIC(factor_model_3fac_10th),2)
+bic_4fac_10th <- round(BIC(factor_model_4fac_10th),2)
+bic_5fac_10th <- round(BIC(factor_model_5fac_10th),2)
+
+# Create a table with BIC values
+bic_table <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `1 Factor` = c(bic_1fac_1st, bic_1fac_5th, bic_1fac_10th),
+  `2 Factors` = c(bic_2fac_1st, bic_2fac_5th, bic_2fac_10th),
+  `3 Factors` = c(bic_3fac_1st, bic_3fac_5th, bic_3fac_10th),
+  `4 Factors` = c(bic_4fac_1st, bic_4fac_5th, bic_4fac_10th),
+  `5 Factors` = c(bic_5fac_1st, bic_5fac_5th, bic_5fac_10th)
+)
+
+
+colnames(bic_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
+kable(bic_table, caption = "BIC values")
 ```
 
+BIC suggests 5 factors for all models.
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
+```{r}
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
+pc_scores_100 <- pca_res_100$factors
+pc_scores_excess_100 <- sweep(pc_scores_100, 1, Rf)
+
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book
+pc_scores_20 <- pca_res_20$factors
+pc_scores_excess_20 <- sweep(pc_scores_20, 1, Rf)
+
+
+factor_model_5fac_1st_100 <- lm(mZ[, 1] ~ pc_scores_excess_100)
+
+factor_model_5fac_5th_100 <- lm(mZ[, 5] ~ pc_scores_excess_100)
+
+factor_model_5fac_10th_100 <- lm(mZ[, 10] ~ pc_scores_excess_100)
+
+factor_model_5fac_1st_20 <- lm(mZ[, 1] ~ pc_scores_excess_20)
+
+factor_model_5fac_5th_20 <- lm(mZ[, 5] ~ pc_scores_excess_20)
+
+factor_model_5fac_10th_20 <- lm(mZ[, 10] ~ pc_scores_excess_20)
+
+# Extract R-squared values for each model
+r_squared_100 <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `100 Size-Book-to-Market` = c(
+    round(summary(factor_model_5fac_1st_100)$r.squared, 2),
+    round(summary(factor_model_5fac_5th_100)$r.squared, 2),
+    round(summary(factor_model_5fac_10th_100)$r.squared, 2)
+  )
+)
+
+r_squared_20 <- data.frame(
+  `20 Size-Book-to-Market` = c(
+    round(summary(factor_model_5fac_1st_20)$r.squared, 2),
+    round(summary(factor_model_5fac_5th_20)$r.squared, 2),
+    round(summary(factor_model_5fac_10th_20)$r.squared, 2)
+  )
+)
+
+# Combine the R-squared values into one table
+r_squared_comparison <- cbind(r_squared_100, r_squared_20)
+
+colnames(r_squared_comparison) <- c("Portfolio", "PCA based on 100 size-book-to-market","PCA based on 20 size and book-to-market")
+kable(r_squared_comparison, caption = "Comparison of R-squared values")
+
+```
 
 ### (c) Evaluate the explanatory power of the individual principal components and compare it to that provided by the market risk premium solely. Does the market risk premium have any explanatory power beyond the principal components? What is about the significance of the market risk premium in such a regression? What can you conclude?
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+vZm = Rm - Rf
+
+market_1st <- lm(mZ[, 1] ~ vZm)
+market_5th <- lm(mZ[, 5] ~ vZm)
+market_10th <- lm(mZ[, 10] ~ vZm)
+
+# Extract R-squared values for each model
+r_squared_market <- data.frame(
+  Portfolio = c("1st", "5th", "10th"),
+  `Market Risk Premium` = c(
+    round(summary(market_1st)$r.squared, 2),
+    round(summary(market_5th)$r.squared, 2),
+    round(summary(market_10th)$r.squared, 2)
+  )
+)
+
+# Display the R-squared table
+kable(r_squared_market, caption = "R-squared values for the regressions with the market risk premium")
+```
 
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
