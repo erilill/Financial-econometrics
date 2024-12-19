@@ -604,7 +604,7 @@ Above you see a comparison in $R^2$ between three models: The augmented model wi
 ## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
 
 ```{r}
-excess_portfolio_factors <-portfolio_factors
+excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_excess$Excess_PC1,  PC2=pc_scores_excess$Excess_PC2)
 excess_portfolio_factors <- excess_portfolio_factors %>%
   mutate(across(c(3, 25:124), ~ . - Tbill))
 
@@ -622,6 +622,52 @@ sur_model <- systemfit(eq, method = "SUR", data = excess_portfolio_factors)
 
 ### (a) Test jointly for exact factor pricing in all equations.
 
+We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989):
+
+```{r}
+residuals <- residuals(sur_model)
+
+alphas <- coef(sur_model)[grepl("\\(Intercept\\)", names(coef(sur_model)))]
+
+Sigma <- cov(residuals)
+
+T <- nrow(residuals)
+N <- length(alphas)
+K <- 3
+
+mu_k <- matrix(colMeans(excess_portfolio_factors[, c("Market", "SMB", "HML")]))
+
+Z_kt <- as.matrix(excess_portfolio_factors[, c("Market", "SMB", "HML")])
+
+Omega <- cov(Z_kt)
+
+GRS_F <- (T - N - K) / N * 
+         (t(alphas) %*% solve(Sigma) %*% alphas) /
+         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
+
+GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
+
+results <- data.frame(
+  Statistic = c("GRS F-statistic:", "p-value:"),
+  Value = c(GRS_F, GRS_p_value)
+)
+
+kable(results, rownames = c("GRS F-statistic:", "p-value:"),
+      caption = "F-test for exact factor pricing", digits = 3)
+```
+Exact factor pricing implies that model explain all of the variation in excess returns, if this holds true all $\alpha$ should be zero. Based on the above F-test we reject this null hypothesis and come to the conclusion that the factor pricing model does not perfectly explain portfolio returns.
+
 ### (b) Test jointly for the significance of the HML and SMB factors as well as the principal components. What do you find? Using information criteria find the model providing the best goodness-of-fit.
+
+```{r}
+restricted_eq <- lapply(eq, function(eq) update(eq, ~ . - SMB - HML))
+restricted_model <- systemfit(restricted_eq, method = "SUR", data = excess_portfolio_factors)
+
+LR <- 2 * (logLik(sur_model) - logLik(restricted_model))
+df <- 2  
+p_value <- pchisq(LR, df = df, lower.tail = FALSE)
+
+
+```
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
