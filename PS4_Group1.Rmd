@@ -142,7 +142,7 @@ Rf = as.matrix(portfolio_m[,'Tbill'])
 mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
 #vZm = Rm - Rf
 
-pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
 pc_scores_100 <- pca_res_100$factors
 pc_scores_excess <- sweep(pc_scores_100, 1, Rf)
 ```
@@ -202,6 +202,8 @@ r_squared_table <- data.frame(
 
 colnames(r_squared_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
 kable(r_squared_table, caption = "R-squared values for different factor models")
+
+BIC(factor_model_1fac_5th)
 ```
 
 
