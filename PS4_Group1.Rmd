@@ -703,6 +703,36 @@ kable(adjusted_LR_results, caption = "Likelihood Ratio test for significance of 
 ```
 The null hypothesis of this test is $H_0:B=0$. Based on the the low p-value of the LR test we conclude that the factors are jointly significantly different from zero.
 
+Next, we will use BIC in order to find the model with the best goodness of fit.
+```{r, echo=F}
+indep1 <- c("Market")
+indep2 <- c("Market", "SMB")
+indep3 <- c("Market", "SMB", "HML")
+indep4 <- c("PC1")
+indep5 <- c("PC1", "PC2")
+indep6 <- c("Market", "PC1", "PC2")
+indep7 <- c("Market", "SMB", "PC1", "PC2")
+indep8 <- c("Market", "SMB", "HML", "PC1", "PC2")
+
+indep_sets <- list(indep1, indep2, indep3, indep4, indep5, indep6, indep7, indep8)
+
+BIC_values <- sapply(indep_sets, function(indep) {
+  Z_k <- as.matrix(excess_portfolio_factors[, indep])
+  sur(Z, Z_k)$BIC
+})
+
+factor_names <- sapply(indep_sets, function(indep) {
+  paste(indep, collapse = ", ")
+})
+
+results_df <- data.frame(
+  Factors = factor_names,
+  BIC = BIC_values
+)
+
+kable(results_df, caption = "BIC Values for Different Models")
+
+```
 
 
 
