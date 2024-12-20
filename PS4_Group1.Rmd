@@ -316,22 +316,30 @@ sur <- function(Z, Z_k){
 
   # Step 1: Compute means
   Z_bar <- colMeans(Z)
-  mu_k <- colMeans(Z_k)
+  mu_k <- if(!is.null(Z_k)) colMeans(Z_k) else numeric(0)  # Handle case when Z_k is NULL
 
-  # Step 2: Estimate B
-  cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
-                      Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-  cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-  B_hat <- cov_Z_Zk %*% solve(cov_Zk)
+  # If Z_k is NULL, estimate only intercepts
+  if (is.null(Z_k)) {
+    B_hat <- matrix(0, ncol(Z), 0)  
+    alpha_hat <- Z_bar  
+    residuals <- Z - matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE)  
+    Sigma_hat <- crossprod(residuals) / T  
+  } else {
+    # Step 2: Estimate B if Z_k is not NULL (i.e., perform regression)
+    cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
+                           Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+    cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+    B_hat <- cov_Z_Zk %*% solve(cov_Zk)
 
-  # Step 3: Estimate alpha
-  alpha_hat <- Z_bar - B_hat %*% mu_k
+    # Step 3: Estimate alpha
+    alpha_hat <- Z_bar - B_hat %*% mu_k
 
-  # Step 4: Estimate Sigma
-  residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
-  Sigma_hat <- crossprod(residuals) / T
+    # Step 4: Estimate Sigma
+    residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
+    Sigma_hat <- crossprod(residuals) / T
+  }
 
-  return(list(mu_k=mu_k, B_hat=B_hat, alpha_hat=alpha_hat, Sigma_hat=Sigma_hat, residuals = residuals))
+  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals))
 }
 
 GRS_F <- function(Z, Z_k){
@@ -358,6 +366,28 @@ GRS_F <- function(Z, Z_k){
     Value = c(GRS_F, GRS_p_value)
   )
   return(results)
+}
+
+adjusted_LR_test <- function(sur_full, sur_res){
+  T <- nrow(sur_full$residuals)
+  N <- ncol(sur_full$residuals)
+  K <- length(sur_full$mu_k)
+  
+  # Calculate LR stat, p.15 lecture 5
+  adjustment_constant <- T - N / 2 - K - 1
+  LR <- adjustment_constant * (logdet(sur_res$Sigma_hat) - logdet(sur_full$Sigma_hat))
+  
+  # p-value (chi-squared distribution)
+  p_value <- pchisq(LR, df = N, lower.tail = FALSE)
+  
+  # Results
+  results <- data.frame(
+    Statistic = c("Adjusted LR statistic:", "p-value:"),
+    Value = c(LR, p_value)
+  )
+  
+  return(results)
+  
 }
 ```
 Do the F-test
@@ -617,60 +647,8 @@ Exact factor pricing implies that model explain all of the variation in excess r
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
 Z_k <- matrix(1, ncol=1, nrow=942)
 
-sur <- function(Z, Z_k){
-  T <- nrow(Z)
-
-  # Step 1: Compute means
-  Z_bar <- colMeans(Z)
-  mu_k <- if(!is.null(Z_k)) colMeans(Z_k) else numeric(0)  # Handle case when Z_k is NULL
-
-  # If Z_k is NULL, estimate only intercepts
-  if (is.null(Z_k)) {
-    B_hat <- matrix(0, ncol(Z), 0)  
-    alpha_hat <- Z_bar  
-    residuals <- Z - matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE)  
-    Sigma_hat <- crossprod(residuals) / T  
-  } else {
-    # Step 2: Estimate B if Z_k is not NULL (i.e., perform regression)
-    cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
-                           Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-    cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-    B_hat <- cov_Z_Zk %*% solve(cov_Zk)
-
-    # Step 3: Estimate alpha
-    alpha_hat <- Z_bar - B_hat %*% mu_k
-
-    # Step 4: Estimate Sigma
-    residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
-    Sigma_hat <- crossprod(residuals) / T
-  }
-
-  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals))
-}
 
 restricted_model <- sur(Z, NULL)
-
-adjusted_LR_test <- function(sur_full, sur_res){
-  T <- nrow(sur_full$residuals)
-  N <- ncol(sur_full$residuals)
-  K <- length(sur_full$mu_k)
-  
-  # Calculate LR stat, p.15 lecture 5
-  adjustment_constant <- T - N / 2 - K - 1
-  LR <- adjustment_constant * (logdet(sur_res$Sigma_hat) - logdet(sur_full$Sigma_hat))
-  
-  # p-value (chi-squared distribution)
-  p_value <- pchisq(LR, df = N, lower.tail = FALSE)
-  
-  # Results
-  results <- data.frame(
-    Statistic = c("Adjusted LR statistic:", "p-value:"),
-    Value = c(LR, p_value)
-  )
-  
-  return(results)
-  
-}
 
 adjusted_LR_results <- adjusted_LR_test(sur1, restricted_model)
 ```
