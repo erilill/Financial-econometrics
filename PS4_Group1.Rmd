@@ -38,7 +38,7 @@ data("portfolio_m")
 
 # A. Factor models with portfolios as factors
 
-In this exercise you have to estimate and to test a multi-factor model with portfolios as factors. Ise the data set \texttt{portfolio_m}
+In this exercise you have to estimate and to test a multi-factor model with portfolios as factors. Is the data set \texttt{portfolio_m}
 
 ## 1. Compute factor portfolios based on principal components using the correlation matrix of returns.
 
@@ -518,40 +518,24 @@ for (i in cols){
   
   capm_comp <- lm(ER ~ market_excess)
   
-  alpha <- coef(capm_model)["(Intercept)"]
-  beta <- coef(capm_model)["market_excess"]
-  s <- coef(capm_model)["portfolio_factors$SMB"]
-  h <- coef(capm_model)["portfolio_factors$HML"]
-  r_squared <- summary(capm_model)$r.squared
-  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
-  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
-  std_err_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"]
-  std_err_h <- coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"]
-  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
-  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
-  p_value_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"]
-  p_value_h <- coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"]
-  
-  r_squared_comp <- summary(capm_comp)$r.squared
-  
   results <- rbind(
     results,
     data.frame(
       Portfolio = i,
-      Alpha = alpha,
-      Beta = beta,
-      s=s,
-      h=h,
-      R2 = r_squared,
-      R2_comp = r_squared_comp, 
-      StdErrAlpha = std_err_alpha,
-      StdErrBeta = std_err_beta,
-      StdErr_s = std_err_s,
-      StdErr_h = std_err_h, 
-      PValueAlpha = p_value_alpha,
-      PValueBeta = p_value_beta,
-      PValue_s = p_value_s,
-      Pvalue_h = p_value_h
+      Alpha = coef(capm_model)["(Intercept)"],
+      Beta = coef(capm_model)["market_excess"],
+      s=coef(capm_model)["portfolio_factors$SMB"],
+      h=coef(capm_model)["portfolio_factors$HML"],
+      R2 = summary(capm_model)$r.squared,
+      R2_comp = summary(capm_comp)$r.squared, 
+      StdErrAlpha = coef(summary(capm_model))["(Intercept)", "Std. Error"],
+      StdErrBeta = coef(summary(capm_model))["market_excess", "Std. Error"],
+      StdErr_s = coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"],
+      StdErr_h = coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"], 
+      PValueAlpha = coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"],
+      PValueBeta = coef(summary(capm_model))["market_excess", "Pr(>|t|)"],
+      PValue_s = coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"],
+      Pvalue_h = coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"]
     )
   )
 }
@@ -614,55 +598,32 @@ for (i in cols){
   market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
   capm_model <- lm(ER ~ market_excess + portfolio_factors$SMB + portfolio_factors$HML + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
   
-  comp <- lm(ER ~pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
-  
-  
-  alpha <- coef(capm_model)["(Intercept)"]
-  beta <- coef(capm_model)["market_excess"]
-  s <- coef(capm_model)["portfolio_factors$SMB"]
-  h <- coef(capm_model)["portfolio_factors$HML"]
-  PC1 <- coef(capm_model)["pc_scores_excess$Excess_PC1"]
-  PC2 <- coef(capm_model)["pc_scores_excess$Excess_PC2"]
-  r_squared <- summary(capm_model)$r.squared
-  r_squared_comp <- summary(comp)$r.squared
-  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
-  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
-  std_err_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"]
-  std_err_h <- coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"]
-  std_err_PC1 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Std. Error"]
-  std_err_PC2 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Std. Error"]
-  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
-  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
-  p_value_s <- coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"]
-  p_value_h <- coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"]
-  p_value_PC1 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Pr(>|t|)"]
-  p_value_PC2 <- coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Pr(>|t|)"]
-  
-  
+  comp <- lm(ER ~market_excess + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
+
   resultsb3c <- rbind(
     resultsb3c,
     data.frame(
       Portfolio = i,
-      Alpha = alpha,
-      Beta = beta,
-      s=s,
-      h=h,
-      PC1 = PC1,
-      PC2 = PC2, 
-      R2 = r_squared,
-      R2_comp = r_squared_comp,
-      StdErrAlpha = std_err_alpha,
-      StdErrBeta = std_err_beta,
-      StdErr_s = std_err_s,
-      StdErr_h = std_err_h, 
-      StdErr_PC1 = std_err_PC1,
-      StdErr_PC2 = std_err_PC2,
-      PValueAlpha = p_value_alpha,
-      PValueBeta = p_value_beta,
-      PValue_s = p_value_s,
-      Pvalue_h = p_value_h,
-      PValue_PC1 = p_value_PC1,
-      PValue_PC2 = p_value_PC2
+      Alpha = coef(capm_model)["(Intercept)"],
+      Beta = coef(capm_model)["market_excess"],
+      s = coef(capm_model)["portfolio_factors$SMB"],
+      h= coef(capm_model)["portfolio_factors$HML"],
+      PC1 = coef(capm_model)["pc_scores_excess$Excess_PC1"],
+      PC2 = coef(capm_model)["pc_scores_excess$Excess_PC2"], 
+      R2 = summary(capm_model)$r.squared,
+      R2_comp = summary(comp)$r.squared,
+      StdErrAlpha = coef(summary(capm_model))["(Intercept)", "Std. Error"],
+      StdErrBeta = coef(summary(capm_model))["market_excess", "Std. Error"],
+      StdErr_s = coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"],
+      StdErr_h = coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"], 
+      StdErr_PC1 = coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Std. Error"],
+      StdErr_PC2 = coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Std. Error"],
+      PValueAlpha = coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"],
+      PValueBeta = coef(summary(capm_model))["market_excess", "Pr(>|t|)"],
+      PValue_s = coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"],
+      Pvalue_h = coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"],
+      PValue_PC1 = coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Pr(>|t|)"],
+      PValue_PC2 = coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Pr(>|t|)"]
     )
   )
 }
@@ -670,7 +631,7 @@ for (i in cols){
 rownames(resultsb3c) <- NULL
 kable(cbind(resultsb3c[,c(1,8:9)],results[,6]), digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor_pca_r2", col.names =  c("Portfolio", "R2 (three factor + PCA)", "R2 (PCA)", "R2 (three factors)"))
 ```
-Above you see a comparison in $R^2$ between three models: The augmented model with HML and SMB factors as well as the first two principal components, the model with only principal components, and a model with only the Fama-French factors. What we see is that including the PC's increases the goodness-of-fit compared to the three-factor model, meaning that the PC's have explanatory power beyond the Fama-French factors. However, there is only small differences in $R^2$ between this augmented model and the PC's model with the first two principal components, this indicates that the Fama-French factors have very little or no explanatory power beyond the principal components.
+Above you see a comparison in $R^2$ between three models: The augmented model with HML and SMB factors as well as the first two principal components, the model with only principal components, and a model with only the Fama-French factors. What we see is that including the PC's increases the goodness-of-fit compared to the three-factor model, meaning that the PC's have explanatory power beyond the Fama-French factors. However, comparing the model with only market excess and PC's we see very small differences between the $R^2$ and the augmented full model, indicating that the Fama-French factors only have small explanatory power beyond the principal components.
 
 ## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
 
