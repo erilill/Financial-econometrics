@@ -571,8 +571,8 @@ Based on this we conclude that SMB more greatly explain the variation in the sma
 ### (c) Augment your model by the first two principal components as constructed in Problem A, Part 2. Do the principle components have explanatory power beyond the Fama- French factors? Do the Fama-French factors have explanatory power beyond the principal components? Interpret your findings.
 
 ```{r}
-colnames(pc_scores_excess) <- paste0("Excess_PC", 1:5)
-pc_scores_excess <- as.data.frame(pc_scores_excess)
+colnames(pc_scores_excess_20) <- paste0("Excess_PC", 1:5)
+pc_scores_excess <- as.data.frame(pc_scores_excess_20)
 cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
 
 resultsb3c <- data.frame(
