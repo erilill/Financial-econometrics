@@ -273,7 +273,6 @@ We want to estimate the model
 $$
 Z_t=\alpha+B Z_{Kt}+\epsilon_t
 $$
-
 where $Z_{Kt}$ is the excess returns of the 5-factor portfolios with PC's based on the 20 size and book-to-market portfolios.
 
 ```{r}
@@ -298,8 +297,18 @@ The covariance matrix of the error terms are estimated by maximum likelihood:
 $$
 \hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})(Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})'
 $$
+The F-test proposed by Gibbons/Ross/Shanken (1989) is:
+$$
+J=\frac{T-N-K}{K}[1+\hat{\mu}_K' \hat{\Omega}_K^{-1} \hat{\mu}_K]^{-1} \hat{\alpha}' \hat{\Sigma}^{-1} \hat{\alpha} \sim F_{N, T-N-K}
+$$
+And the adjusted likelihood ratio test is: 
 
-We can do the above in R
+$$
+LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
+$$
+
+
+So now we test jointly for exact factor pricing in all equations. We estimate the SUR model and do the F-test for $\alpha$. Here are the functions
 
 ```{r}
 sur <- function(Z, Z_k){
@@ -329,21 +338,10 @@ sur <- function(Z, Z_k){
     residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
     Sigma_hat <- crossprod(residuals) / T
   }
-  mE <- residuals
-  ll <- LogLikelihood(mE)
-  k <- dim(B_hat)[1]*dim(B_hat)[2]+length(alpha_hat)
-  BIC = k*log(T)-2*ll
-  
-  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals,BIC=BIC))
+
+  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals))
 }
-```
 
-The F-test proposed by Gibbons/Ross/Shanken (1989) is:
-$$
-J=\frac{T-N-K}{K}[1+\hat{\mu}_K' \hat{\Omega}_K^{-1} \hat{\mu}_K]^{-1} \hat{\alpha}' \hat{\Sigma}^{-1} \hat{\alpha} \sim F_{N, T-N-K}
-$$
-
-```{r}
 GRS_F <- function(Z, Z_k){
   
   sur <- sur(Z, Z_k)
@@ -369,16 +367,7 @@ GRS_F <- function(Z, Z_k){
   )
   return(results)
 }
-```
 
-And the adjusted likelihood ratio test is: 
-
-$$
-LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
-$$
-
-
-```{r}
 adjusted_LR_test <- function(sur_full, sur_res){
   T <- nrow(sur_full$residuals)
   N <- ncol(sur_full$residuals)
@@ -401,8 +390,7 @@ adjusted_LR_test <- function(sur_full, sur_res){
   
 }
 ```
-
-Do the F-test for $\alpha=0$.
+Do the F-test
 ```{r}
 F_test_alpha <- GRS_F(mZ,mZk)
 kable(F_test_alpha)
@@ -410,45 +398,13 @@ kable(F_test_alpha)
 
 We can see that we reject the null that $\alpha=0$, so we do not have evidence exact factor pricing.
 
-Do the LR test for the joint significance of the factors, i.e. the do LR test with the restricted model where $B=0$
-
-$$
-Z_t=\alpha+\epsilon_t
-$$
-
+Lets do the LR test
 ```{r}
-sur_ur <- sur(mZ,mZk)
-sur_r <- sur(mZ,NULL)
-kable(adjusted_LR_test(sur_ur,sur_r))
+adjusted_LR_results <- adjusted_LR_test(sur(mZ,mZk), restricted_model)
 ```
-
-We can see that we reject the null that $B=0$, i.e. the factors are jointly significant at a 1\% level.
-
-
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
-Now we estimate the 1 factor model
 
-$$
-Z_t=\alpha+B Z_{mt}+\epsilon_t
-$$
-and test if $B=0$.
-
-```{r}
-mR = as.matrix(portfolio_m[,25:124])
-Rf = as.matrix(portfolio_m[,'Tbill'])
-Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
-vZm = Rm - Rf #matrix of excess returns for the market portfolio
-
-sur_ur <- sur(mZ,vZm)
-sur_r <- sur(mZ,NULL)
-kable(adjusted_LR_test(sur_ur,sur_r))
-
-```
-
-
-We reject the null that $B=0$,i .e. the market risk premium is jointly significant.
 
 
 # B. Fama-French regressions
@@ -656,6 +612,8 @@ Above you see a comparison in $R^2$ between three models: The augmented model wi
 
 ## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
 
+Based on sub-question (b), we interpret this to be the augmented model from question B.2(c). The PC's based on the 100 size-book-to-market portfolios seems to be colinear, or at least the resulting $\hat{\Omega}$ is singular such that we could not calculate the F-test. For this reason we have used the PC's computed using the 20 size and book-to-market portfolios in this question instead.
+
 ```{r}
 # Pre-process data
 excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_20[,1], PC2 = pc_scores_20[,2])
@@ -663,7 +621,7 @@ excess_portfolio_factors <- excess_portfolio_factors %>%
   mutate(across(c(3, 25:124,127:128), ~ . - Tbill))
 
 # Set factors
-indep <- c("Market", "SMB", "HML")
+indep <- c("Market", "SMB", "HML", "PC1", "PC2")
 
 # As matrix
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
@@ -679,22 +637,23 @@ We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989
 ```{r}
 results <- GRS_F(Z, Z_k)
 
-kable(results, rownames = c("GRS F-statistic:", "p-value:"),
-      caption = "F-test for exact factor pricing", digits = 3)
+kable(results, caption = "F-test for exact factor pricing", digits = 3)
 ```
 Exact factor pricing implies that model explain all of the variation in excess returns, if this holds true all $\alpha$ should be zero. Based on the above F-test we reject this null hypothesis and come to the conclusion that the factor pricing model does not perfectly explain portfolio returns.
 
 ### (b) Test jointly for the significance of the HML and SMB factors as well as the principal components. What do you find? Using information criteria find the model providing the best goodness-of-fit.
 
 ```{r}
-# As matrix
+# First we estimate the restricted model which only includes "Market"
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
-Z_k <- matrix(1, ncol=1, nrow=942)
+Z_k <- as.matrix(excess_portfolio_factors[, "Market"])
 
+restricted_model <- sur(Z, Z_k)
 
-restricted_model <- sur(Z, NULL)
-
+# Compute the LR-test
 adjusted_LR_results <- adjusted_LR_test(sur1, restricted_model)
+
+kable(adjusted_LR_results, caption = "Likelihood Ratio test for significance of factors.")
 ```
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
