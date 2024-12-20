@@ -175,7 +175,9 @@ colnames(BIC_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 F
 kable(BIC_table, caption = "BIC values for 1-5 factor models")
 ```
 
-BIC suggests 5,5,5,4,4,5,5,4,5 factors for the respective portfolios. The difference is very small for the portfolios where it suggests 4 instead of 5.
+AMong the first observations for the R2 we observe that the variation explained by the models increases for the portfolios in the models  1&5, 1&10, 5&1 - 5&10, 10&1, 10&5 concluding that it is harder to explain the variation in the most extreme cases 1&1 and 10&10. The other finding is that the explained variation increases as we introduce more factors, often concluding that the optimal number of factors are 4 or 5. The BIC will help us evaluate this in greater detail, especially due to the fact that BIC also penalizes a model for introducing factors that doesn't contribute to the model. 
+
+The BIC suggests that optimal number of factors are R11: 5 , R15: 5, R110: 5, R51: 4, R55: 4, R510: 5, R101: 5, R105: 4, and R1010: 5. Please notice that the difference is very small for the portfolios where it suggests 4 instead of 5 concluding that it doesn't influence the effectiveness of the model greatly but considering that we always prefer less complex models, we should go for the 4-facotr models when it is suggested. 
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
@@ -286,82 +288,59 @@ where the restricted model is with intercept = 0 and the unrestricted model is t
 
 
 
-First we start by preproccesing the data:
-```{r}
-returns_100 <- as.data.frame(portfolio_m[, 25:124])
-factors_pca <- as.data.frame(pc_scores_20)
-```
-
-```{r}
-# Create the system of equations 
-equations <- list()
-for (i in 1:ncol(returns_100)) {
-  portfolio <- colnames(returns_100)[i]
-  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
-}
-sur_data <- cbind(returns_100, factors_pca)
-
-# Initialize the matrices
-res_mat = matrix(0, nrow = nrow(returns_100), ncol = ncol(returns_100))
-coef_mat = matrix(0, nrow = ncol(factors_pca) + 1, ncol = ncol(returns_100))
-
-
-for (i in 1:ncol(returns_100)) {
-  # Fit OLS for each portfolio
-  model <- lm(returns_100[, i] ~ ., data = factors_pca)
-  res_mat[, i] <- residuals(model)  # Save residuals
-  coef_mat[, i] <- coef(model)  # Save coefficients
-}
-Sigma_hat <- cov(res_mat) # 100x100
-
-
-
-```
-
-
-
 
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
 
 To estimate a SUR model, the following equations are needed 
+
 ```{r}
 library(systemfit)
-returns_100 <- as.data.frame(portfolio_m[, 25:124])
-factors_pca <- as.data.frame(pc_scores_20)
-```
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for the portfolios
 
-```{r}
-# Create the system of equations 
-equations <- list()
-for (i in 1:ncol(returns_100)) {
-  portfolio <- colnames(returns_100)[i]
-  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
-}
-```
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
+pc_scores_20 <- pca_res_20$factors
+mZk <- sweep(pc_scores_20, 1, Rf)
 
-```{r}
-# Prepare the dataset for SUR
-sur_data <- cbind(returns_100, factors_pca)
+T <- nrow(mZ)
 
-# First step: estimate the SUR model using FGLS
-sur_model_fgls <- systemfit(equations, data = sur_data, method = "SUR")
-# Second step: estimate the SUR model using OLS 
-sur_model_ols <- systemfit(equations, data = sur_data, method = "OLS")
+# Step 1: Compute means
+Z_bar <- colMeans(mZ)
+mu_k <- colMeans(mZk)
 
+# Step 2: Estimate B
+cov_Z_Zk <- crossprod(mZ - matrix(Z_bar, nrow = T, ncol = ncol(mZ), byrow = TRUE), 
+                      mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
+cov_Zk <- crossprod(mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
+B_hat <- cov_Z_Zk %*% solve(cov_Zk)
 
-factor_names <- colnames(factors_pca)
-hypothesis <- paste(factor_names, "= 0", collapse = " & ")
+# Step 3: Estimate alpha
+alpha_hat <- Z_bar - B_hat %*% mu_k
 
-f_test <- linearHypothesis(coef = sur_model_fgls[["coefCov"]], vcov = sur_model_fgls[["residCov"]])
-  
-  (sur_model_fgls, sur_model_fgls[["residCov"]], c(0, 1, 1, 1, 1, 1)))
-f_test <- lht(sur_model_fgls, sur_model_fgls[["coefCov"]])
-print(f_test)
-              
-```
+# Step 4: Estimate Sigma
+residuals <- mZ - (matrix(alpha_hat, nrow = T, ncol = ncol(mZ), byrow = TRUE) + mZk %*% t(B_hat))
+Sigma_hat <- crossprod(residuals) / T
 
-```{r}
+N <- length(alphas)
+K <- 3
+
+Omega <- cov(mZk)
+
+GRS_F <- (T - N - K) / N * 
+         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
+         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
+
+GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
+
+results <- data.frame(
+  Statistic = c("GRS F-statistic:", "p-value:"),
+  Value = c(GRS_F, GRS_p_value)
+)
+
+kable(results, rownames = c("GRS F-statistic:", "p-value:"),
+      caption = "F-test for exact factor pricing", digits = 3)
 
 ```
 
