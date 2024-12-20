@@ -604,7 +604,7 @@ for (i in cols){
   market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
   capm_model <- lm(ER ~ market_excess + portfolio_factors$SMB + portfolio_factors$HML + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
   
-  comp <- lm(ER ~market_excess + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
+  comp <- lm(ER ~pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
   
   
   alpha <- coef(capm_model)["(Intercept)"]
