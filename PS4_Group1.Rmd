@@ -32,6 +32,7 @@ library(dplyr)
 library(ggplot2)
 library(psych)
 library(systemfit)
+library(msos)
 data("portfolio_m")
 ```
 
@@ -644,7 +645,29 @@ LR <- 2 * (LogLikelihood(sur1$residuals) - LogLikelihood(restricted_model$residu
 df <- ncol(sur1$B_hat) - ncol(restricted_model$B_hat)
 p_value <- pchisq(LR, df = df, lower.tail = FALSE)
 
+adjusted_LR_test <- function(sur_full, sur_res){
+  T <- nrow(sur_full$residuals)
+  N <- ncol(sur_full$residuals)
+  K <- length(sur_full$mu_k)
+  
+  # Calculate LR stat, p.15 lecture 5
+  adjustment_constant <- T - N / 2 - K - 1
+  LR <- adjustment_constant * (logdet(sur_res$Sigma_hat) - logdet(sur_full$Sigma_hat))
+  
+  # p-value (chi-squared distribution)
+  p_value <- pchisq(LR, df = N, lower.tail = FALSE)
+  
+  # Results
+  results <- data.frame(
+    Statistic = c("Adjusted LR statistic:", "p-value:"),
+    Value = c(LR, p_value)
+  )
+  
+  return(results)
+  
+}
 
+adjusted_LR_results <- adjusted_LR_test(sur1, restricted_model)
 ```
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
