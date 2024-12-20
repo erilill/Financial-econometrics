@@ -330,6 +330,7 @@ GRS_F <- function(Z, Z_k){
 
   N <- length(alpha_hat)
   K <- ncol(Z_k)
+  T <- nrow(Z)
 
   Omega <- cov(Z_k)
 
@@ -611,7 +612,6 @@ indep <- c("Market", "SMB", "HML")
 # As matrix
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
 Z_k <- as.matrix(excess_portfolio_factors[, indep])
-
 
 sur1 <- sur(Z, Z_k)
 ```
