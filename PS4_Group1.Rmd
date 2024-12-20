@@ -140,92 +140,76 @@ The first factor for each of the sets are most highly correlated with the market
 mR = as.matrix(portfolio_m[,25:124])
 Rf = as.matrix(portfolio_m[,'Tbill'])
 Rm = as.matrix(portfolio_m[,'Market'])
-mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
-vZm = Rm - Rf
+mZ = sweep(mR,1,Rf) #matrix of excess returns for the portfolios
+vZm = Rm - Rf #market excess returns
 
-pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #5 Principal components based on the 100 sbtm portfolios
 pc_scores_100 <- pca_res_100$factors
-pc_scores_excess <- sweep(pc_scores_100, 1, Rf)
+pc_scores_excess_100 <- sweep(pc_scores_100, 1, Rf) #excess returns of factor portfolios
+
+portfolio <- c(1,5,10,41,45,50,91,95,100)
+factors <- c(1,2,3,4,5)
+
+mR2 <- matrix(NA,nrow=length(portfolio),ncol=length(factors))
+mBIC <- matrix(NA,nrow=length(portfolio),ncol=length(factors))
+
+for (i in 1:length(portfolio)){
+  for (j in 1:length(factors)){
+    model <- lm(mZ[, portfolio[i]] ~ pc_scores_excess_100[, 1:j])
+    mR2[i, j] <- summary(model)$r.squared
+    mBIC[i, j] <- BIC(model)
+  }
+}
 ```
 
 
 ### (a) How much of the time series variations of the portfolio returns can be explained by the individual principal components? How strong does the goodness-of-fit increase when we include more than one factor? What is the optimal number of factors according to the Bayes/Schwarz information criterion?
 
 ```{r}
-portfolio <- c(1,5,10)
-factors <- c(1,2,3,4,5)
-mR2 <- matrix(NA,nrow=length(portfolio),ncol=length(factors))
-mBIC <- matrix(NA,nrow=length(portfolio),ncol=length(factors))
-
-# Loop through the portfolio and factors
-for (i in 1:length(portfolio)){
-  for (j in 1:length(factors)){
-    # Fit the model
-    model <- lm(mZ[, portfolio[i]] ~ pc_scores_excess[, 1:j])
-    # Extract and store the R-squared value
-    mR2[i, j] <- summary(model)$r.squared
-    mBIC[i, j] <- BIC(model)
-  }
-}
-
-R2_table <- cbind(portfolio,round(mR2,2))
+R2_table <- cbind(colnames(mZ)[c(1,5,10,41,45,50,91,95,100)],round(mR2,2))
 colnames(R2_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
-kable(R2_table, caption = "R-squared values for different factor models")
+kable(R2_table, caption = "R-squared values for 1-5 factor model")
 
-BIC_table <- cbind(portfolio,round(mBIC,2))
+BIC_table <- cbind(colnames(mZ)[c(1,5,10,41,45,50,91,95,100)],round(mBIC,0))
 colnames(BIC_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors")
-kable(BIC_table, caption = "BIC values for different factor models")
+kable(BIC_table, caption = "BIC values for 1-5 factor models")
 ```
 
-BIC suggests 5 factors for all models, (lowest BIC is best).
+BIC suggests 5,5,5,4,4,5,5,4,5 factors for the respective portfolios. The difference is very small for the portfolios where it suggests 4 instead of 5.
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
-```{r}
-pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book
-pc_scores_100 <- pca_res_100$factors
-pc_scores_excess_100 <- sweep(pc_scores_100, 1, Rf)
+For simplicity lets assume 5 factor model is the best.
 
-pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book
+```{r}
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
 pc_scores_20 <- pca_res_20$factors
 pc_scores_excess_20 <- sweep(pc_scores_20, 1, Rf)
 
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #100 size book, 5 factors
+pc_scores_100 <- pca_res_100$factors
+pc_scores_excess_100 <- sweep(pc_scores_100, 1, Rf)
 
-factor_model_5fac_1st_100 <- lm(mZ[, 1] ~ pc_scores_excess_100)
 
-factor_model_5fac_5th_100 <- lm(mZ[, 5] ~ pc_scores_excess_100)
+portfolio <- c(1,5,10,41,45,50,91,95,100)
 
-factor_model_5fac_10th_100 <- lm(mZ[, 10] ~ pc_scores_excess_100)
+mR2_20_100 <- matrix(NA, nrow = length(portfolio), ncol = 2)
 
-factor_model_5fac_1st_20 <- lm(mZ[, 1] ~ pc_scores_excess_20)
+for (i in 1:length(portfolio)){
+    model_20 <- lm(mZ[, portfolio[i]] ~ pc_scores_excess_20)
+    mR2_100_20[i,1] <- summary(model_20)$r.squared
+    model_100 <- lm(mZ[, portfolio[i]] ~ pc_scores_excess_100)
+    mR2_100_20[i,2] <- summary(model_100)$r.squared
+}
 
-factor_model_5fac_5th_20 <- lm(mZ[, 5] ~ pc_scores_excess_20)
 
-factor_model_5fac_10th_20 <- lm(mZ[, 10] ~ pc_scores_excess_20)
-
-# Extract R-squared values for each model
-r_squared_100 <- data.frame(
-  Portfolio = c("1st", "5th", "10th"),
-  `100 Size-Book-to-Market` = c(
-    round(summary(factor_model_5fac_1st_100)$r.squared, 2),
-    round(summary(factor_model_5fac_5th_100)$r.squared, 2),
-    round(summary(factor_model_5fac_10th_100)$r.squared, 2)
-  )
+R2_comparison <- data.frame(
+  Portfolio = colnames(mZ)[portfolio],
+  `PCA based on 20 MEx/MEBEx portfolios` = round(mR2_100_20[, 1], 2),
+  `PCA based on 100 Rx(x)y(y) portfolios` = round(mR2_100_20[, 2], 2)
 )
 
-r_squared_20 <- data.frame(
-  `20 Size-Book-to-Market` = c(
-    round(summary(factor_model_5fac_1st_20)$r.squared, 2),
-    round(summary(factor_model_5fac_5th_20)$r.squared, 2),
-    round(summary(factor_model_5fac_10th_20)$r.squared, 2)
-  )
-)
-
-# Combine the R-squared values into one table
-r_squared_comparison <- cbind(r_squared_100, r_squared_20)
-
-colnames(r_squared_comparison) <- c("Portfolio", "PCA based on 100 size-book-to-market","PCA based on 20 size and book-to-market")
-kable(r_squared_comparison, caption = "Comparison of R-squared values")
+kable(R2_comparison, caption = "R-squared values for 5 factor models")
 
 ```
 
@@ -282,8 +266,6 @@ kable(market_stats, caption = "t-statistics and P-values for regressions with on
 ```{r}
 kable(r_squared_comparison2, caption = "Comparison of R-squared values")
 ```
-
-We can see that the best goodness of fit is obtained for the regression for the 5 factor model based on the 20 portfolios for the 10th portfolio. The worst goodness of fit is for the regression for the 1 factor model (market excess returns) for the 5th portfolio.
 
 ## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
 
