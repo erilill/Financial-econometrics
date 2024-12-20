@@ -329,8 +329,12 @@ sur <- function(Z, Z_k){
     residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
     Sigma_hat <- crossprod(residuals) / T
   }
-
-  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals))
+  mE <- residuals
+  ll <- LogLikelihood(mE)
+  k <- dim(B_hat)[1]*dim(B_hat)[2]+length(alpha_hat)
+  BIC = k*log(T)-2*ll
+  
+  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals,BIC=BIC))
 }
 ```
 
