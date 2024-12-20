@@ -297,18 +297,8 @@ The covariance matrix of the error terms are estimated by maximum likelihood:
 $$
 \hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})(Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})'
 $$
-The F-test proposed by Gibbons/Ross/Shanken (1989) is:
-$$
-J=\frac{T-N-K}{K}[1+\hat{\mu}_K' \hat{\Omega}_K^{-1} \hat{\mu}_K]^{-1} \hat{\alpha}' \hat{\Sigma}^{-1} \hat{\alpha} \sim F_{N, T-N-K}
-$$
-And the adjusted likelihood ratio test is: 
 
-$$
-LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
-$$
-
-
-So now we test jointly for exact factor pricing in all equations. We estimate the SUR model and do the F-test for $\alpha$. Here are the functions
+We can do the above in R
 
 ```{r}
 sur <- function(Z, Z_k){
@@ -341,7 +331,14 @@ sur <- function(Z, Z_k){
 
   return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals))
 }
+```
 
+The F-test proposed by Gibbons/Ross/Shanken (1989) is:
+$$
+J=\frac{T-N-K}{K}[1+\hat{\mu}_K' \hat{\Omega}_K^{-1} \hat{\mu}_K]^{-1} \hat{\alpha}' \hat{\Sigma}^{-1} \hat{\alpha} \sim F_{N, T-N-K}
+$$
+
+```{r}
 GRS_F <- function(Z, Z_k){
   
   sur <- sur(Z, Z_k)
@@ -367,7 +364,17 @@ GRS_F <- function(Z, Z_k){
   )
   return(results)
 }
+```
 
+
+And the adjusted likelihood ratio test is: 
+
+$$
+LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
+$$
+
+
+```{r}
 adjusted_LR_test <- function(sur_full, sur_res){
   T <- nrow(sur_full$residuals)
   N <- ncol(sur_full$residuals)
@@ -390,6 +397,10 @@ adjusted_LR_test <- function(sur_full, sur_res){
   
 }
 ```
+
+
+
+
 Do the F-test
 ```{r}
 F_test_alpha <- GRS_F(mZ,mZk)
