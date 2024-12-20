@@ -273,6 +273,7 @@ We want to estimate the model
 $$
 Z_t=\alpha+B Z_{Kt}+\epsilon_t
 $$
+
 where $Z_{Kt}$ is the excess returns of the 5-factor portfolios with PC's based on the 20 size and book-to-market portfolios.
 
 ```{r}
@@ -366,7 +367,6 @@ GRS_F <- function(Z, Z_k){
 }
 ```
 
-
 And the adjusted likelihood ratio test is: 
 
 $$
@@ -398,10 +398,7 @@ adjusted_LR_test <- function(sur_full, sur_res){
 }
 ```
 
-
-
-
-Do the F-test
+Do the F-test for $\alpha=0$.
 ```{r}
 F_test_alpha <- GRS_F(mZ,mZk)
 kable(F_test_alpha)
@@ -409,10 +406,21 @@ kable(F_test_alpha)
 
 We can see that we reject the null that $\alpha=0$, so we do not have evidence exact factor pricing.
 
-Lets do the LR test
+Do the LR test for the joint significance of the factors, i.e. the do LR test with the restricted model where $B=0$
+
+$$
+Z_t=\alpha+\epsilon_t
+$$
+
 ```{r}
-adjusted_LR_results <- adjusted_LR_test(sur(mZ,mZk), restricted_model)
+sur_ur <- sur(mZ,mZk)
+sur_r <- sur(mZ,NULL)
+kable(adjusted_LR_test(sur_ur,sur_r))
 ```
+
+We can see that we reject the null that $B=0$, i.e. the factors are jointly significant at a 1\% level.
+
+
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
 
