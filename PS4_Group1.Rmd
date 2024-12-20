@@ -290,8 +290,34 @@ F-test based on Gibbons/Ross/Shanken (1989).
 To estimate a SUR model, the following equations are needed 
 ```{r}
 library(systemfit)
-returns_100 <- as.data.frame(portfolio_m[, 25:124])
-factors_pca <- as.data.frame(pc_scores_20)
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for the portfolios
+
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
+pc_scores_20 <- pca_res_20$factors
+mZk <- sweep(pc_scores_20, 1, Rf)
+
+T <- nrow(mZ)
+
+# Step 1: Compute means
+Z_bar <- colMeans(mZ)
+mu_k <- colMeans(mZk)
+
+# Step 2: Estimate B
+cov_Z_Zk <- crossprod(mZ - matrix(Z_bar, nrow = T, ncol = ncol(mZ), byrow = TRUE), 
+                      mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
+cov_Zk <- crossprod(mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
+B_hat <- cov_Z_Zk %*% solve(cov_Zk)
+
+# Step 3: Estimate alpha
+alpha_hat <- Z_bar - B_hat %*% mu_k
+
+# Step 4: Estimate Sigma
+residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
+Sigma_hat <- crossprod(residuals) / T
+
+
 ```
 
 
