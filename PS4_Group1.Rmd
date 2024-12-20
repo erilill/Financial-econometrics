@@ -745,3 +745,81 @@ kable(results_df, caption = "BIC Values for Different Models")
 
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
+
+```{r}
+SMB <- factors_m$SMB
+HML <- factors_m$HML
+
+cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
+
+results <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  s = numeric(),
+  h = numeric(),
+  R2 = numeric(),
+  R2_comp = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  StdErr_s = numeric(),
+  StdErr_h = numeric(), 
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  PValue_s = numeric(),
+  Pvalue_h = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in cols){
+  ER <- portfolio_factors[[i]]-portfolio_factors$Tbill
+  market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
+  capm_model <- lm(ER ~ market_excess+SMB+HML)
+  
+  capm_comp <- lm(ER ~ market_excess)
+  
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["market_excess"]
+  s <- coef(capm_model)["SMB"]
+  h <- coef(capm_model)["HML"]
+  r_squared <- summary(capm_model)$r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
+  std_err_s <- coef(summary(capm_model))["SMB", "Std. Error"]
+  std_err_h <- coef(summary(capm_model))["HML", "Std. Error"]
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
+  p_value_s <- coef(summary(capm_model))["SMB", "Pr(>|t|)"]
+  p_value_h <- coef(summary(capm_model))["HML", "Pr(>|t|)"]
+  
+  r_squared_comp <- summary(capm_comp)$r.squared
+  
+  results <- rbind(
+    results,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      s=s,
+      h=h,
+      R2 = r_squared,
+      R2_comp = r_squared_comp, 
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      StdErr_s = std_err_s,
+      StdErr_h = std_err_h, 
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta,
+      PValue_s = p_value_s,
+      Pvalue_h = p_value_h
+    )
+  )
+}
+
+rownames(results) <- NULL
+
+kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
+
+kable(results[,c(1,4:5)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor model between the portfolios", label = "tab:3factor_coeff")
+```
+
