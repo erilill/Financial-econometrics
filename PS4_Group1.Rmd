@@ -417,8 +417,8 @@ Z_t=\alpha+\epsilon_t
 $$
 
 ```{r}
-sur_ur <- sur(mZ,mZk)
-sur_r <- sur(mZ,NULL)
+sur_ur_5f <- sur(mZ,mZk)
+sur_r_5f <- sur(mZ,NULL)
 kable(adjusted_LR_test(sur_ur,sur_r))
 ```
 
@@ -441,14 +441,22 @@ Rm = as.matrix(portfolio_m[,'Market'])
 mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
 vZm = Rm - Rf #matrix of excess returns for the market portfolio
 
-sur_ur <- sur(mZ,vZm)
-sur_r <- sur(mZ,NULL)
+sur_ur_1f <- sur(mZ,vZm)
+sur_r_1f <- sur(mZ,NULL)
 kable(adjusted_LR_test(sur_ur,sur_r))
 
 ```
 
 
-We reject the null that $B=0$,i .e. the market risk premium is jointly significant.
+We reject the null that $B=0$,i .e. the market risk premium is jointly significant. Since we reject the null in both cases, the tests do not indicate that the market risk premium has explanatory power beyond the principal components.
+
+Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
+
+```{r}
+sur_ur_5f$BIC # 5 factor model with principal components
+sur_ur_1f$BIC # 1 factor model with market risk premium
+```
+We can see that the 5 factor model with the principal components has a better goodness of fit than the 1 factor model with the market risk premium, for the complete system.
 
 
 # B. Fama-French regressions
