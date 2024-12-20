@@ -264,8 +264,15 @@ Checking for how much of the variation is explained using the one-factor model d
 However, when analyzing the significance we have found that it is significant at the 1\% level for all portfolios.
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
+To be able to interpret the findings we need to divide the data into three parts, small, medium and large sized companies. We observe the medium sized companies are often one of the models that exhibit the highest $R^2$ among all the models with R55 having an $R^2$ in the four and five factor models and second highest in the one-factor model. 
 
-We can see in the table above that the 1 factor model has the lowest R squareds. The best...
+For small companies we observe that the ones with low and medium book-to-market ratio are experiencing consistently among the worse goodness-of-fit and this becomes especially clear in the one-factor model. However, R110 have second highest $R^2$ in the four and five factor models.
+
+For the largest companies we observe that R101 and R105 are behaving quite similarly to the medium sized companies, experience relatively high degree of explanation and particularly R101 which is estimated with the highest $R^2$ by the one-factor model. One diverging finding here is the R1010 which is by far the absolutely worst goodness-of-fit by all the models. 
+
+These findings can be interpreted as there are unique dynamics in the R11, R15 and R1010 which is hard to capture by the one-factor model or the PCA-models. 
+
+Among the models we observe that the one-factor models compares generally worse than the four and five-factor models.  
 
 ## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
 
@@ -300,7 +307,7 @@ $$
 \hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})(Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})'
 $$
 
-We can do the above in R
+We can do the above in R:
 
 ```{r}
 sur <- function(Z, Z_k){
@@ -707,3 +714,81 @@ kable(results_df, caption = "BIC Values for Different Models")
 
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
+
+```{r}
+SMB <- factors_m$SMB
+HML <- factors_m$HML
+
+cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
+
+results <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  s = numeric(),
+  h = numeric(),
+  R2 = numeric(),
+  R2_comp = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  StdErr_s = numeric(),
+  StdErr_h = numeric(), 
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  PValue_s = numeric(),
+  Pvalue_h = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in cols){
+  ER <- portfolio_factors[[i]]-portfolio_factors$Tbill
+  market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
+  capm_model <- lm(ER ~ market_excess+SMB+HML)
+  
+  capm_comp <- lm(ER ~ market_excess)
+  
+  alpha <- coef(capm_model)["(Intercept)"]
+  beta <- coef(capm_model)["market_excess"]
+  s <- coef(capm_model)["SMB"]
+  h <- coef(capm_model)["HML"]
+  r_squared <- summary(capm_model)$r.squared
+  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
+  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
+  std_err_s <- coef(summary(capm_model))["SMB", "Std. Error"]
+  std_err_h <- coef(summary(capm_model))["HML", "Std. Error"]
+  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
+  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
+  p_value_s <- coef(summary(capm_model))["SMB", "Pr(>|t|)"]
+  p_value_h <- coef(summary(capm_model))["HML", "Pr(>|t|)"]
+  
+  r_squared_comp <- summary(capm_comp)$r.squared
+  
+  results <- rbind(
+    results,
+    data.frame(
+      Portfolio = i,
+      Alpha = alpha,
+      Beta = beta,
+      s=s,
+      h=h,
+      R2 = r_squared,
+      R2_comp = r_squared_comp, 
+      StdErrAlpha = std_err_alpha,
+      StdErrBeta = std_err_beta,
+      StdErr_s = std_err_s,
+      StdErr_h = std_err_h, 
+      PValueAlpha = p_value_alpha,
+      PValueBeta = p_value_beta,
+      PValue_s = p_value_s,
+      Pvalue_h = p_value_h
+    )
+  )
+}
+
+rownames(results) <- NULL
+
+kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
+
+kable(results[,c(1,4:5)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor model between the portfolios", label = "tab:3factor_coeff")
+```
+
