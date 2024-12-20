@@ -197,16 +197,16 @@ mR2_20_100 <- matrix(NA, nrow = length(portfolio), ncol = 2)
 
 for (i in 1:length(portfolio)){
     model_20 <- lm(mZ[, portfolio[i]] ~ pc_scores_excess_20)
-    mR2_100_20[i,1] <- summary(model_20)$r.squared
+    mR2_20_100[i,1] <- summary(model_20)$r.squared
     model_100 <- lm(mZ[, portfolio[i]] ~ pc_scores_excess_100)
-    mR2_100_20[i,2] <- summary(model_100)$r.squared
+    mR2_20_100[i,2] <- summary(model_100)$r.squared
 }
 
 
 R2_comparison <- data.frame(
   Portfolio = colnames(mZ)[portfolio],
-  `PCA based on 20 MEx/MEBEx portfolios` = round(mR2_100_20[, 1], 2),
-  `PCA based on 100 Rx(x)y(y) portfolios` = round(mR2_100_20[, 2], 2)
+  `PCA based on 20 MEx/MEBEx portfolios` = round(mR2_20_100[, 1], 2),
+  `PCA based on 100 Rx(x)y(y) portfolios` = round(mR2_20_100[, 2], 2)
 )
 
 kable(R2_comparison, caption = "R-squared values for 5 factor models")
@@ -237,7 +237,7 @@ for (i in 1:length(portfolio)){
 }
 
 R2_table <- cbind(colnames(mZ)[c(1,5,10,41,45,50,91,95,100)],round(mR2,2))
-R2_table_final <- cbind(R2_table,round(mR2_market,2))
+R2_table_final <- cbind(R2_table,round(vR2_market,2))
 colnames(R2_table_final) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors", "1 Factor - Market risk premium")
 kable(R2_table_final, caption = "R-squared values for 1-5 factor model and 1 Factor market model")
 
