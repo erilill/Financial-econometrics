@@ -263,13 +263,30 @@ We can see in the table above that the 1 factor model has the lowest R squareds.
 
 ## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
 
-To answer this question, since we have the PCA for 20, we want to estimate a system of equations. The OLS estimator for this becomes as following:
+We want to estimate the model
+
+$$
+Z_t=\alpha+B Z_{Kt}+\epsilon_t
+$$
+where $Z_{Kt}$ is the excess returns of the 5-factor portfolios with PC's based on the 20 size and book-to-market portfolios.
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for the portfolios
+
+pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
+pc_scores_20 <- pca_res_20$factors
+mZk <- sweep(pc_scores_20, 1, Rf)
+```
+
+We can estimate the system with OLS
 
 $$
 \hat{\alpha}=\bar{Z}-\hat{\beta}\hat{\mu}_K, \\
 \text{where }
 \bar{Z}=\frac{1}{T} \sum_{t=1}^{T}Z_t, \text{ }\hat{\mu}_k=\frac{1}{T}\sum_{t=1}^{T}Z_{Kt},\\
-\hat{\beta}= [\sum_{t=1}^{T}(Z_t-\bar{Z})(Z_{Kt}-\hat{\mu}_k)' ][\sum_{t=1}^{T} (Z_t-\hat{\mu}_K)(Z_{Kt}-\hat{\mu}_k)' ]
+\hat{\beta}= \left[\sum_{t=1}^{T}(Z_t-\bar{Z})(Z_{Kt}-\hat{\mu}_k)' \right]\left[\sum_{t=1}^{T} (Z_t-\hat{\mu}_K)(Z_{Kt}-\hat{\mu}_k)' \right]
 $$
 The covariance matrix of the error terms are estimated by maximum likelihood: 
 $$
@@ -284,15 +301,10 @@ And the adjusted likelihood ratio test is:
 $$
 LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
 $$
-where the restricted model is with intercept = 0 and the unrestricted model is the full model. 
 
 
+So now we test jointly for exact factor pricing in all equations. We estimate the SUR model and do the F-test for $\alpha$. Here are the functions
 
-
-Since we have stock portfolios as factors we aim to estimate a SUR. 
-F-test based on Gibbons/Ross/Shanken (1989). 
-
-We estimate a SUR model
 ```{r}
 sur <- function(Z, Z_k){
   T <- nrow(Z)
@@ -316,11 +328,7 @@ sur <- function(Z, Z_k){
 
   return(list(mu_k=mu_k, B_hat=B_hat, alpha_hat=alpha_hat, Sigma_hat=Sigma_hat, residuals = residuals))
 }
-```
 
-We do F test for $\alpha$
-
-```{r}
 GRS_F <- function(Z, Z_k){
   
   sur <- sur(Z, Z_k)
@@ -347,48 +355,13 @@ GRS_F <- function(Z, Z_k){
   return(results)
 }
 ```
-
+Do the F-test
 ```{r}
-library(systemfit)
-mR = as.matrix(portfolio_m[,25:124])
-Rf = as.matrix(portfolio_m[,'Tbill'])
-mZ = sweep(mR,1,Rf) #matrix of excess returns for the portfolios
-
-pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
-pc_scores_20 <- pca_res_20$factors
-mZk <- sweep(pc_scores_20, 1, Rf)
-
-fit <- sur(mZ,mZk)
-
-# Step 3: Estimate alpha
-alpha_hat <- Z_bar - B_hat %*% mu_k
-
-# Step 4: Estimate Sigma
-residuals <- mZ - (matrix(alpha_hat, nrow = T, ncol = ncol(mZ), byrow = TRUE) + mZk %*% t(B_hat))
-Sigma_hat <- crossprod(residuals) / T
-
-N <- length(alphas)
-K <- 3
-
-Omega <- cov(mZk)
-
-GRS_F <- (T - N - K) / N * 
-         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
-         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
-
-GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
-
-results <- data.frame(
-  Statistic = c("GRS F-statistic:", "p-value:"),
-  Value = c(GRS_F, GRS_p_value)
-)
-
-kable(results, rownames = c("GRS F-statistic:", "p-value:"),
-      caption = "F-test for exact factor pricing", digits = 3)
-
+F_test_alpha <- GRS_F(mZ,mZk)
+kable(F_test_alpha)
 ```
 
-
+We can see that we reject the null that $\alpha=0$, so we do not have evidence exact factor pricing.
 
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
