@@ -210,7 +210,6 @@ R2_comparison <- data.frame(
 )
 
 kable(R2_comparison, caption = "R-squared values for 5 factor models")
-
 ```
 
 ### (c) Evaluate the explanatory power of the individual principal components and compare it to that provided by the market risk premium solely. Does the market risk premium have any explanatory power beyond the principal components? What is about the significance of the market risk premium in such a regression? What can you conclude?
@@ -253,7 +252,6 @@ market_stats <- data.frame(
 kable(market_stats, caption = "Significance of the market risk premium")
 
 ```
-
 
 It is significant at the 1\% level for all portfolios.
 
