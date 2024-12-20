@@ -284,7 +284,6 @@ LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \
 $$
 where the restricted model is with intercept = 0 and the unrestricted model is the full model. 
 
-<<<<<<< HEAD
 
 
 First we start by preproccesing the data:
@@ -345,14 +344,12 @@ kable(results, rownames = c("GRS F-statistic:", "p-value:"),
 ```
 
 
-=======
->>>>>>> 4510924a18e09e8779cf8c85a35b9eb7a6a66aea
+
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
 
 To estimate a SUR model, the following equations are needed 
-<<<<<<< HEAD
-=======
+
 ```{r}
 library(systemfit)
 mR = as.matrix(portfolio_m[,25:124])
@@ -384,7 +381,6 @@ Sigma_hat <- crossprod(residuals) / T
 
 
 ```
->>>>>>> 4510924a18e09e8779cf8c85a35b9eb7a6a66aea
 
 
 
