@@ -423,7 +423,28 @@ We can see that we reject the null that $B=0$, i.e. the factors are jointly sign
 
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
+Now we estimate the 1 factor model
 
+$$
+Z_t=\alpha+B Z_{mt}+\epsilon_t
+$$
+and test if $B=0$.
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+vZm = Rm - Rf #matrix of excess returns for the market portfolio
+
+sur_ur <- sur(mZ,vZm)
+sur_r <- sur(mZ,NULL)
+kable(adjusted_LR_test(sur_ur,sur_r))
+
+```
+
+
+We reject the null that $B=0$,i .e. the market risk premium is jointly significant.
 
 
 # B. Fama-French regressions
