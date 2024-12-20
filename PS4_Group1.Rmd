@@ -368,6 +368,10 @@ kable(F_test_alpha)
 
 We can see that we reject the null that $\alpha=0$, so we do not have evidence exact factor pricing.
 
+Lets do the LR test
+```{r}
+adjusted_LR_results <- adjusted_LR_test(sur(mZ,mZk), restricted_model)
+```
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
 
