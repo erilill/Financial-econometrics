@@ -259,8 +259,9 @@ market_stats <- data.frame(
 kable(market_stats, caption = "Significance of the market risk premium")
 
 ```
+Checking for how much of the variation is explained using the one-factor model doesn't prove any improvement compared to the 5-factor model previously used. We see that the one-factor model outperformed the other models in only one instance, for portfolio R101 and quite similar result for R105 to the result of the 5-factor model. However, it is considerably worse in all other cases, especially when we are analyzing the variation explained for low size/book-to-market portfolios. Here the model is really bad. This finding is not surprising, since empirical evidence suggests that smaller companies have a different risk-return dynamic more related to the idiosyncratic risk while the one-factor model contains the market risk premium and for this reason doesn't explain the variation that well. This might be the reasoning why Fama and French introduced additional factors size(SMB) and value(HML) to the model and developed the three-factor model. 
 
-It is significant at the 1\% level for all portfolios.
+However, when analyzing the significance we have found that it is significant at the 1\% level for all portfolios.
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
 
