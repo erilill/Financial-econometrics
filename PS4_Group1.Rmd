@@ -292,69 +292,65 @@ where the restricted model is with intercept = 0 and the unrestricted model is t
 
 
 
-First we start by preproccesing the data:
-```{r}
-returns_100 <- as.data.frame(portfolio_m[, 25:124])
-factors_pca <- as.data.frame(pc_scores_20)
-```
-
-```{r}
-# Create the system of equations 
-equations <- list()
-for (i in 1:ncol(returns_100)) {
-  portfolio <- colnames(returns_100)[i]
-  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
-}
-
-sur_data <- cbind(returns_100, factors_pca)
-colnames(sur_data)[101:105] <- c("PC1", "PC2", "PC3", "PC4", "PC5")
-
-sur_model <- systemfit(equations, method = "SUR", data = sur_data)
-```
-
-
-```{r}
-residuals <- residuals(sur_model)
-
-alphas <- coef(sur_model)[grepl("\\(Intercept\\)", names(coef(sur_model)))]
-
-Sigma <- cov(residuals)
-
-T <- nrow(residuals)
-N <- length(alphas)
-K <- 3
-
-mu_k <- matrix(colMeans(sur_data[, c("PC1", "PC2", "PC3", "PC4", "PC5")]))
-
-Z_kt <- as.matrix(sur_data[, c("PC1", "PC2", "PC3", "PC4", "PC5")])
-
-Omega <- cov(Z_kt)
-
-GRS_F <- (T - N - K) / N * 
-         (t(alphas) %*% solve(Sigma) %*% alphas) /
-         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
-
-GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
-
-results <- data.frame(
-  Statistic = c("GRS F-statistic:", "p-value:"),
-  Value = c(GRS_F, GRS_p_value)
-)
-
-kable(results, rownames = c("GRS F-statistic:", "p-value:"),
-      caption = "F-test for exact factor pricing", digits = 3)
-```
-
-```{r}
-
-```
-
-
 
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
 
-To estimate a SUR model, the following equations are needed 
+We estimate a SUR model
+```{r}
+sur <- function(Z, Z_k){
+  T <- nrow(Z)
+
+  # Step 1: Compute means
+  Z_bar <- colMeans(Z)
+  mu_k <- colMeans(Z_k)
+
+  # Step 2: Estimate B
+  cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
+                      Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+  cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+  B_hat <- cov_Z_Zk %*% solve(cov_Zk)
+
+  # Step 3: Estimate alpha
+  alpha_hat <- Z_bar - B_hat %*% mu_k
+
+  # Step 4: Estimate Sigma
+  residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
+  Sigma_hat <- crossprod(residuals) / T
+
+  return(list(mu_k=mu_k, B_hat=B_hat, alpha_hat=alpha_hat, Sigma_hat=Sigma_hat, residuals = residuals))
+}
+```
+
+We do F test for $\alpha$
+
+```{r}
+GRS_F <- function(Z, Z_k){
+  
+  sur <- sur(Z, Z_k)
+  alpha_hat <- sur$alpha_hat
+  mu_k <- sur$mu_k
+  Sigma_hat <- sur$Sigma_hat
+
+  N <- length(alpha_hat)
+  K <- ncol(Z_k)
+  T <- nrow(Z)
+
+  Omega <- cov(Z_k)
+
+  GRS_F <- (T - N - K) / N * 
+         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
+         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
+
+  GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
+
+  results <- data.frame(
+    Statistic = c("GRS F-statistic:", "p-value:"),
+    Value = c(GRS_F, GRS_p_value)
+  )
+  return(results)
+}
+```
 
 ```{r}
 library(systemfit)
@@ -366,21 +362,8 @@ pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
 pc_scores_20 <- pca_res_20$factors
 mZk <- sweep(pc_scores_20, 1, Rf)
 
-T <- nrow(mZ)
+fit <- sur(mZ,mZk)
 
-# Step 1: Compute means
-Z_bar <- colMeans(mZ)
-mu_k <- colMeans(mZk)
-
-# Step 2: Estimate B
-cov_Z_Zk <- crossprod(mZ - matrix(Z_bar, nrow = T, ncol = ncol(mZ), byrow = TRUE), 
-                      mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
-cov_Zk <- crossprod(mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
-B_hat <- cov_Z_Zk %*% solve(cov_Zk)
-
-fit <- lm(mZ[,1]~mZk)
-fit$coefficients
-head(c(alpha_hat,B_hat))
 # Step 3: Estimate alpha
 alpha_hat <- Z_bar - B_hat %*% mu_k
 
@@ -623,36 +606,18 @@ Above you see a comparison in $R^2$ between three models: The augmented model wi
 
 ```{r}
 # Pre-process data
-excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_excess$Excess_PC1,  PC2=pc_scores_excess$Excess_PC2)
+excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_20[,1], PC2 = pc_scores_20[,2])
 excess_portfolio_factors <- excess_portfolio_factors %>%
-  mutate(across(c(3, 25:124), ~ . - Tbill))
+  mutate(across(c(3, 25:124,127:128), ~ . - Tbill))
 
 # Set factors
-indep <- c("Market", "SMB", "HML", "PC1", "PC2")
+indep <- c("Market", "SMB", "HML")
 
+# As matrix
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
 Z_k <- as.matrix(excess_portfolio_factors[, indep])
 
-T <- nrow(Z)
-
-# Step 1: Compute means
-Z_bar <- colMeans(Z)
-mu_k <- colMeans(Z_k)
-
-# Step 2: Estimate B
-cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
-                      Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-B_hat <- cov_Z_Zk %*% solve(cov_Zk)
-
-# Step 3: Estimate alpha
-alpha_hat <- Z_bar - B_hat %*% mu_k
-
-# Step 4: Estimate Sigma
-residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
-Sigma_hat <- crossprod(residuals) / T
-
-
+sur1 <- sur(Z, Z_k)
 ```
 
 ### (a) Test jointly for exact factor pricing in all equations.
@@ -660,21 +625,7 @@ Sigma_hat <- crossprod(residuals) / T
 We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989):
 
 ```{r}
-N <- length(alphas)
-K <- 3
-
-Omega <- cov(Z_k)
-
-GRS_F <- (T - N - K) / N * 
-         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
-         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
-
-GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
-
-results <- data.frame(
-  Statistic = c("GRS F-statistic:", "p-value:"),
-  Value = c(GRS_F, GRS_p_value)
-)
+results <- GRS_F(Z, Z_k)
 
 kable(results, rownames = c("GRS F-statistic:", "p-value:"),
       caption = "F-test for exact factor pricing", digits = 3)
@@ -684,11 +635,17 @@ Exact factor pricing implies that model explain all of the variation in excess r
 ### (b) Test jointly for the significance of the HML and SMB factors as well as the principal components. What do you find? Using information criteria find the model providing the best goodness-of-fit.
 
 ```{r}
-restricted_eq <- lapply(eq, function(eq) update(eq, ~ . - SMB - HML))
-restricted_model <- systemfit(restricted_eq, method = "SUR", data = excess_portfolio_factors)
+# Set factors
+indep <- c("Market")
 
-LR <- 2 * (logLik(sur_model) - logLik(restricted_model))
-df <- 2  
+# As matrix
+Z <- as.matrix(excess_portfolio_factors[, 25:124])
+Z_k <- as.matrix(excess_portfolio_factors[, indep])
+
+restricted_model <- sur(Z, Z_k)
+
+LR <- 2 * (LogLikelihood(sur1$residuals) - LogLikelihood(restricted_model$residuals))
+df <- ncol(sur1$B_hat) - ncol(restricted_model$B_hat)
 p_value <- pchisq(LR, df = df, lower.tail = FALSE)
 
 
