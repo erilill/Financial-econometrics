@@ -708,9 +708,8 @@ results_df <- data.frame(
 )
 
 kable(results_df, caption = "BIC Values for Different Models")
-
 ```
-
+In the above table you see the BIC for different combinations of factors which we deemed reasonable. The model with the lowest BIC is the one which includes Market, SMB, HML, PC1, and PC2, and we conclude that this model provides the best goodness of fit.
 
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
