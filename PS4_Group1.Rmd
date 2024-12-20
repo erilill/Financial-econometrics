@@ -310,13 +310,34 @@ cov_Z_Zk <- crossprod(mZ - matrix(Z_bar, nrow = T, ncol = ncol(mZ), byrow = TRUE
 cov_Zk <- crossprod(mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
 B_hat <- cov_Z_Zk %*% solve(cov_Zk)
 
+fit <- lm(mZ[,1]~mZk)
+fit$coefficients
+head(c(alpha_hat,B_hat))
 # Step 3: Estimate alpha
 alpha_hat <- Z_bar - B_hat %*% mu_k
 
 # Step 4: Estimate Sigma
-residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
+residuals <- mZ - (matrix(alpha_hat, nrow = T, ncol = ncol(mZ), byrow = TRUE) + mZk %*% t(B_hat))
 Sigma_hat <- crossprod(residuals) / T
 
+N <- length(alphas)
+K <- 3
+
+Omega <- cov(mZk)
+
+GRS_F <- (T - N - K) / N * 
+         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
+         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
+
+GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
+
+results <- data.frame(
+  Statistic = c("GRS F-statistic:", "p-value:"),
+  Value = c(GRS_F, GRS_p_value)
+)
+
+kable(results, rownames = c("GRS F-statistic:", "p-value:"),
+      caption = "F-test for exact factor pricing", digits = 3)
 
 ```
 
