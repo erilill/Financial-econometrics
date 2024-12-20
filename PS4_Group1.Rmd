@@ -273,6 +273,7 @@ We want to estimate the model
 $$
 Z_t=\alpha+B Z_{Kt}+\epsilon_t
 $$
+
 where $Z_{Kt}$ is the excess returns of the 5-factor portfolios with PC's based on the 20 size and book-to-market portfolios.
 
 ```{r}
@@ -297,18 +298,8 @@ The covariance matrix of the error terms are estimated by maximum likelihood:
 $$
 \hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})(Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})'
 $$
-The F-test proposed by Gibbons/Ross/Shanken (1989) is:
-$$
-J=\frac{T-N-K}{K}[1+\hat{\mu}_K' \hat{\Omega}_K^{-1} \hat{\mu}_K]^{-1} \hat{\alpha}' \hat{\Sigma}^{-1} \hat{\alpha} \sim F_{N, T-N-K}
-$$
-And the adjusted likelihood ratio test is: 
 
-$$
-LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
-$$
-
-
-So now we test jointly for exact factor pricing in all equations. We estimate the SUR model and do the F-test for $\alpha$. Here are the functions
+We can do the above in R
 
 ```{r}
 sur <- function(Z, Z_k){
@@ -338,10 +329,21 @@ sur <- function(Z, Z_k){
     residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
     Sigma_hat <- crossprod(residuals) / T
   }
-
-  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals))
+  mE <- residuals
+  ll <- LogLikelihood(mE)
+  k <- dim(B_hat)[1]*dim(B_hat)[2]+length(alpha_hat)
+  BIC = k*log(T)-2*ll
+  
+  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals,BIC=BIC))
 }
+```
 
+The F-test proposed by Gibbons/Ross/Shanken (1989) is:
+$$
+J=\frac{T-N-K}{K}[1+\hat{\mu}_K' \hat{\Omega}_K^{-1} \hat{\mu}_K]^{-1} \hat{\alpha}' \hat{\Sigma}^{-1} \hat{\alpha} \sim F_{N, T-N-K}
+$$
+
+```{r}
 GRS_F <- function(Z, Z_k){
   
   sur <- sur(Z, Z_k)
@@ -367,7 +369,16 @@ GRS_F <- function(Z, Z_k){
   )
   return(results)
 }
+```
 
+And the adjusted likelihood ratio test is: 
+
+$$
+LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
+$$
+
+
+```{r}
 adjusted_LR_test <- function(sur_full, sur_res){
   T <- nrow(sur_full$residuals)
   N <- ncol(sur_full$residuals)
@@ -390,7 +401,8 @@ adjusted_LR_test <- function(sur_full, sur_res){
   
 }
 ```
-Do the F-test
+
+Do the F-test for $\alpha=0$.
 ```{r}
 F_test_alpha <- GRS_F(mZ,mZk)
 kable(F_test_alpha)
@@ -398,13 +410,45 @@ kable(F_test_alpha)
 
 We can see that we reject the null that $\alpha=0$, so we do not have evidence exact factor pricing.
 
-Lets do the LR test
+Do the LR test for the joint significance of the factors, i.e. the do LR test with the restricted model where $B=0$
+
+$$
+Z_t=\alpha+\epsilon_t
+$$
+
 ```{r}
-adjusted_LR_results <- adjusted_LR_test(sur(mZ,mZk), restricted_model)
+sur_ur <- sur(mZ,mZk)
+sur_r <- sur(mZ,NULL)
+kable(adjusted_LR_test(sur_ur,sur_r))
 ```
+
+We can see that we reject the null that $B=0$, i.e. the factors are jointly significant at a 1\% level.
+
+
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
+Now we estimate the 1 factor model
 
+$$
+Z_t=\alpha+B Z_{mt}+\epsilon_t
+$$
+and test if $B=0$.
+
+```{r}
+mR = as.matrix(portfolio_m[,25:124])
+Rf = as.matrix(portfolio_m[,'Tbill'])
+Rm = as.matrix(portfolio_m[,'Market'])
+mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
+vZm = Rm - Rf #matrix of excess returns for the market portfolio
+
+sur_ur <- sur(mZ,vZm)
+sur_r <- sur(mZ,NULL)
+kable(adjusted_LR_test(sur_ur,sur_r))
+
+```
+
+
+We reject the null that $B=0$,i .e. the market risk premium is jointly significant.
 
 
 # B. Fama-French regressions
