@@ -578,20 +578,37 @@ Above you see a comparison in $R^2$ between three models: The augmented model wi
 ## 3. Estimate the Fama-French model for all 100 size-book-to-market portfolios as a system.
 
 ```{r}
+# Pre-process data
 excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_excess$Excess_PC1,  PC2=pc_scores_excess$Excess_PC2)
 excess_portfolio_factors <- excess_portfolio_factors %>%
   mutate(across(c(3, 25:124), ~ . - Tbill))
 
-cols <- colnames(portfolio_factors[,25:124])
-indep <- c("Market", "SMB", "HML")
+# Set factors
+indep <- c("Market", "SMB", "HML", "PC1", "PC2")
 
-eq <- list()
-for (i in cols) {
-  formula <- as.formula(paste(i, "~", paste(indep, collapse = " + ")))
-  eq[[i]] <- formula
-}
+Z <- as.matrix(excess_portfolio_factors[, 25:124])
+Z_k <- as.matrix(excess_portfolio_factors[, indep])
 
-sur_model <- systemfit(eq, method = "SUR", data = excess_portfolio_factors)
+T <- nrow(Z)
+
+# Step 1: Compute means
+Z_bar <- colMeans(Z)
+mu_k <- colMeans(Z_k)
+
+# Step 2: Estimate B
+cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
+                      Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+B_hat <- cov_Z_Zk %*% solve(cov_Zk)
+
+# Step 3: Estimate alpha
+alpha_hat <- Z_bar - B_hat %*% mu_k
+
+# Step 4: Estimate Sigma
+residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
+Sigma_hat <- crossprod(residuals) / T
+
+
 ```
 
 ### (a) Test jointly for exact factor pricing in all equations.
@@ -599,24 +616,13 @@ sur_model <- systemfit(eq, method = "SUR", data = excess_portfolio_factors)
 We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989):
 
 ```{r}
-residuals <- residuals(sur_model)
-
-alphas <- coef(sur_model)[grepl("\\(Intercept\\)", names(coef(sur_model)))]
-
-Sigma <- cov(residuals)
-
-T <- nrow(residuals)
 N <- length(alphas)
 K <- 3
 
-mu_k <- matrix(colMeans(excess_portfolio_factors[, c("Market", "SMB", "HML")]))
-
-Z_kt <- as.matrix(excess_portfolio_factors[, c("Market", "SMB", "HML")])
-
-Omega <- cov(Z_kt)
+Omega <- cov(Z_k)
 
 GRS_F <- (T - N - K) / N * 
-         (t(alphas) %*% solve(Sigma) %*% alphas) /
+         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
          (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
 
 GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
