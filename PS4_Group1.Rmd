@@ -292,7 +292,60 @@ where the restricted model is with intercept = 0 and the unrestricted model is t
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
 
-To estimate a SUR model, the following equations are needed 
+We estimate a SUR model
+```{r}
+sur <- function(Z, Z_k){
+  T <- nrow(Z)
+
+  # Step 1: Compute means
+  Z_bar <- colMeans(Z)
+  mu_k <- colMeans(Z_k)
+
+  # Step 2: Estimate B
+  cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
+                      Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+  cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
+  B_hat <- cov_Z_Zk %*% solve(cov_Zk)
+
+  # Step 3: Estimate alpha
+  alpha_hat <- Z_bar - B_hat %*% mu_k
+
+  # Step 4: Estimate Sigma
+  residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
+  Sigma_hat <- crossprod(residuals) / T
+
+  return(list(mu_k=mu_k, B_hat=B_hat, alpha_hat=alpha_hat, Sigma_hat=Sigma_hat, residuals = residuals))
+}
+```
+
+We do F test for $\alpha$
+
+```{r}
+GRS_F <- function(Z, Z_k){
+  
+  sur <- sur(Z, Z_k)
+  alpha_hat <- sur$alpha_hat
+  mu_k <- sur$mu_k
+  Sigma_hat <- sur$Sigma_hat
+
+  N <- length(alpha_hat)
+  K <- ncol(Z_k)
+
+  Omega <- cov(Z_k)
+
+  GRS_F <- (T - N - K) / N * 
+         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
+         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
+
+  GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
+
+  results <- data.frame(
+    Statistic = c("GRS F-statistic:", "p-value:"),
+    Value = c(GRS_F, GRS_p_value)
+  )
+  return(results)
+}
+```
 
 ```{r}
 library(systemfit)
@@ -304,17 +357,7 @@ pca_res_20 <- PCA(as.matrix(portfolio_m[,5:24]), 5) #20 size book, 5 factors
 pc_scores_20 <- pca_res_20$factors
 mZk <- sweep(pc_scores_20, 1, Rf)
 
-T <- nrow(mZ)
-
-# Step 1: Compute means
-Z_bar <- colMeans(mZ)
-mu_k <- colMeans(mZk)
-
-# Step 2: Estimate B
-cov_Z_Zk <- crossprod(mZ - matrix(Z_bar, nrow = T, ncol = ncol(mZ), byrow = TRUE), 
-                      mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
-cov_Zk <- crossprod(mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
-B_hat <- cov_Z_Zk %*% solve(cov_Zk)
+fit <- sur(mZ,mZk)
 
 # Step 3: Estimate alpha
 alpha_hat <- Z_bar - B_hat %*% mu_k
@@ -569,28 +612,6 @@ indep <- c("Market", "SMB", "HML")
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
 Z_k <- as.matrix(excess_portfolio_factors[, indep])
 
-sur <- function(Z, Z_k){
-  T <- nrow(Z)
-
-  # Step 1: Compute means
-  Z_bar <- colMeans(Z)
-  mu_k <- colMeans(Z_k)
-
-  # Step 2: Estimate B
-  cov_Z_Zk <- crossprod(Z - matrix(Z_bar, nrow = T, ncol = ncol(Z), byrow = TRUE), 
-                      Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-  cov_Zk <- crossprod(Z_k - matrix(mu_k, nrow = T, ncol = ncol(Z_k), byrow = TRUE))
-  B_hat <- cov_Z_Zk %*% solve(cov_Zk)
-
-  # Step 3: Estimate alpha
-  alpha_hat <- Z_bar - B_hat %*% mu_k
-
-  # Step 4: Estimate Sigma
-  residuals <- Z - (matrix(alpha_hat, nrow = T, ncol = ncol(Z), byrow = TRUE) + Z_k %*% t(B_hat))
-  Sigma_hat <- crossprod(residuals) / T
-
-  return(list(mu_k=mu_k, B_hat=B_hat, alpha_hat=alpha_hat, Sigma_hat=Sigma_hat, residuals = residuals))
-}
 
 sur1 <- sur(Z, Z_k)
 ```
@@ -600,32 +621,6 @@ sur1 <- sur(Z, Z_k)
 We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989):
 
 ```{r}
-
-GRS_F <- function(Z, Z_k){
-  
-  sur <- sur(Z, Z_k)
-  alpha_hat <- sur$alpha_hat
-  mu_k <- sur$mu_k
-  Sigma_hat <- sur$Sigma_hat
-
-  N <- length(alpha_hat)
-  K <- ncol(Z_k)
-
-  Omega <- cov(Z_k)
-
-  GRS_F <- (T - N - K) / N * 
-         (t(alpha_hat) %*% solve(Sigma_hat) %*% alpha_hat) /
-         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
-
-  GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
-
-  results <- data.frame(
-    Statistic = c("GRS F-statistic:", "p-value:"),
-    Value = c(GRS_F, GRS_p_value)
-  )
-  return(results)
-}
-
 results <- GRS_F(Z, Z_k)
 
 kable(results, rownames = c("GRS F-statistic:", "p-value:"),
