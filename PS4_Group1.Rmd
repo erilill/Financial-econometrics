@@ -286,64 +286,6 @@ where the restricted model is with intercept = 0 and the unrestricted model is t
 
 
 
-First we start by preproccesing the data:
-```{r}
-returns_100 <- as.data.frame(portfolio_m[, 25:124])
-factors_pca <- as.data.frame(pc_scores_20)
-```
-
-```{r}
-# Create the system of equations 
-equations <- list()
-for (i in 1:ncol(returns_100)) {
-  portfolio <- colnames(returns_100)[i]
-  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
-}
-
-sur_data <- cbind(returns_100, factors_pca)
-colnames(sur_data)[101:105] <- c("PC1", "PC2", "PC3", "PC4", "PC5")
-
-sur_model <- systemfit(equations, method = "SUR", data = sur_data)
-```
-
-
-```{r}
-residuals <- residuals(sur_model)
-
-alphas <- coef(sur_model)[grepl("\\(Intercept\\)", names(coef(sur_model)))]
-
-Sigma <- cov(residuals)
-
-T <- nrow(residuals)
-N <- length(alphas)
-K <- 3
-
-mu_k <- matrix(colMeans(sur_data[, c("PC1", "PC2", "PC3", "PC4", "PC5")]))
-
-Z_kt <- as.matrix(sur_data[, c("PC1", "PC2", "PC3", "PC4", "PC5")])
-
-Omega <- cov(Z_kt)
-
-GRS_F <- (T - N - K) / N * 
-         (t(alphas) %*% solve(Sigma) %*% alphas) /
-         (1 + t(mu_k) %*% solve(Omega) %*% (mu_k))
-
-GRS_p_value <- pf(GRS_F, df1 = N, df2 = T - N - K, lower.tail = FALSE)
-
-results <- data.frame(
-  Statistic = c("GRS F-statistic:", "p-value:"),
-  Value = c(GRS_F, GRS_p_value)
-)
-
-kable(results, rownames = c("GRS F-statistic:", "p-value:"),
-      caption = "F-test for exact factor pricing", digits = 3)
-```
-
-```{r}
-
-```
-
-
 
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
@@ -372,9 +314,6 @@ cov_Z_Zk <- crossprod(mZ - matrix(Z_bar, nrow = T, ncol = ncol(mZ), byrow = TRUE
 cov_Zk <- crossprod(mZk - matrix(mu_k, nrow = T, ncol = ncol(mZk), byrow = TRUE))
 B_hat <- cov_Z_Zk %*% solve(cov_Zk)
 
-fit <- lm(mZ[,1]~mZk)
-fit$coefficients
-head(c(alpha_hat,B_hat))
 # Step 3: Estimate alpha
 alpha_hat <- Z_bar - B_hat %*% mu_k
 
