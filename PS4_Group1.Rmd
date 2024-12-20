@@ -284,43 +284,6 @@ LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \
 $$
 where the restricted model is with intercept = 0 and the unrestricted model is the full model. 
 
-
-
-First we start by preproccesing the data:
-```{r}
-returns_100 <- as.data.frame(portfolio_m[, 25:124])
-factors_pca <- as.data.frame(pc_scores_20)
-```
-
-```{r}
-# Create the system of equations 
-equations <- list()
-for (i in 1:ncol(returns_100)) {
-  portfolio <- colnames(returns_100)[i]
-  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
-}
-sur_data <- cbind(returns_100, factors_pca)
-
-# Initialize the matrices
-res_mat = matrix(0, nrow = nrow(returns_100), ncol = ncol(returns_100))
-coef_mat = matrix(0, nrow = ncol(factors_pca) + 1, ncol = ncol(returns_100))
-
-
-for (i in 1:ncol(returns_100)) {
-  # Fit OLS for each portfolio
-  model <- lm(returns_100[, i] ~ ., data = factors_pca)
-  res_mat[, i] <- residuals(model)  # Save residuals
-  coef_mat[, i] <- coef(model)  # Save coefficients
-}
-Sigma_hat <- cov(res_mat) # 100x100
-
-
-
-```
-
-
-
-
 Since we have stock portfolios as factors we aim to estimate a SUR. 
 F-test based on Gibbons/Ross/Shanken (1989). 
 
@@ -329,40 +292,6 @@ To estimate a SUR model, the following equations are needed
 library(systemfit)
 returns_100 <- as.data.frame(portfolio_m[, 25:124])
 factors_pca <- as.data.frame(pc_scores_20)
-```
-
-```{r}
-# Create the system of equations 
-equations <- list()
-for (i in 1:ncol(returns_100)) {
-  portfolio <- colnames(returns_100)[i]
-  equations[[portfolio]] <- as.formula(paste(portfolio, "~", paste(colnames(factors_pca), collapse = " + ")))
-}
-```
-
-```{r}
-# Prepare the dataset for SUR
-sur_data <- cbind(returns_100, factors_pca)
-
-# First step: estimate the SUR model using FGLS
-sur_model_fgls <- systemfit(equations, data = sur_data, method = "SUR")
-# Second step: estimate the SUR model using OLS 
-sur_model_ols <- systemfit(equations, data = sur_data, method = "OLS")
-
-
-factor_names <- colnames(factors_pca)
-hypothesis <- paste(factor_names, "= 0", collapse = " & ")
-
-f_test <- linearHypothesis(coef = sur_model_fgls[["coefCov"]], vcov = sur_model_fgls[["residCov"]])
-  
-  (sur_model_fgls, sur_model_fgls[["residCov"]], c(0, 1, 1, 1, 1, 1)))
-f_test <- lht(sur_model_fgls, sur_model_fgls[["coefCov"]])
-print(f_test)
-              
-```
-
-```{r}
-
 ```
 
 
