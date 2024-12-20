@@ -220,52 +220,46 @@ mR = as.matrix(portfolio_m[,25:124])
 Rf = as.matrix(portfolio_m[,'Tbill'])
 Rm = as.matrix(portfolio_m[,'Market'])
 mZ = sweep(mR,1,Rf) #matrix of excess returns for all portfolios
-vZm = Rm - Rf
+vZm = Rm - Rf #matrix of excess returns for the market portfolio
 
-market_1st <- lm(mZ[, 1] ~ vZm)
-market_5th <- lm(mZ[, 5] ~ vZm)
-market_10th <- lm(mZ[, 10] ~ vZm)
+portfolio <- c(1,5,10,41,45,50,91,95,100)
 
-# Extract R-squared values for each model
-r_squared_market <- data.frame(
-  Portfolio = c("1st", "5th", "10th"),
-  `Market Risk Premium` = c(
-    round(summary(market_1st)$r.squared, 2),
-    round(summary(market_5th)$r.squared, 2),
-    round(summary(market_10th)$r.squared, 2)
-  )
-)
+vR2_market <- matrix(NA,nrow=length(portfolio),1)
+vtstat_market <- matrix(NA,nrow=length(portfolio),1)
+vpval_market <- matrix(NA,nrow=length(portfolio),1)
 
-r_squared_comparison2 <- cbind(r_squared_comparison,r_squared_market[,2])
-colnames(r_squared_comparison2) <- c("Portfolio", "PCA 100 size-book-to-market","PCA 20 size and book-to-market", "Market risk premium")
-kable(r_squared_comparison2, caption = "Comparison of R-squared values")
 
-# Extract t-statistics and p-values for each model
+
+for (i in 1:length(portfolio)){
+    model <- lm(mZ[, portfolio[i]] ~ vZm)
+    vR2_market[i, 1] <- summary(model)$r.squared
+    vtstat_market[i,1] <-  summary(model)$coefficients[2, "t value"]
+    vpval_market[i,1] <-  summary(model)$coefficients[2, "Pr(>|t|)"]
+}
+
+R2_table <- cbind(colnames(mZ)[c(1,5,10,41,45,50,91,95,100)],round(mR2,2))
+R2_table_final <- cbind(R2_table,round(mR2_market,2))
+colnames(R2_table_final) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors", "1 Factor - Market risk premium")
+kable(R2_table_final, caption = "R-squared values for 1-5 factor model and 1 Factor market model")
+
+# Combine results into a data frame
 market_stats <- data.frame(
-  Portfolio = c("1st", "5th", "10th"),
-  `Market Risk Premium t-statistic` = c(
-    round(coef(summary(market_1st))["vZm", "t value"], 3),
-    round(coef(summary(market_5th))["vZm", "t value"], 3),
-    round(coef(summary(market_10th))["vZm", "t value"], 3)
-  ),
-  `Market Risk Premium p-value` = c(
-    round(coef(summary(market_1st))["vZm", "Pr(>|t|)"], 3),
-    round(coef(summary(market_5th))["vZm", "Pr(>|t|)"], 3),
-    round(coef(summary(market_10th))["vZm", "Pr(>|t|)"], 3)
-  )
+  Portfolio = colnames(mZ)[portfolio],
+  `T-statistic` = round(vtstat_market, 2),
+  `P-value` = round(vpval_market, 4)
 )
 
-# Display the table of t-statistics and p-values for the market risk premium regressions
-kable(market_stats, caption = "t-statistics and P-values for regressions with only the market risk premium")
+# Display the results as a table
+kable(market_stats, caption = "Significance of the market risk premium")
+
 ```
 
 
+It is significant at the 1\% level for all portfolios.
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
 
-```{r}
-kable(r_squared_comparison2, caption = "Comparison of R-squared values")
-```
+We can see in the table above that the 1 factor model has the lowest R squareds. The best...
 
 ## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
 
