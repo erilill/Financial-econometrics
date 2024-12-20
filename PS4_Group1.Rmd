@@ -643,6 +643,8 @@ Exact factor pricing implies that model explain all of the variation in excess r
 
 ### (b) Test jointly for the significance of the HML and SMB factors as well as the principal components. What do you find? Using information criteria find the model providing the best goodness-of-fit.
 
+For this question we perform the LR-test on slide 15 in lecture 5. We will compare the full model which includes all factors to the restricted model which only includes market excess.
+
 ```{r}
 # First we estimate the restricted model which only includes "Market"
 Z <- as.matrix(excess_portfolio_factors[, 25:124])
@@ -655,5 +657,9 @@ adjusted_LR_results <- adjusted_LR_test(sur1, restricted_model)
 
 kable(adjusted_LR_results, caption = "Likelihood Ratio test for significance of factors.")
 ```
+The null hypothesis of this test is $H_0:B=0$. Based on the the low p-value of the LR test we conclude that the factors are jointly significantly different from zero.
+
+
+
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
