@@ -411,7 +411,7 @@ adjusted_LR_test <- function(sur_full, sur_res){
 ```
 
 Do the F-test for $\alpha=0$.
-```{r}
+```{r, echo=F}
 F_test_alpha <- GRS_F(mZ,mZk)
 kable(F_test_alpha)
 ```
@@ -424,7 +424,7 @@ $$
 Z_t=\alpha+\epsilon_t
 $$
 
-```{r}
+```{r, echo=F}
 sur_ur_5f <- sur(mZ,mZk)
 sur_r_5f <- sur(mZ,NULL)
 kable(adjusted_LR_test(sur_ur_5f,sur_r_5f))
@@ -444,7 +444,7 @@ Z_t=\alpha+B Z_{mt}+\epsilon_t
 $$
 and test if $B=0$.
 
-```{r}
+```{r, echo=F}
 mR = as.matrix(portfolio_m[,25:124])
 Rf = as.matrix(portfolio_m[,'Tbill'])
 Rm = as.matrix(portfolio_m[,'Market'])
@@ -453,7 +453,7 @@ vZm = Rm - Rf #matrix of excess returns for the market portfolio
 
 sur_ur_1f <- sur(mZ,vZm)
 sur_r_1f <- sur(mZ,NULL)
-kable(adjusted_LR_test(sur_ur,sur_r))
+kable(adjusted_LR_test(sur_ur_1f,sur_r_1f))
 
 ```
 
@@ -489,7 +489,7 @@ head(portfolio_factors[,c(1:4, 125:126)])
 
 ## 2. Estimate the resulting Fama-French three-factor model based on individual size-book-to-market portfolios in the 1st, 5th and 10th size and book-to-market decile.
 
-```{r}
+```{r, echo=F}
 cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
 
 results <- data.frame(
@@ -545,7 +545,7 @@ rownames(results) <- NULL
 
 ### (a) Evaluate the goodness-of-fit of the model for the individual portfolios. How much explanatory power do the HML and SMB factors have beyond the market portfolio?
 
-```{r}
+```{r, echo=F}
 kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
 ```
 In the table above you see a comparison of the $R^2$ between the Fama and French three factor model and the regular CAPM. What we see is that the $R^2$ increases for all portfolios when including SMB and HML in the model, indicating that HML and SMB factors have explanatory power beyond the market portfolio. The increase in explanatory power is largest for the smaller portfolios (R11, R15, and R110), with the smallest increase for the largest portfolios (R101, R105, and R1010). We also see that the change is larger for the portfolios with higher book-to-market deciles (R110, R510, and R110) compared to the lower deciles. 
@@ -554,7 +554,7 @@ Based on this it seems that the explanatory power increases most for the more vo
 
 ### (b) Compare the estimated coefficients associated with the HML and SMB factors for portfolios in different size and book-to-market deciles. Do you find differences? Interpret your results.
 
-```{r}
+```{r, echo=F}
 kable(results[,c(1,4:5)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor model between the portfolios", label = "tab:3factor_coeff")
 ```
 Looking at the estimated coefficients above, we see that estimated $s_i$ is positive for the small and medium size portfolios (R1x and R5x), and negative for the larger size portfolios (R10x). The Estimated $s_i$ is also largest for the smallest size portfolios, and smaller for the medium and large size portfolios. The estimated $h_i$ are negative for the low book-to-market portfolios and positive for the high and medium (except R15). There is no clear correlation between the magnitude of the h coefficient and book-to-market.
@@ -563,12 +563,12 @@ Based on this we conclude that SMB more greatly explain the variation in the sma
 
 ### (c) Augment your model by the first two principal components as constructed in Problem A, Part 2. Do the principle components have explanatory power beyond the Fama- French factors? Do the Fama-French factors have explanatory power beyond the principal components? Interpret your findings.
 
-```{r}
-colnames(pc_scores_excess) <- paste0("Excess_PC", 1:5)
-pc_scores_excess <- as.data.frame(pc_scores_excess)
+```{r, echo=F}
+colnames(pc_scores_excess_100) <- paste0("Excess_PC", 1:5)
+pc_scores_excess_100 <- as.data.frame(pc_scores_excess_100)
 cols <- c("R11", "R15", "R110", "R51", "R55", "R510", "R101", "R105", "R1010")
 
-resultsb3c <- data.frame(
+resultsb2c <- data.frame(
   Portfolio = character(),
   Alpha = numeric(),
   Beta = numeric(),
@@ -596,40 +596,40 @@ resultsb3c <- data.frame(
 for (i in cols){
   ER <- portfolio_factors[[i]]-portfolio_factors$Tbill
   market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
-  capm_model <- lm(ER ~ market_excess + portfolio_factors$SMB + portfolio_factors$HML + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
+  capm_model <- lm(ER ~ market_excess + portfolio_factors$SMB + portfolio_factors$HML + pc_scores_excess_100$Excess_PC1 + pc_scores_excess_100$Excess_PC2)
   
-  comp <- lm(ER ~market_excess + pc_scores_excess$Excess_PC1 + pc_scores_excess$Excess_PC2)
+  comp <- lm(ER ~market_excess + pc_scores_excess_100$Excess_PC1 + pc_scores_excess_100$Excess_PC2)
 
-  resultsb3c <- rbind(
-    resultsb3c,
+  resultsb2c <- rbind(
+    resultsb2c,
     data.frame(
       Portfolio = i,
       Alpha = coef(capm_model)["(Intercept)"],
       Beta = coef(capm_model)["market_excess"],
       s = coef(capm_model)["portfolio_factors$SMB"],
       h= coef(capm_model)["portfolio_factors$HML"],
-      PC1 = coef(capm_model)["pc_scores_excess$Excess_PC1"],
-      PC2 = coef(capm_model)["pc_scores_excess$Excess_PC2"], 
+      PC1 = coef(capm_model)["pc_scores_excess_100$Excess_PC1"],
+      PC2 = coef(capm_model)["pc_scores_excess_100$Excess_PC2"], 
       R2 = summary(capm_model)$r.squared,
       R2_comp = summary(comp)$r.squared,
       StdErrAlpha = coef(summary(capm_model))["(Intercept)", "Std. Error"],
       StdErrBeta = coef(summary(capm_model))["market_excess", "Std. Error"],
       StdErr_s = coef(summary(capm_model))["portfolio_factors$SMB", "Std. Error"],
       StdErr_h = coef(summary(capm_model))["portfolio_factors$HML", "Std. Error"], 
-      StdErr_PC1 = coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Std. Error"],
-      StdErr_PC2 = coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Std. Error"],
+      StdErr_PC1 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC1", "Std. Error"],
+      StdErr_PC2 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC2", "Std. Error"],
       PValueAlpha = coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"],
       PValueBeta = coef(summary(capm_model))["market_excess", "Pr(>|t|)"],
       PValue_s = coef(summary(capm_model))["portfolio_factors$SMB", "Pr(>|t|)"],
       Pvalue_h = coef(summary(capm_model))["portfolio_factors$HML", "Pr(>|t|)"],
-      PValue_PC1 = coef(summary(capm_model))["pc_scores_excess$Excess_PC1", "Pr(>|t|)"],
-      PValue_PC2 = coef(summary(capm_model))["pc_scores_excess$Excess_PC2", "Pr(>|t|)"]
+      PValue_PC1 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC1", "Pr(>|t|)"],
+      PValue_PC2 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC2", "Pr(>|t|)"]
     )
   )
 }
 
 rownames(resultsb3c) <- NULL
-kable(cbind(resultsb3c[,c(1,8:9)],results[,6]), digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor_pca_r2", col.names =  c("Portfolio", "R2 (three factor + PCA)", "R2 (PCA)", "R2 (three factors)"))
+kable(cbind(resultsb2c[,c(1,8:9)],results[,6]), digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor_pca_r2", col.names =  c("Portfolio", "R2 (three factor + PCA)", "R2 (PCA)", "R2 (three factors)"))
 ```
 Above you see a comparison in $R^2$ between three models: The augmented model with HML and SMB factors as well as the first two principal components, the model with only principal components, and a model with only the Fama-French factors. What we see is that including the PC's increases the goodness-of-fit compared to the three-factor model, meaning that the PC's have explanatory power beyond the Fama-French factors. However, comparing the model with only market excess and PC's we see very small differences between the $R^2$ and the augmented full model, indicating that the Fama-French factors only have small explanatory power beyond the principal components.
 
@@ -637,7 +637,7 @@ Above you see a comparison in $R^2$ between three models: The augmented model wi
 
 Based on sub-question (b), we interpret this to be the augmented model from question B.2(c). The PC's based on the 100 size-book-to-market portfolios seems to be colinear, or at least the resulting $\hat{\Omega}$ is singular such that we could not calculate the F-test. For this reason we have used the PC's computed using the 20 size and book-to-market portfolios in this question instead.
 
-```{r}
+```{r, echo=F}
 # Pre-process data
 excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_20[,1], PC2 = pc_scores_20[,2])
 excess_portfolio_factors <- excess_portfolio_factors %>%
@@ -657,7 +657,7 @@ sur1 <- sur(Z, Z_k)
 
 We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989):
 
-```{r}
+```{r, echo=F}
 results <- GRS_F(Z, Z_k)
 
 kable(results, caption = "F-test for exact factor pricing", digits = 3)
@@ -716,7 +716,7 @@ In the above table you see the BIC for different combinations of factors which w
 
 ### (c) Open the data set factors_m containing the original HML and SMB factors as constructed by Fama and French (1993). Repeat the analysis above. Are your results robust regarding the exact construction of the factors?
 
-```{r}
+```{r, echo=F}
 SMB <- factors_m$SMB
 HML <- factors_m$HML
 
@@ -746,50 +746,182 @@ for (i in cols){
   market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
   capm_model <- lm(ER ~ market_excess+SMB+HML)
   
-  capm_comp <- lm(ER ~ market_excess)
-  
-  alpha <- coef(capm_model)["(Intercept)"]
-  beta <- coef(capm_model)["market_excess"]
-  s <- coef(capm_model)["SMB"]
-  h <- coef(capm_model)["HML"]
-  r_squared <- summary(capm_model)$r.squared
-  std_err_alpha <- coef(summary(capm_model))["(Intercept)", "Std. Error"]
-  std_err_beta <- coef(summary(capm_model))["market_excess", "Std. Error"]
-  std_err_s <- coef(summary(capm_model))["SMB", "Std. Error"]
-  std_err_h <- coef(summary(capm_model))["HML", "Std. Error"]
-  p_value_alpha <- coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"]
-  p_value_beta <- coef(summary(capm_model))["market_excess", "Pr(>|t|)"]
-  p_value_s <- coef(summary(capm_model))["SMB", "Pr(>|t|)"]
-  p_value_h <- coef(summary(capm_model))["HML", "Pr(>|t|)"]
-  
-  r_squared_comp <- summary(capm_comp)$r.squared
+  capm_comp <- lm(ER ~ market_excess+portfolio_factors$SMB+portfolio_factors$HML)
   
   results <- rbind(
     results,
     data.frame(
       Portfolio = i,
-      Alpha = alpha,
-      Beta = beta,
-      s=s,
-      h=h,
-      R2 = r_squared,
-      R2_comp = r_squared_comp, 
-      StdErrAlpha = std_err_alpha,
-      StdErrBeta = std_err_beta,
-      StdErr_s = std_err_s,
-      StdErr_h = std_err_h, 
-      PValueAlpha = p_value_alpha,
-      PValueBeta = p_value_beta,
-      PValue_s = p_value_s,
-      Pvalue_h = p_value_h
+      Alpha = coef(capm_model)["(Intercept)"],
+      Beta = coef(capm_model)["market_excess"],
+      s=coef(capm_model)["SMB"],
+      h=coef(capm_model)["HML"],
+      s_comp=coef(capm_comp)["portfolio_factors$SMB"],
+      h_comp=coef(capm_comp)["portfolio_factors$HML"],
+      R2 = summary(capm_model)$r.squared,
+      R2_comp = summary(capm_comp)$r.squared, 
+      StdErrAlpha = coef(summary(capm_model))["(Intercept)", "Std. Error"],
+      StdErrBeta = coef(summary(capm_model))["market_excess", "Std. Error"],
+      StdErr_s = coef(summary(capm_model))["SMB", "Std. Error"],
+      StdErr_h = coef(summary(capm_model))["HML", "Std. Error"], 
+      PValueAlpha = coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"],
+      PValueBeta = coef(summary(capm_model))["market_excess", "Pr(>|t|)"],
+      PValue_s = coef(summary(capm_model))["SMB", "Pr(>|t|)"],
+      Pvalue_h = coef(summary(capm_model))["HML", "Pr(>|t|)"]
     )
   )
 }
 
 rownames(results) <- NULL
 
-kable(results[,c(1,6:7)], digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor")
+kable(results[,c(1,8:9)], digits = 3, caption = "Comparison of R2 between the estimated three factor models. Left: Original HML and SMB factors. Right: Our constructed factors.", label = "tab:3factor")
 
-kable(results[,c(1,4:5)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor model between the portfolios", label = "tab:3factor_coeff")
+kable(results[,c(1,4:7)], digits = 3, caption = "Comparison of estimated coefficients of the estimated three factor models. Left: Original HML and SMB factors. Right: Our constructed factors.", label = "tab:3factor_coeff")
+```
+In the tables above we see that the $R^2$ are very similar between the three factor model constructed using our factors and the original Fama and French factors. There are some slight differences but based on the $R^2$, our results seems to be robust regarding the exact construction of the factors. Looking at the coefficients we see similarities between the models, there are however some differences. This is likely due to the difference in construction of the factors between ours and Fama and French's construction.
+
+Augmenting the model in order to include the first two principal components:
+
+```{r, echo=F}
+resultsb3c <- data.frame(
+  Portfolio = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  s = numeric(),
+  h = numeric(),
+  PC1 = numeric(),
+  PC2 = numeric(),
+  R2 = numeric(),
+  R2_comp = numeric(),
+  StdErrAlpha = numeric(),
+  StdErrBeta = numeric(),
+  StdErr_s = numeric(),
+  StdErr_h = numeric(), 
+  StdErr_PC1 = numeric(),
+  StdErr_PC2 = numeric(),
+  PValueAlpha = numeric(),
+  PValueBeta = numeric(),
+  PValue_s = numeric(),
+  Pvalue_h = numeric(),
+  PValue_PC1 = numeric(),
+  PValue_PC2 = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in cols){
+  ER <- portfolio_factors[[i]]-portfolio_factors$Tbill
+  market_excess <- portfolio_factors$Market-portfolio_factors$Tbill
+  capm_model <- lm(ER ~ market_excess + SMB + HML + pc_scores_excess_100$Excess_PC1 + pc_scores_excess_100$Excess_PC2)
+  
+
+  resultsb3c <- rbind(
+    resultsb3c,
+    data.frame(
+      Portfolio = i,
+      Alpha = coef(capm_model)["(Intercept)"],
+      Beta = coef(capm_model)["market_excess"],
+      s = coef(capm_model)["SMB"],
+      h= coef(capm_model)["HML"],
+      PC1 = coef(capm_model)["pc_scores_excess_100$Excess_PC1"],
+      PC2 = coef(capm_model)["pc_scores_excess_100$Excess_PC2"], 
+      R2 = summary(capm_model)$r.squared,
+      StdErrAlpha = coef(summary(capm_model))["(Intercept)", "Std. Error"],
+      StdErrBeta = coef(summary(capm_model))["market_excess", "Std. Error"],
+      StdErr_s = coef(summary(capm_model))["SMB", "Std. Error"],
+      StdErr_h = coef(summary(capm_model))["HML", "Std. Error"], 
+      StdErr_PC1 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC1", "Std. Error"],
+      StdErr_PC2 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC2", "Std. Error"],
+      PValueAlpha = coef(summary(capm_model))["(Intercept)", "Pr(>|t|)"],
+      PValueBeta = coef(summary(capm_model))["market_excess", "Pr(>|t|)"],
+      PValue_s = coef(summary(capm_model))["SMB", "Pr(>|t|)"],
+      Pvalue_h = coef(summary(capm_model))["HML", "Pr(>|t|)"],
+      PValue_PC1 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC1", "Pr(>|t|)"],
+      PValue_PC2 = coef(summary(capm_model))["pc_scores_excess_100$Excess_PC2", "Pr(>|t|)"]
+    )
+  )
+}
+
+rownames(resultsb3c) <- NULL
+kable(cbind(resultsb3c[,c(1,8)],resultsb2c[,8]), digits = 3, caption = "Comparison of R2 between the estimated three factor models including PC's. Left: Original HML and SMB factors. Right: Our constructed factors.", label = "tab:3factor_pca_r2", col.names =  c("Portfolio", "R2 (Original three factor + PCA)", "R2 (Our three factor + PCA)"))
 ```
 
+Once again we see very similar $R^2$ between the model estimated with the original factors and our factors, indicating that our model is robust compared to the model with the original factors.
+
+Now we will estimate the Fama-French model for all 100 size-book-to-market portfolios as a system. As in B.2(a), we will use the PC's estimated on the 20 size and book-to-market portfolios.
+
+```{r, echo=F}
+# Pre-process data
+excess_portfolio_factors <- cbind(portfolio_factors, PC1=pc_scores_20[,1], PC2 = pc_scores_20[,2])
+excess_portfolio_factors <- excess_portfolio_factors %>%
+  mutate(across(c(3, 25:124,127:128), ~ . - Tbill))
+excess_portfolio_factors$HML <- HML
+excess_portfolio_factors$SMB <- SMB
+
+# Set factors
+indep <- c("Market", "SMB", "HML", "PC1", "PC2")
+
+# As matrix
+Z <- as.matrix(excess_portfolio_factors[, 25:124])
+Z_k <- as.matrix(excess_portfolio_factors[, indep])
+
+sur3c <- sur(Z, Z_k)
+```
+
+Now we test jointly for exact factor pricing in all equations. We will test $H_0:\alpha=0$ using the F-test based on Gibbons/Ross/Shanken (1989):
+
+```{r, echo=F}
+results <- GRS_F(Z, Z_k)
+
+kable(results, caption = "F-test for exact factor pricing", digits = 3)
+```
+Exact factor pricing implies that model explain all of the variation in excess returns, if this holds true all $\alpha$ should be zero. Based on the above F-test we reject this null hypothesis and come to the conclusion that the factor pricing model does not perfectly explain portfolio returns.
+
+Now w test jointly for the significance of the HML and SMB factors as well as the principal components. We use the same LR-test as in B.3(b), and we will compare the full model which includes all factors to the restricted model which only includes market excess.
+
+```{r, echo=F}
+# First we estimate the restricted model which only includes "Market"
+Z <- as.matrix(excess_portfolio_factors[, 25:124])
+Z_k <- as.matrix(excess_portfolio_factors[, "Market"])
+
+restricted_model <- sur(Z, Z_k)
+
+# Compute the LR-test
+adjusted_LR_results <- adjusted_LR_test(sur3c, restricted_model)
+
+kable(adjusted_LR_results, caption = "Likelihood Ratio test for significance of factors.")
+```
+The null hypothesis of this test is $H_0:B=0$. Based on the the low p-value of the LR test we conclude that the factors are jointly significantly different from zero.
+
+Next, we will use BIC in order to find the model with the best goodness of fit.
+```{r, echo=F}
+indep1 <- c("Market")
+indep2 <- c("Market", "SMB")
+indep3 <- c("Market", "SMB", "HML")
+indep4 <- c("PC1")
+indep5 <- c("PC1", "PC2")
+indep6 <- c("Market", "PC1", "PC2")
+indep7 <- c("Market", "SMB", "PC1", "PC2")
+indep8 <- c("Market", "SMB", "HML", "PC1", "PC2")
+
+indep_sets <- list(indep1, indep2, indep3, indep4, indep5, indep6, indep7, indep8)
+
+BIC_values <- sapply(indep_sets, function(indep) {
+  Z_k <- as.matrix(excess_portfolio_factors[, indep])
+  sur(Z, Z_k)$BIC
+})
+
+factor_names <- sapply(indep_sets, function(indep) {
+  paste(indep, collapse = ", ")
+})
+
+results_df <- data.frame(
+  Factors = factor_names,
+  BIC = BIC_values
+)
+
+kable(results_df, caption = "BIC Values for Different Models")
+```
+
+The model with the lowest BIC is the one which includes Market, SMB, HML, PC1, and PC2, and we conclude that this model provides the best goodness of fit.
+
+As the results between the models using the original Fama and French factors are almost the same as those we got using our constructed factors, we conclude that our results are robust regarding the exact construction of the factors.
