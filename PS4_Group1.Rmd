@@ -38,7 +38,7 @@ data("portfolio_m")
 
 # A. Factor models with portfolios as factors
 
-In this exercise you have to estimate and to test a multi-factor model with portfolios as factors. Is the data set $\texttt{portfolio_m}$
+In this exercise you have to estimate and to test a multi-factor model with portfolios as factors. Is the data set portfolio_m
 
 ## 1. Compute factor portfolios based on principal components using the correlation matrix of returns.
 
