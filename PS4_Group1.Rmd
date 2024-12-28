@@ -218,9 +218,7 @@ R2_comparison <- data.frame(
 kable(R2_comparison, caption = "R-squared values for 5 factor models")
 ```
 
-Once again, we observe the for most of the cases they are quite similar. Initially and connecting to theory we would expect the $R^2$ for the 100 portfolios to be higher since this would allow for more granular analysis. For the first three portfolios, we observe that $R^2$ is considerably higher except for the R110 portfolio. In that case $R^2$is higher by 5\%. In the middlemost portfolios the difference between PCA20 and PCA100 is at most 0.01, which makes us believe there is no considerable difference in the variation explained using PCA for the 20 portfolios or 100. Lastly, when interpreting the $R^2$ for the last three rows, we observe that PCA20 would capture more variation than PCA100 except for in the last row which is R1010. This finding concludes that for the low size/book-to-market portfolios, PCA100 is preferred, in the middle it is a matter of personal preference and for the higher size/book-to-market portfolios it would be preferred using PCA20. 
 
-We say matter of personal preference in this case since one would suggest a model with fewer factors would lesser the risk of overfitting and be more robust, however a model with a higher number of factors might capture the more granular information and estimate the broader systemic risk to a better degree. 
 
 ### (c) Evaluate the explanatory power of the individual principal components and compare it to that provided by the market risk premium solely. Does the market risk premium have any explanatory power beyond the principal components? What is about the significance of the market risk premium in such a regression? What can you conclude?
 
