@@ -144,7 +144,8 @@ Rm = as.matrix(portfolio_m[,'Market'])
 mZ = sweep(mR,1,Rf) #matrix of excess returns for the portfolios
 vZm = Rm - Rf #market excess returns
 
-pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5) #5 Principal components based on the 100 sbtm portfolios
+#5 Principal components based on the 100 sbtm portfolios
+pca_res_100 <- PCA(as.matrix(portfolio_m[,25:124]), 5)
 pc_scores_100 <- pca_res_100$factors
 pc_scores_excess_100 <- sweep(pc_scores_100, 1, Rf) #excess returns of factor portfolios
 
@@ -176,9 +177,11 @@ colnames(BIC_table) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 F
 kable(BIC_table, caption = "BIC values for 1-5 factor models")
 ```
 
-Among the first observations for the R2 we observe that the variation explained by the models increases for the portfolios in the models  1&5, 1&10, 5&1 - 5&10, 10&1, 10&5 concluding that it is harder to explain the variation in the most extreme cases 1&1 and 10&10. The other finding is that the explained variation increases as we introduce more factors, often concluding that the optimal number of factors are 4 or 5. The BIC will help us evaluate this in greater detail, especially due to the fact that BIC also penalizes a model for introducing factors that doesn't contribute to the model. 
+We can see in table 8 how much of the time series variations of the portfolio returns which can be explained by the individual principal components. We see that for all portfolios except R1010, one factor/1 principal component explains over 50\% of the time series variation of the portfolio returns. For R1010 the 1 factor model only explains 22\% of the variation. For all portfolios except R1010, the 5 factor model explains between 68-86\%, depending on the portfolio, so quite high values. For the R1010 model, the 5 factor model only explains 37\%.
 
-The BIC suggests that optimal number of factors are R11: 5 , R15: 5, R110: 5, R51: 4, R55: 4, R510: 5, R101: 5, R105: 4, and R1010: 5. Please notice that the difference is very small for the portfolios where it suggests 4 instead of 5 concluding that it doesn't influence the effectiveness of the model greatly but considering that we always prefer less complex models, we should go for the 4-factor models when it is suggested. 
+We can also see that when we include more than 1 factor, the $R^2$ increases for all portfolios, however including 2,3,4 factors more does not to much in terms of increasing $R^2$, so the goodness of fit does not increase that strongly when we include more than one factor. Except maybe for R1010 where the $R^2$ goes from 22\% to 37\% from the 1 factor model to the 5 factor model.
+
+We can look at what is the optimal number of factors according tot the Bayes/Schwarz IC (BIC), i.e. which factor model has the lowest BIC value. In table 9 we can see that the BIC suggests that optimal number of factors are R11: 5 , R15: 5, R110: 5, R51: 4, R55: 4, R510: 5, R101: 5, R105: 4, and R1010: 5. We note that the difference is very small for the portfolios where it suggests 4 instead of 5 factors. So the optimal number of factors according to BIC for all the portfolios seem to be 4-5 factors, depending on the portfolio.
 
 ### (b) Do you find differences in the explanatory power of the two sets of principal components?
 
