@@ -628,7 +628,7 @@ for (i in cols){
   )
 }
 
-rownames(resultsb3c) <- NULL
+rownames(resultsb2c) <- NULL
 kable(cbind(resultsb2c[,c(1,8:9)],results[,6]), digits = 3, caption = "Comparison of R2 between the estimated three factor and CAPM model for the portfolios", label = "tab:3factor_pca_r2", col.names =  c("Portfolio", "R2 (three factor + PCA)", "R2 (PCA)", "R2 (three factors)"))
 ```
 Above you see a comparison in $R^2$ between three models: The augmented model with HML and SMB factors as well as the first two principal components, the model with only principal components, and a model with only the Fama-French factors. What we see is that including the PC's increases the goodness-of-fit compared to the three-factor model, meaning that the PC's have explanatory power beyond the Fama-French factors. However, comparing the model with only market excess and PC's we see very small differences between the $R^2$ and the augmented full model, indicating that the Fama-French factors only have small explanatory power beyond the principal components.
