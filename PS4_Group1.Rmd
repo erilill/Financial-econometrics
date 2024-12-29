@@ -60,7 +60,8 @@ variance_table <- rbind(
 
 colnames(variance_table) <- paste0("PC", 1:5)
 
-kable(variance_table, caption="The variation of the 100 portfolios that can be explained by the first 5 principal components. In percentages.")
+kable(variance_table, caption="The variation of the 100 portfolios that can be explained by
+      the first 5 principal components. In percentages.")
 ```
 Approximately $77\%$ of the variance in the 100 size-book-to-market portfolios can be explained by the first 5 principal components.
 
@@ -82,7 +83,8 @@ variance_table <- rbind(
 
 colnames(variance_table) <- paste0("PC", 1:5)
 
-kable(variance_table, caption="The variation of the 20 portfolios that can be explained by the first 5 principal components. In percentages.")
+kable(variance_table, caption="The variation of the 20 portfolios that can be explained by
+      the first 5 principal components. In percentages.")
 ```
 
 Approximately $97\%$ of the variance in the 20 size and book-to-market portfolios can be explained by the first 5 principal components.
@@ -96,7 +98,8 @@ descr_100 <- describe(pc_scores_100)[,c("mean", "sd", "skew", "kurtosis", "min",
 
 rownames(descr_100) <- paste0("PC", 1:5)
 
-kable(descr_100, digits = 3, caption = "Descriptive statistics of the factor portfolios for the 100 size-book-to-market portfolios.")
+kable(descr_100, digits = 3, caption = "Descriptive statistics of the factor portfolios for the
+      100 size-book-to-market portfolios.")
 ```
 In the table above you see the descriptive statistics for the factors of the 100 size-book-to-market portfolios. The first factor portfolio has large negative average return compared the other factors which have average returns closer to  zero. The standard deviations of the factor portfolios is decreasing in the order PC1 to PC5, this is because the first principal component will by design always capture the most of the variability in the data.
 
@@ -107,7 +110,8 @@ descr_20 <- describe(pc_scores_20)[,c("mean", "sd", "skew", "kurtosis", "min", "
 
 rownames(descr_20) <- paste0("PC", 1:5)
 
-kable(descr_20, digits = 3, caption = "Descriptive statistics of the factor portfolios for the 20 size and book-to-market portfolios.")
+kable(descr_20, digits = 3, caption = "Descriptive statistics of the factor portfolios for the
+      20 size and book-to-market portfolios.")
 ```
 In the table above we see the descriptive statistics for the factor portfolios of the 20 size and book-to-market portfolios. Here we see similar patterns as for the factor portfolios of the 100 size-book-to-market portfolios. The average returns are negative for the first factor portfolio and close to zero for the other. PC1 captures most of the variation in the original data. The factor portfolios differ in their skewness and kurtosis, PC1 and PC2 are moderately skewed while the other factors are only slightly skewed, and all factor portfolios have heavy tails.
 
@@ -124,13 +128,15 @@ correlations_with_market <- sapply(colnames(pc_scores_100), function(factor) {
   cor(pc_scores_100[,factor], portfolio_m[,3])
 })
 
-kable(round(correlations_with_market,2), caption = "Correlation of each factor portfolio (of the 100 size-book-to-market) with the market portfolio:")
+kable(round(correlations_with_market,2), caption = "Correlation of each factor portfolio
+      (of the 100 size-book-to-market) with the market portfolio:")
 
 correlations_with_market_20 <- sapply(colnames(pc_scores_20), function(factor) {
   cor(pc_scores_20[,factor], portfolio_m[,3])
 })
 
-kable(round(correlations_with_market_20,2), caption = "Correlation of each factor portfolio (of the 20 size and book-to-market) with the market portfolio:")
+kable(round(correlations_with_market_20,2), caption = "Correlation of each factor portfolio
+      (of the 20 size and book-to-market) with the market portfolio:")
 ```
 
 The first factor for each of the sets are most highly correlated with the market, with the second factor having the second highest correlation with the market, and so forth. The first factors likely captures the market-wide risks and movements. Factors 3, 4, and 5 are not correlated with the market indicating that the variability these factors capture is not market wide.
@@ -235,8 +241,6 @@ vR2_market <- matrix(NA,nrow=length(portfolio),1)
 vtstat_market <- matrix(NA,nrow=length(portfolio),1)
 vpval_market <- matrix(NA,nrow=length(portfolio),1)
 
-
-
 for (i in 1:length(portfolio)){
     model <- lm(mZ[, portfolio[i]] ~ vZm)
     vR2_market[i, 1] <- summary(model)$r.squared
@@ -246,17 +250,16 @@ for (i in 1:length(portfolio)){
 
 R2_table <- cbind(colnames(mZ)[c(1,5,10,41,45,50,91,95,100)],round(mR2,2))
 R2_table_final <- cbind(R2_table,round(vR2_market,2))
-colnames(R2_table_final) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors", "5 Factors", "1 Factor - Market risk premium")
+colnames(R2_table_final) <- c("Portfolio", "1 Factor", "2 Factors", "3 Factors", "4 Factors",
+                              "5 Factors", "1 Factor - Market risk premium")
 kable(R2_table_final, caption = "R-squared values for 1-5 factor model and 1 Factor market model")
 
-# Combine results into a data frame
 market_stats <- data.frame(
   Portfolio = colnames(mZ)[portfolio],
   `T-statistic` = round(vtstat_market, 2),
   `P-value` = round(vpval_market, 4)
 )
 
-# Display the results as a table
 kable(market_stats, caption = "Significance of the market risk premium")
 
 ```
@@ -336,7 +339,8 @@ sur <- function(Z, Z_k){
   k <- dim(B_hat)[1]*dim(B_hat)[2]+length(alpha_hat)
   BIC = k*log(T)-2*ll
   
-  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat, residuals = residuals,BIC=BIC))
+  return(list(mu_k = mu_k, B_hat = B_hat, alpha_hat = alpha_hat, Sigma_hat = Sigma_hat,
+              residuals = residuals, BIC=BIC))
 }
 ```
 
