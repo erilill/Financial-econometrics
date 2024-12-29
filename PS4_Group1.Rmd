@@ -295,14 +295,14 @@ mZk <- sweep(pc_scores_20, 1, Rf)
 We can estimate the system with OLS
 
 $$
-\hat{\alpha}=\bar{Z}-\hat{\beta}\hat{\mu}_K, \\
+\hat{\alpha}=\bar{Z}-\hat{B}\hat{\mu}_K, \\
 \text{where }
 \bar{Z}=\frac{1}{T} \sum_{t=1}^{T}Z_t, \text{ }\hat{\mu}_k=\frac{1}{T}\sum_{t=1}^{T}Z_{Kt},\\
-\hat{\beta}= \left[\sum_{t=1}^{T}(Z_t-\bar{Z})(Z_{Kt}-\hat{\mu}_k)' \right]\left[\sum_{t=1}^{T} (Z_t-\hat{\mu}_K)(Z_{Kt}-\hat{\mu}_k)' \right]
+\hat{B}= \left[\sum_{t=1}^{T}(Z_t-\bar{Z})(Z_{Kt}-\hat{\mu}_k)' \right]\left[\sum_{t=1}^{T} (Z_t-\hat{\mu}_K)(Z_{Kt}-\hat{\mu}_k)' \right]
 $$
 The covariance matrix of the error terms are estimated by maximum likelihood: 
 $$
-\hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})(Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})'
+\hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{B}Z_{Kt})(Z_t-\hat{\alpha}-\hat{B}Z_{Kt})'
 $$
 We can do the above in R:
 
@@ -408,41 +408,46 @@ adjusted_LR_test <- function(sur_full, sur_res){
 }
 ```
 
-Do the F-test for $\alpha=0$.
-```{r, echo=F}
+Test for exact factor pricing, i.e. do the F-test with null $\alpha=0$. Note that we estimate the model as a system in GRS_F() as we call the sur() estimation function in there.
+
+```{r, echo=TRUE}
 F_test_alpha <- GRS_F(mZ,mZk)
 kable(F_test_alpha)
 ```
 
-We can see that we reject the null that $\alpha=0$, so we do not have evidence of exact factor pricing. Since we reject the null that $\alpha=0$ we conclude that the factors does not achieve exact factor pricing for all pricing and there might be some systematic pricing errors in the data. 
+We can see that we reject the null that $\alpha=0$. That means that we do not have evidence that there is exact factor pricing in all equations, i.e. there is at least one equation where $\alpha \neq 0$.
 
-Do the LR test for the joint significance of the factors, i.e. the do LR test with the restricted model where $B=0$
+Now we do the LR test for the joint significance of the factors, i.e. the do LR test with the restricted model where $B=0$
 
 $$
 Z_t=\alpha+\epsilon_t
 $$
+and unrestricted model
 
-```{r, echo=F}
+$$
+Z_t=\alpha+B Z_{Kt}+\epsilon_t
+$$
+We do it.
+
+```{r, echo=T}
 sur_ur_5f <- sur(mZ,mZk)
 sur_r_5f <- sur(mZ,NULL)
 kable(adjusted_LR_test(sur_ur_5f,sur_r_5f))
 ```
 
-We can see that we reject the null that $B=0$, i.e. the factors are non-zero and jointly significant at a 1\% level. The presence of non-zero factors implies that they contribute significantly to the model of exact factor pricing. This result also validates the usage of principal components as factor in the model and is in accordance with the theory of APT which claims that systematic risks are driven by common factors. 
-
-To summarize the results, GRS F-test rejected the null hypothesis that all intercepts are 0. In addition adj. LR test also rejected the null that the factors are zero. These two tests conclude that there are systematic pricing and that the models does not achieve exact factor pricing for all portfolios and that the non-zero factors contribute to the models significantly and are important for explaining systematic variations in portfolio returns. 
+We can see that we reject the null model, i.e. the restricted model quite strongly, in favor of the unrestricted model. So we have strong evidence of joint significance of the factors.
 
 
 ## 4. Test for joint significance of the market risk premium in all equations. Does it have explanatory power beyond the principal components? Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
 
-Now we estimate the 1 factor model
+Now we estimate the 1 factor market risk premium model
 
 $$
 Z_t=\alpha+B Z_{mt}+\epsilon_t
 $$
 and test if $B=0$.
 
-```{r, echo=F}
+```{r, echo=T}
 mR = as.matrix(portfolio_m[,25:124])
 Rf = as.matrix(portfolio_m[,'Tbill'])
 Rm = as.matrix(portfolio_m[,'Market'])
@@ -452,19 +457,17 @@ vZm = Rm - Rf #matrix of excess returns for the market portfolio
 sur_ur_1f <- sur(mZ,vZm)
 sur_r_1f <- sur(mZ,NULL)
 kable(adjusted_LR_test(sur_ur_1f,sur_r_1f))
-
 ```
 
+We can see that we reject the null model, i.e. the restricted model quite strongly, in favor of the unrestricted model. So we have strong evidence of joint significance of the market risk premium in all equations.
 
-We reject the null that $B=0$,i .e. the market risk premium is jointly significant. Since we reject the null in both cases, the tests do not indicate that the market risk premium has explanatory power beyond the principal components.
-
-Compare the goodness-of-fit of alternative factor specifications using information criteria. Which model provides the highest goodness-of-fit for the complete system?
+Now to compare the goodness-of-fit of alternative factor specifications using information criteria (BIC). We compare the 1 factor market risk premium model with the 5 factor model with the principal components based on the 20 size and book-to-market portfolios.
 
 ```{r}
 sur_ur_5f$BIC # 5 factor model with principal components
 sur_ur_1f$BIC # 1 factor model with market risk premium
 ```
-We can see that the 5 factor model with the principal components has a better goodness of fit than the 1 factor model with the market risk premium, for the complete system.
+We can see that the 5 factor model with the principal components has a better goodness of fit than the 1 factor model with the market risk premium, for the complete system, since it has a lower BIC value.
 
 
 # B. Fama-French regressions
