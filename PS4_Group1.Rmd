@@ -377,7 +377,7 @@ GRS_F <- function(Z, Z_k){
 }
 ```
 
-And the adjusted likelihood ratio test is: 
+And the adjusted likelihood ratio test is 
 
 $$
 LR=(T-\frac{N}{2}-K-1) [\text{log }|\hat{\Sigma}_R|-\text{log }|\hat{\Sigma}|] \sim \chi_N^2
