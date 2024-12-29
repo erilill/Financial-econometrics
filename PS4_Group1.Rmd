@@ -218,7 +218,7 @@ R2_comparison <- data.frame(
 kable(R2_comparison, caption = "R-squared values for 5 factor models")
 ```
 
-
+For the portfolios R51, R55, R510 and R1010, the difference in explanatory power of the two sets of principal components is really really small. For R11,R15, the PCA based on 100 Rx(x)y(y) portfolios has higher explanatory power, and for the R110, R101, R105, the PCA based on 20 MEx/MEBEx portfolios provide higher explanatory power.
 
 ### (c) Evaluate the explanatory power of the individual principal components and compare it to that provided by the market risk premium solely. Does the market risk premium have any explanatory power beyond the principal components? What is about the significance of the market risk premium in such a regression? What can you conclude?
 
@@ -260,9 +260,8 @@ market_stats <- data.frame(
 kable(market_stats, caption = "Significance of the market risk premium")
 
 ```
-Checking for how much of the variation is explained using the one-factor model doesn't prove any improvement compared to the 5-factor model previously used. We see that the one-factor model outperformed the other models in only one instance, for portfolio R101 and quite similar result for R105 to the result of the 5-factor model. However, it is considerably worse in all other cases, especially when we are analyzing the variation explained for low size/book-to-market portfolios. Here the model is really bad. This finding is not surprising, since empirical evidence suggests that smaller companies have a different risk-return dynamic more related to the idiosyncratic risk while the one-factor model contains the market risk premium and for this reason doesn't explain the variation that well. This might be the reasoning why Fama and French introduced additional factors size(SMB) and value(HML) to the model and developed the three-factor model. 
 
-However, when analyzing the significance we have found that it is significant at the 1\% level for all portfolios.
+In Table 11 we can see that the first principal component have more explanatory power than the market risk premium solely for all portfolios except R101, R105 and R1010. But when we increase the principal components, i.e. we have multi-factor models, wee see that for R105 and R1010 the multi factor models have more explanatory power over the market risk premium. Only for R101 the market risk premium has any explanatory power beyond the market risk premium. In table 12 we can look at the significance of the market risk premium, and we can see that the p-value is 0 for all portfolios. So we can conclude that the market risk premium is significant for all portfolios.
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
 To be able to interpret the findings we need to divide the data into three parts, small, medium and large sized companies. We observe the medium sized companies are often one of the models that exhibit the highest $R^2$ among all the models with R55 having an $R^2$ in the four and five factor models and second highest in the one-factor model. 
