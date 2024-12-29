@@ -264,15 +264,10 @@ kable(market_stats, caption = "Significance of the market risk premium")
 In Table 11 we can see that the first principal component have more explanatory power than the market risk premium solely for all portfolios except R101, R105 and R1010. But when we increase the principal components, i.e. we have multi-factor models, wee see that for R105 and R1010 the multi factor models have more explanatory power over the market risk premium. Only for R101 the market risk premium has any explanatory power beyond the market risk premium. In table 12 we can look at the significance of the market risk premium, and we can see that the p-value is 0 for all portfolios. So we can conclude that the market risk premium is significant for all portfolios.
 
 ### (d) For which type of portfolio do you find the best goodness-of-fit? For which type of portfolio do you find the worst goodness-of-fit? Interpret your findings.
-To be able to interpret the findings we need to divide the data into three parts, small, medium and large sized companies. We observe the medium sized companies are often one of the models that exhibit the highest $R^2$ among all the models with R55 having an $R^2$ in the four and five factor models and second highest in the one-factor model. 
 
-For small companies we observe that the ones with low and medium book-to-market ratio are experiencing consistently among the worse goodness-of-fit and this becomes especially clear in the one-factor model. However, R110 have second highest $R^2$ in the four and five factor models.
+We can see that highest goodness of fit is achieved by the R55 portfolio, followed closely by the R110 portfolio. So there is a high goodness of fit for mid-size, mid-book-to-market, and large size, low book-to-market. The worst goodness of fit is for the R1010 portfolio, i.e. the goodness of fit is really low for large size high book-to-market.
 
-For the largest companies we observe that R101 and R105 are behaving quite similarly to the medium sized companies, experience relatively high degree of explanation and particularly R101 which is estimated with the highest $R^2$ by the one-factor model. One diverging finding here is the R1010 which is by far the absolutely worst goodness-of-fit by all the models. 
-
-These findings can be interpreted as there are unique dynamics in the R11, R15 and R1010 which is hard to capture by the one-factor model or the PCA-models. 
-
-Among the models we observe that the one-factor models compares generally worse than the four and five-factor models.  
+Perhaps we can view these findings as if the portfolio is only of large size and high book to market, we barely see any explanatory power using multi-factor models beyond the market risk premium, which means that the market risk premium basically explains the returns of that portfolio. But for other portfolios, such as the highest ones, mid-mid and large-low, we see that we can not properly explain the (excess returns) with just the market risk premium, and there a multi-factor model works really well.
 
 ## 3. Use the principal components constructed based on the 20 size and book- to-market portfolios in a multi-factor model and estimate it as a system for all 100 size-book-to- market portfolios. Test jointly for exact factor pricing in all equations. Furthermore, test for the joint significance of the factors. Use an F-test as well as a likelihood ratio test. What do you find?
 
@@ -306,7 +301,6 @@ The covariance matrix of the error terms are estimated by maximum likelihood:
 $$
 \hat{\Sigma}=\frac{1}{T} \sum_{t=1}^{T} (Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})(Z_t-\hat{\alpha}-\hat{\beta}Z_{Kt})'
 $$
-
 We can do the above in R:
 
 ```{r}
