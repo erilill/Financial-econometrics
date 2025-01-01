@@ -34,6 +34,7 @@ library(ggplot2)
 library(psych)
 library(systemfit)
 library(msos)
+library(fGarch)
 data("portfolio_m")
 ```
 
@@ -68,8 +69,17 @@ Pacf(r)
 Acf(r^2)
 Pacf(r^2)
 ```
-We can see that the log returns series $r$ has significant autocorrelation, so an ARMA(p,q) model for the mean seems appropriate. Also the $r^2$ seiries shows very large persistance, so a GARCH(p,q) model is appropriate in that case.
+We can see that the log returns series $r$ has significant autocorrelation. So now we need to specify an appropriate $ARMA(p,q)$ model for the conditional mean function $\mu_t$.
 
 ```{r}
-library(fGarch)
+m1 <- auto.arima(r)
+m1
+```
+We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. Now to check whether the mean-corrected returns $\epsilon_t=r_t-\mu_t$ are serially uncorrelated.
+
+```{r}
+forecast::checkresiduals(m1, lag=20)
+m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, 
+    trace = F)
+summary(m2)
 ```
