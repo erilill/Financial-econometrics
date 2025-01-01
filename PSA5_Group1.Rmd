@@ -1,0 +1,75 @@
+---
+title: "Report for PS5"
+author:
+- Mark Becker, Erik Lillrank & Vilim Nedic
+date: ''
+output:
+  pdf_document:
+    keep_tex: true
+  df_print: kable
+  html_document:
+    df_print: paged
+  word_document: default
+header-includes:
+  - \usepackage{float}
+  - \usepackage{booktabs}
+  - \usepackage{multirow}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
+  - \usepackage{adjustbox}
+  - \usepackage{hyperref}
+toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(FE)
+library(forecast)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(systemfit)
+library(msos)
+data("portfolio_m")
+```
+
+# A. A. Estimation of GARCH processes
+
+In this exercise, you have to model the time-varying volatility in different index series. Perform the following analysis based on daily indexes of your choice.
+
+We use Daily S&P 500 index close price data from 1950 to 2015, obtained from the 'gt' package.
+
+```{r}
+library(gt)
+close <- sp500$close #Daily S&P 500 index close from 1950 to 2015
+r <- diff(log(close))
+ts.plot(r)
+ts.plot(r^2)
+```
+
+## 1. Analyze the dynamical properties of log returns and squared log returns. Suggest an appropriate AR-GARCH model and estimate it. Hint: you can use an R package, for example, the package ’fGarch’. Since the package ’fGarch’ allows for ARMA specification in the conditional mean, you can also fit the data by using ARMA-GARCH framework if you want.
+
+
+```{r}
+desc_r <- describe(r)[, c("n", "mean", "median","sd", "min", "max", "skew", "kurtosis")]
+desc_r2 <- describe(r^2)[, c("n", "mean", "median","sd", "min", "max", "skew", "kurtosis")]
+table <- rbind(desc_r,desc_r2)
+rownames(table) <- c("r", "r^2")
+kable(round(table,4))
+```
+
+```{r}
+Acf(r)
+Pacf(r)
+Acf(r^2)
+Pacf(r^2)
+```
+We can see that the log returns series $r$ has significant autocorrelation, so an ARMA(p,q) model for the mean seems appropriate. Also the $r^2$ seiries shows very large persistance, so a GARCH(p,q) model is appropriate in that case.
+
+```{r}
+library(fGarch)
+```
