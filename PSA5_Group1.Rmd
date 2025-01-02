@@ -202,4 +202,40 @@ Furthermore the AIC/BIC values confirm that m2, i.e. the ARMA(2,0)-GARCH(1,1) ha
 
 Summarizing the ACF plots, the Portmanteau statistics, the ARCH-LM tests and information criteria (AIC and BIC) all point towards the conclusion that the model ARMA(2,0)-GARCH(1,1), i.e. m2, is able to capture the dynamical properties of the data. Therefore the optimal lag order would be 1 for p and q for the GARCH.
 
+## 3. Compute the standardized residuals and test the series against normality using appropriate goodness-of-fit tests as well as QQ-plots. What do you find?
+
+```{r}
+z_hat = residuals(m2, standardize=TRUE)
+
+vdata = z_hat
+ik = 20
+grids = 1:ik/ik
+
+vq = pnorm(vdata)
+
+ggplot(data.frame(vq), aes(x = vq)) +
+  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
+  ggtitle("N(0,1)")
+
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+
+The Chi square goodness of fit test clearly rejects the null that the standardized residuals $\hat{z}_t \sim N(0,1)$. Also we can see from the histogram that it does not look like a uniform distribution, which it should look like if the null is true.
+
+```{r}
+qqnorm(z_hat)
+qqline(z_hat, col="red")
+```
+
+The qqplot also confirms that the standardized residuals are not normally distributed.
+
+
+## 4. Re-estimate the model based on a t-distribution and re-evaluate the distributional properties of the resulting standardized residuals. Do you find the t-distribution to be more appropriate?
+
+```{r}
+m9 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, cond.dist = "std", trace = F)
+```
 
