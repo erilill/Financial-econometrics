@@ -212,11 +212,7 @@ ik = 20
 grids = 1:ik/ik
 
 vq = pnorm(vdata)
-
-ggplot(data.frame(vq), aes(x = vq)) +
-  geom_histogram(breaks = c(0,grids), fill = "lightblue", color = "black") +
-  ggtitle("N(0,1)")
-
+hist(vq)
 vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
 vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
@@ -238,4 +234,33 @@ The qqplot also confirms that the standardized residuals are not normally distri
 ```{r}
 m9 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, cond.dist = "std", trace = F)
 ```
+If we look at the summary now, the estimated shape parameter, i.e. the estimated degrees of freedom is 6.7. So we try the standardized residuals against a t distribution with 7 degrees of freedom.
+
+```{r}
+z_hat_t = residuals(m9,standardize=TRUE)
+
+vdata = z_hat_t
+ik = 20
+grids = 1:ik/ik
+
+df = 7
+ndata = vdata*sqrt(df/(df-2))
+vq = pt(ndata,df=7); hist(vq)
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+Still quite a high test statistic of 59, but much smaller than for the normal distribution where the test statistic was 323. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Lets look at the qqplot.
+
+```{r}
+dataframe = data.frame(z_hat_t)
+
+df = 7
+tmp = ggplot(dataframe, aes(sample=z_hat_t*sqrt(df/(df-2))))
+tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red")
+```
+It seems like the t distribution is more appropriate than the normal distribution.
+
+## 5. 
 
