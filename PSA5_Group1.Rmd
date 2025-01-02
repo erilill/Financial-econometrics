@@ -358,3 +358,18 @@ V <- 1
 
 VaR_normal(mean(r_w),var(r_w),p,h,V)
 ```
+## $\bullet$ the unconditional moments of a t-distribution
+
+
+```{r}
+VaR_t <- function(x){
+  print(x)
+}
+```
+
+## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
+
+```{r}
+m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
+```
+
