@@ -64,10 +64,10 @@ kable(round(table,4))
 ```
 
 ```{r}
-Acf(r)
-Pacf(r)
-Acf(r^2)
-Pacf(r^2)
+Acf(r, lag.max=20)
+Pacf(r, lag.max=20)
+Acf(r^2, lag.max=20)
+Pacf(r^2, lag.max=20)
 ```
 We can see that the log returns series $r$ has significant autocorrelation. So now we need to specify an appropriate $ARMA(p,q)$ model for the conditional mean function $\mu_t$.
 
@@ -75,11 +75,52 @@ We can see that the log returns series $r$ has significant autocorrelation. So n
 m1 <- auto.arima(r)
 m1
 ```
-We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. Now to check whether the mean-corrected returns $\epsilon_t=r_t-\mu_t$ are serially uncorrelated.
+We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So now we want to test for ARCH effects. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
 
 ```{r}
-forecast::checkresiduals(m1, lag=20)
-m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, 
-    trace = F)
+epsilon = m1$residuals
+Acf(epsilon, lag.max=20)
+Box.test(epsilon, lag = 20, type = "Ljung-Box")
+```
+We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean correced returns $\epsilon_t^2$.
+
+```{r}
+Acf(epsilon^2)
+Pacf(epsilon^2)
+Box.test(epsilon^2, lag = 20, type = "Ljung-Box")
+```
+
+We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high perstistance, so we would need a large $ARCH(p)$ model. To make it more parsimonious, we can make use of a $GARCH(1,1)$ model.
+
+```{r}
+m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, trace = F)
 summary(m2)
 ```
+
+## 2. Test whether the model is able to capture the dynamical properties of the data and determine the optimal lag order by
+
+### $\bullet$ plotting the original returns, the standardized residuals as well as the estimated conditional standard deviation,
+
+```{r}
+plot(m2, which = 1) #original returns
+plot(m2, which = 9) #the standardized residuals
+plot(m2, which = 2) #estimated conditional standard deviation
+```
+
+### $\bullet$ evaluating the autocorrelation functions of of the standardized residuals and squared standardized residuals,
+
+Now we check that there is no remaining serial correlation in the residuals of the ARMA-GARCH model we just fit. We compute the standardized residuals and squared standardized residuals
+
+```{r}
+z_hat = residuals(m2, standardize = TRUE)
+Acf(z_hat, lag.max=20)
+Box.test(z_hat, lag = 20, type = "Ljung-Box")
+```
+
+It is hard to tell if there is autocorrelation or not for the standardized residuals, since we have 2 spikes that are just barely significant. But lets perform a Ljung-Box test where we test that the first 20 autocorrelations are zero. As we can see we can not reject even on a 10\% level that the standardized residuals are uncorrelated. Lets do the same for the squared standardized residuals
+
+```{r}
+Acf(z_hat^2, lag.max=20)
+Box.test(z_hat^2, lag = 20, type = "Ljung-Box")
+```
+Now the ACF plot is more clear, it does not indicate strong autocorrelation, we have 2 barely significant spikes, but they are smaller this time. Again we can not reject even on a 10\% level that the squared standardized residuals are uncorrelated.
