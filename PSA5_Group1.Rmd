@@ -371,5 +371,27 @@ VaR_t <- function(x){
 
 ```{r}
 m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
+
+
+VaR_normal <- function(mu,sigma2,p,h,V){
+  
+  VaR <- list()
+  phi_inv_p <- qnorm(p)
+  
+  for (i in 1:length(phi_inv_p)){
+    VaR[[i]] <- V*(exp(phi_inv_p[i]*sqrt(h*sigma2)+h*mu)-1)
+  }
+  return(VaR)
+}
+
+
+fGarch::predict(m12,n.ahead=30)[c(1,10,30),1]
+
 ```
 
+## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
+
+```{r}
+m14 <- garchFit(r_d ~ garch(1, 1), cond.dist ="std", data = r_d, trace = F)
+m15 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
+```
