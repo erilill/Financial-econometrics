@@ -308,3 +308,25 @@ Acf(z_hat^2, lag.max=12)
 Box.test(z_hat, lag = 12, type = "Ljung-Box")
 Box.test(z_hat^2, lag = 12, type = "Ljung-Box")
 ```
+
+# B. Estimating Value-at-Risk
+
+This exercise deals with the estimation of the Value-at-Risk (VaR) based on alternative underlying models. Use the data sets ”DJ_d” (Dow Jones daily) and ”DJ_w” (Dow Jones weekly) containing daily and weekly observations of the Dow Jones index.
+
+```{r}
+r_d <- DJ_d$r_Dow_Jones
+r_w <- DJ_w$r_close
+```
+
+Compute the Value-at-Risk of a position V = 1 for different horizons using
+
+## $\bullet$ the unconditional moments of a normal distribution
+
+```{r}
+## daily
+
+mu = mean(r_d)
+sigma = sd(r_d)
+
+
+```
