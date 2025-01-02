@@ -69,7 +69,7 @@ Pacf(r, lag.max=20)
 Acf(r^2, lag.max=20)
 Pacf(r^2, lag.max=20)
 ```
-We can see that the log returns series $r$ has significant autocorrelation. So now we need to specify an appropriate $ARMA(p,q)$ model for the conditional mean function $\mu_t$.
+We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. So now we need to specify an appropriate $ARMA(p,q)$ model for the conditional mean function $\mu_t$.
 
 ```{r}
 m1 <- auto.arima(r)
@@ -90,11 +90,10 @@ Pacf(epsilon^2)
 Box.test(epsilon^2, lag = 20, type = "Ljung-Box")
 ```
 
-We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high perstistance, so we would need a large $ARCH(p)$ model. To make it more parsimonious, we can make use of a $GARCH(1,1)$ model.
+We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high persistence, so we would need a $ARCH(p)$ model with a large $p$. To make it more parsimonious, we can make use of a $ARMA(2,0)-GARCH(1,1)$ model.
 
 ```{r}
 m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, trace = F)
-summary(m2)
 ```
 
 ## 2. Test whether the model is able to capture the dynamical properties of the data and determine the optimal lag order by
@@ -109,18 +108,98 @@ plot(m2, which = 2) #estimated conditional standard deviation
 
 ### $\bullet$ evaluating the autocorrelation functions of of the standardized residuals and squared standardized residuals,
 
-Now we check that there is no remaining serial correlation in the residuals of the ARMA-GARCH model we just fit. We compute the standardized residuals and squared standardized residuals
-
 ```{r}
 z_hat = residuals(m2, standardize = TRUE)
 Acf(z_hat, lag.max=20)
-Box.test(z_hat, lag = 20, type = "Ljung-Box")
 ```
-
-It is hard to tell if there is autocorrelation or not for the standardized residuals, since we have 2 spikes that are just barely significant. But lets perform a Ljung-Box test where we test that the first 20 autocorrelations are zero. As we can see we can not reject even on a 10\% level that the standardized residuals are uncorrelated. Lets do the same for the squared standardized residuals
+It is hard to tell if there is much autocorrelation or not for the standardized residuals, since we have 2 spikes that are just barely significant. Lets check the squared standardized residuals
 
 ```{r}
 Acf(z_hat^2, lag.max=20)
+```
+Now the ACF plot is a bit more clear, it does not indicate very strong autocorrelation, we have 2 barely significant spikes, but they are smaller this time.
+
+### $\bullet$ computing Portmanteau statistics based on the standardized residuals,
+
+
+Lets perform a Ljung-Box test for the standardized residuals with the null that the first 20 autocorrelations are zero.
+
+```{r}
+Box.test(z_hat, lag = 20, type = "Ljung-Box")
+```
+
+As we can see we can not reject even on a 10\% level that the standardized residuals are uncorrelated. Lets do the same for the squared standardized residuals
+
+```{r}
 Box.test(z_hat^2, lag = 20, type = "Ljung-Box")
 ```
-Now the ACF plot is more clear, it does not indicate strong autocorrelation, we have 2 barely significant spikes, but they are smaller this time. Again we can not reject even on a 10\% level that the squared standardized residuals are uncorrelated.
+
+Again we can not reject even on a 10\% level that the squared standardized residuals are uncorrelated.
+
+### $\bullet$ testing for (G)ARCH effects of higher orders by applying ARCH-LM tests,
+
+We now try other ARMA-GARCH models with higher GARCH orders.
+
+```{r}
+m3 <- garchFit(r ~ arma(2, 0) + garch(1, 2), data = r, trace = F)
+m4 <- garchFit(r ~ arma(2, 0) + garch(2, 1), data = r, trace = F)
+m5 <- garchFit(r ~ arma(2, 0) + garch(2, 2), data = r, trace = F)
+m6 <- garchFit(r ~ arma(2, 0) + garch(2, 3), data = r, trace = F)
+m7 <- garchFit(r ~ arma(2, 0) + garch(3, 2), data = r, trace = F)
+m8 <- garchFit(r ~ arma(2, 0) + garch(3, 3), data = r, trace = F)
+```
+Now we get the LM Arch Test directly from the summary function (also the previous ljung box test) and information criteria for each model.
+
+```{r}
+summary(m2)
+```
+To not clutter, we just check the tests for each model and do not include it in the report.
+
+```{r, include=FALSE, eval=FALSE}
+summary(m2)
+summary(m3)
+summary(m4)
+summary(m5)
+summary(m6)
+summary(m7)
+summary(m8)
+```
+\begin{table}[]
+\begin{tabular}{|ccc|}
+\multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
+\multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
+\multicolumn{1}{|c|}{m2}    & \multicolumn{1}{c|}{17.05822}  & 0.14742034 \\
+\multicolumn{1}{|c|}{m3}    & \multicolumn{1}{c|}{17.04670}  & 0.14784886 \\
+\multicolumn{1}{|c|}{m4}    & \multicolumn{1}{c|}{17.50144}  & 0.13168815 \\
+\multicolumn{1}{|c|}{m5}    & \multicolumn{1}{c|}{17.67835}  & 0.12581163 \\
+\multicolumn{1}{|c|}{m6}    & \multicolumn{1}{c|}{13.29505}  & 0.34796510 \\
+\multicolumn{1}{|c|}{m7}    & \multicolumn{1}{c|}{17.66287}  & 0.12631691 \\
+\multicolumn{1}{|c|}{m8}    & \multicolumn{1}{c|}{12.003996} & 0.44535875
+\end{tabular}
+\end{table}
+
+Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3,3) is more suitable. But since we have p-values for all models above 0.1, this means that we do not see any GARCH effects for the standardized residuals of any model. So our conclusion is that the LM arch tests says that an ARMA(2,0)-GARCH(1,1) is enough.
+
+### $\bullet$ using information criteria.
+
+We also get information criteria from the summary function.
+
+\begin{table}[]
+\begin{tabular}{|ccc|}
+\multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
+\multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
+\multicolumn{1}{|c|}{m2}    & \multicolumn{1}{c|}{-6.824967} & -6.822179 \\
+\multicolumn{1}{|c|}{m3}    & \multicolumn{1}{c|}{-6.824853} & -6.821600 \\
+\multicolumn{1}{|c|}{m4}    & \multicolumn{1}{c|}{-6.824857} & -6.821604 \\
+\multicolumn{1}{|c|}{m5}    & \multicolumn{1}{c|}{-6.824763} & -6.821045 \\
+\multicolumn{1}{|c|}{m6}    & \multicolumn{1}{c|}{-6.824752} & -6.820569 \\
+\multicolumn{1}{|c|}{m7}    & \multicolumn{1}{c|}{-6.824655} & -6.820472 \\
+\multicolumn{1}{|c|}{m8}    & \multicolumn{1}{c|}{-6.824873} & -6.820225
+\end{tabular}
+\end{table}
+
+Furthermore the AIC/BIC values confirm that m2, i.e. the ARMA(2,0)-GARCH(1,1) has the lowest AIC and BIC values, so the information criteria confirm that the more parsimonious model is the best/enough.
+
+Summarizing the ACF plots, the Portmanteau statistics, the ARCH-LM tests and information criteria (AIC and BIC) all point towards the conclusion that the model ARMA(2,0)-GARCH(1,1), i.e. m2, is able to capture the dynamical properties of the data. Therefore the optimal lag order would be 1 for p and q for the GARCH.
+
+
