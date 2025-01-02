@@ -370,23 +370,31 @@ VaR_t <- function(x){
 ## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
 
 ```{r}
-m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
-
-
-VaR_normal <- function(mu,sigma2,p,h,V){
+VaR_normal_ARMA_GARCH <- function(model,p,h,V){
+  
+  pred <- fGarch::predict(model,n.ahead=h)
+  mupred <- pred$meanForecast
+  sigma2pred <- mpred$standardDeviation^2
   
   VaR <- list()
   phi_inv_p <- qnorm(p)
   
   for (i in 1:length(phi_inv_p)){
-    VaR[[i]] <- V*(exp(phi_inv_p[i]*sqrt(h*sigma2)+h*mu)-1)
+    VaR[[i]] <- V*(exp(phi_inv_p[i]*sqrt(sigma2pred)+mupred)-1)
   }
   return(VaR)
 }
 
+p <- c(0.1)
+h <- c(1,10,30)
+V <- 1
 
-fGarch::predict(m12,n.ahead=30)[c(1,10,30),1]
+m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
+m12pred <- fGarch::predict(m12,n.ahead=30,p_loss=c(0.1))
+mupred <- m12pred$meanForecast
+sigma2pred <- m12pred$standardDeviation^2
 
+VaR_normal_ARMA_GARCH(mupred,sigma2pred,p,h,V)
 ```
 
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
