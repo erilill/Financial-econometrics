@@ -46,7 +46,7 @@ We use Daily S&P 500 index close price data from 1950 to 2015, obtained from the
 
 ```{r}
 library(gt)
-close <- sp500$close #Daily S&P 500 index close from 1950 to 2015
+close <- gt::sp500$close #Daily S&P 500 index close from 1950 to 2015
 r <- diff(log(close))
 ts.plot(r)
 ts.plot(r^2)
@@ -336,6 +336,7 @@ VaR_normal <- function(mu,sigma2,p,h,V){
 
 #slide 41 replication
 VaR_normal(mu=0.001,sigma2=0.015^2,p=0.01,h=c(1,10,30),V=10)
+VaR_normal(mu=0.001,sigma2=0.016^2,p=0.01,h=c(1,10,30),V=10)
 ```
 For the daily data and horizons 1, 10 and 30, V=1 and using the mentioned probabilities.
 
@@ -370,11 +371,18 @@ VaR_t <- function(x){
 ## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
 
 ```{r}
+m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
+m13 <- garchFit(r_w ~ garch(1, 1), cond.dist ="norm", data = r_w, trace = F)
+```
+
+First for daily data and horizons 1,10,30
+
+```{r}
 VaR_normal_ARMA_GARCH <- function(model,p,h,V){
   
-  pred <- fGarch::predict(model,n.ahead=h)
+  pred <- fGarch::predict(model,n.ahead=tail(h,1))[h,]
   mupred <- pred$meanForecast
-  sigma2pred <- mpred$standardDeviation^2
+  sigma2pred <- pred$standardDeviation^2
   
   VaR <- list()
   phi_inv_p <- qnorm(p)
@@ -385,16 +393,18 @@ VaR_normal_ARMA_GARCH <- function(model,p,h,V){
   return(VaR)
 }
 
-p <- c(0.1)
-h <- c(1,10,30)
+p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 
-m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
-m12pred <- fGarch::predict(m12,n.ahead=30,p_loss=c(0.1))
-mupred <- m12pred$meanForecast
-sigma2pred <- m12pred$standardDeviation^2
+h <- c(1,10,30)
+VaR_normal_ARMA_GARCH(m12,p,h,V) #daily
+```
 
-VaR_normal_ARMA_GARCH(mupred,sigma2pred,p,h,V)
+And for weekly with horizons 1,4,8.
+
+```{r}
+h <- c(1,4,8)
+VaR_normal_ARMA_GARCH(m13,p,h,V) #weekly
 ```
 
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
