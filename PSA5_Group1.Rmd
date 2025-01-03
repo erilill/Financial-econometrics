@@ -55,7 +55,7 @@ ts.plot(r^2)
 ## 1. Analyze the dynamical properties of log returns and squared log returns. Suggest an appropriate AR-GARCH model and estimate it. Hint: you can use an R package, for example, the package ’fGarch’. Since the package ’fGarch’ allows for ARMA specification in the conditional mean, you can also fit the data by using ARMA-GARCH framework if you want.
 
 
-```{r}
+```{r, eval=FALSE}
 desc_r <- describe(r)[, c("n", "mean", "median","sd", "min", "max", "skew", "kurtosis")]
 desc_r2 <- describe(r^2)[, c("n", "mean", "median","sd", "min", "max", "skew", "kurtosis")]
 table <- rbind(desc_r,desc_r2)
