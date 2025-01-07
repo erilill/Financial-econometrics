@@ -35,6 +35,7 @@ library(psych)
 library(systemfit)
 library(msos)
 library(fGarch)
+library(MASS)
 data("portfolio_m")
 ```
 
@@ -55,24 +56,16 @@ ts.plot(r^2)
 ## 1. Analyze the dynamical properties of log returns and squared log returns. Suggest an appropriate AR-GARCH model and estimate it. Hint: you can use an R package, for example, the package ’fGarch’. Since the package ’fGarch’ allows for ARMA specification in the conditional mean, you can also fit the data by using ARMA-GARCH framework if you want.
 
 
-```{r, eval=FALSE}
-desc_r <- describe(r)[, c("n", "mean", "median","sd", "min", "max", "skew", "kurtosis")]
-desc_r2 <- describe(r^2)[, c("n", "mean", "median","sd", "min", "max", "skew", "kurtosis")]
-table <- rbind(desc_r,desc_r2)
-rownames(table) <- c("r", "r^2")
-kable(round(table,4))
-```
-
 ```{r}
 Acf(r, lag.max=20)
 Pacf(r, lag.max=20)
 Acf(r^2, lag.max=20)
 Pacf(r^2, lag.max=20)
 ```
-We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. So now we need to specify an appropriate $ARMA(p,q)$ model for the conditional mean function $\mu_t$.
+We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. We also examine the degree of persistence in the volatility of the process, which we can see by the squared log returns. As we can see in the ACF and PACF plots, there is very much persistance. Now we need to specify an appropriate $ARMA(p,0)$ model for the conditional mean function $\mu_t$. We use the auto.arima() function to determine the appropriate $AR(p)$ model.
 
 ```{r}
-m1 <- auto.arima(r)
+m1 <- auto.arima(r, max.q=0)
 m1
 ```
 We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So now we want to test for ARCH effects. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
@@ -398,11 +391,40 @@ kable(
 
 ## $\bullet$ the unconditional moments of a t-distribution
 
+```{r}
+VaR_t <- function(mu, sigma2, p, h, V, nu) {
+  VaR <- list()
+  t_inv_p <- qt(p, df = nu)
+  
+  for (i in 1:length(t_inv_p)) {
+    VaR[[i]] <- V * (exp(t_inv_p[i] * sqrt(h * sigma2) + h * mu) - 1)
+  }
+  return(VaR)
+}
+```
+
+For the daily data and horizons 1, 10 and 30, V=1 and using the mentioned probabilities.
 
 ```{r}
-VaR_t <- function(x){
-  print(x)
-}
+## daily
+p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
+h <- c(1,10,30)
+V <- 1
+nu <- 5
+
+VaR_t(mean(r_d),var(r_d),p,h,V, nu)
+```
+
+For the weekly data and horizons 1, 4 and 8, V=1 and using the mentioned probabilities.
+
+```{r}
+## weekly
+p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
+h <- c(1,4,8)
+V <- 1
+nu <- 5
+
+VaR_t(mean(r_w),var(r_w),p,h,V, nu)
 ```
 
 ## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
