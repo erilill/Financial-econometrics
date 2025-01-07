@@ -274,20 +274,35 @@ Pacf(r, lag.max=12)
 Acf(r^2, lag.max=12)
 Pacf(r^2, lag.max=12)
 ```
+We can see that there is not much persistance in the log returns, but there is persistance in the squared log returns. To specify the mean equation we use auto.arima again
 
 ```{r}
-m10 <- auto.arima(r)
+m10 <- auto.arima(r, max.q=0)
 m10
+```
+We can see that auto.arima suggests that the returns are white noise. We use a t-test to see if the mean is different from zero
 
-epsilon = m10$residuals
+```{r}
+t.test(r)
+```
+The t test suggests the mean is different from zero, so we get our mean-corrected returns by simply
+
+```{r}
+epsilon <- r-mean(r)
+```
+
+Now we look at the ACF plots and do box tests for the mean corrected returns and squared mean corrected returns
+
+```{r}
 Acf(epsilon, lag.max=12)
+Pacf(epsilon, lag.max=12)
 Box.test(epsilon, lag = 12, type = "Ljung-Box")
 
-Acf(epsilon^2)
-Pacf(epsilon^2)
+Acf(epsilon^2, lag.max=12)
+Pacf(epsilon, lag.max=12)
 Box.test(epsilon^2, lag = 12, type = "Ljung-Box")
 
-m11 <- garchFit(r ~ arma(1, 1) + garch(1, 1), data = r, trace = F)
+m11 <- garchFit(r ~ garch(1, 1), data = r, trace = F)
 ```
 
 ```{r}
@@ -295,7 +310,7 @@ plot(m11, which = 1) #original returns
 plot(m11, which = 9) #the standardized residuals
 plot(m11, which = 2) #estimated conditional standard deviation
 
-z_hat = residuals(m2, standardize = TRUE)
+z_hat = residuals(m11, standardize = TRUE)
 Acf(z_hat, lag.max=12)
 Acf(z_hat^2, lag.max=12)
 Box.test(z_hat, lag = 12, type = "Ljung-Box")
