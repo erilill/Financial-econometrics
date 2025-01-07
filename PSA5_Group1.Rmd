@@ -484,7 +484,7 @@ m13 <- garchFit(r_w ~ garch(1, 1), cond.dist ="norm", data = r_w, trace = F)
 First for daily data and horizons 1,10,30
 
 ```{r}
-VaR_normal_ARMA_GARCH <- function(model,p,h,V){
+VaR_ARMA_GARCH <- function(model,p,h,V){
   
   pred <- fGarch::predict(model,n.ahead=tail(h,1))[h,]
   mupred <- pred$meanForecast
@@ -501,9 +501,8 @@ VaR_normal_ARMA_GARCH <- function(model,p,h,V){
 
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
-
 h <- c(1,10,30)
-VaR_normal_ARMA_GARCH(m12,p,h,V) #daily
+VaR_ARMA_GARCH(m12,p,h,V) #daily
 ```
 
 ```{r}
@@ -529,7 +528,7 @@ And for weekly with horizons 1,4,8.
 
 ```{r}
 h <- c(1,4,8)
-VaR_normal_ARMA_GARCH(m13,p,h,V) #weekly
+VaR_ARMA_GARCH(m13,p,h,V) #weekly
 ```
 
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
@@ -537,4 +536,22 @@ VaR_normal_ARMA_GARCH(m13,p,h,V) #weekly
 ```{r}
 m14 <- garchFit(r_d ~ garch(1, 1), cond.dist ="std", data = r_d, trace = F)
 m15 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
+
+p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
+V <- 1
+h <- c(1,10,30)
+m14_daily <- VaR_ARMA_GARCH(m14,p,h,V) #daily
+
+VaR_table <- data.frame(matrix(unlist(m14_daily), ncol = length(h), byrow = TRUE))
+colnames(VaR_table) <- paste("Horizon", h)
+rownames(VaR_table) <- paste("p =", p)
+kable(VaR_table, caption = "Value-at-Risk for daily data of a position V = 1 for different horizons using a GARCH(1,1) model based on the t-distribution with constant conditional mean function.")
+
+h <- c(1,4,8)
+m15_weekly <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
+VaR_table <- data.frame(matrix(unlist(m15_weekly), ncol = length(h), byrow = TRUE))
+colnames(VaR_table) <- paste("Horizon", h)
+rownames(VaR_table) <- paste("p =", p)
+kable(VaR_table, caption = "Value-at-Risk for weekly data of a position V = 1 for different horizons using a GARCH(1,1) model based on the t-distribution with constant conditional mean function.")
 ```
+
