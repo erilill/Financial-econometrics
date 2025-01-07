@@ -274,7 +274,7 @@ Pacf(r, lag.max=12)
 Acf(r^2, lag.max=12)
 Pacf(r^2, lag.max=12)
 ```
-We can see that there is not much persistance in the log returns, but there is persistance in the squared log returns. To specify the mean equation we use auto.arima again
+We can see that there is not much persistence in the log returns, but there is persistence in the squared log returns. To specify the mean equation we use auto.arima again
 
 ```{r}
 m10 <- auto.arima(r, max.q=0)
@@ -291,7 +291,7 @@ The t test suggests the mean is different from zero, so we get our mean-correcte
 epsilon <- r-mean(r)
 ```
 
-Now we look at the ACF plots and do box tests for the mean corrected returns and squared mean corrected returns
+This means that we have a constant conditional mean function. Now we look at the ACF plots and do box tests for the mean corrected returns and squared mean corrected returns
 
 ```{r}
 Acf(epsilon, lag.max=12)
@@ -299,9 +299,12 @@ Pacf(epsilon, lag.max=12)
 Box.test(epsilon, lag = 12, type = "Ljung-Box")
 
 Acf(epsilon^2, lag.max=12)
-Pacf(epsilon, lag.max=12)
+Pacf(epsilon^2, lag.max=12)
 Box.test(epsilon^2, lag = 12, type = "Ljung-Box")
+```
+We can see that the ACF/PACF plots suggest litte to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns. However the ACF and PACF plots for the squared mean corrected returns indicate significant autocorrelation. As well as the Ljung-Box tests which rejects the null of no autocorrelation in the squared mean corrected (log) returns, which indicates that there are ARCH effects present. Now we again consider a $GARCH(1,1)$. To fit a (gaussian by default) $GARCH(1,1)$ with a conditional mean function we simply do
 
+```{r}
 m11 <- garchFit(r ~ garch(1, 1), data = r, trace = F)
 ```
 
