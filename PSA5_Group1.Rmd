@@ -365,8 +365,6 @@ res <- VaR_normal(mean(r_d),var(r_d),p,h,V)
 ```{r}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
-  mu = rep(mean(r_w), length(p)), 
-  sigma2 = rep(var(r_w), length(p)),
   Horizon_1 = sapply(res, function(x) x[1]),
   Horizon_10 = sapply(res, function(x) x[2]),
   Horizon_30 = sapply(res, function(x) x[3]), 
@@ -375,8 +373,8 @@ VaR_df <- data.frame(
 
 kable(
   VaR_df,
-  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
-  caption = "Value-at-Risk Estimates from unconditional normal DJ Daily",
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Daily from unconditional normal.",
   digits = 3
 )
 ```
@@ -396,8 +394,6 @@ res <- VaR_normal(mean(r_w),var(r_w),p,h,V)
 ```{r}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
-  mu = rep(mean(r_w), length(p)), 
-  sigma2 = rep(var(r_w), length(p)),
   Horizon_1 = sapply(res, function(x) x[1]),
   Horizon_10 = sapply(res, function(x) x[2]),
   Horizon_30 = sapply(res, function(x) x[3]), 
@@ -406,8 +402,8 @@ VaR_df <- data.frame(
 
 kable(
   VaR_df,
-  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=4)", "Horizon (h=8)", "V"),
-  caption = "Value-at-Risk Estimates from unconditional normal on DJ Weekly",
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=4)", "Horizon (h=8)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Weekly from unconditional normal.",
   digits = 3
 )
 ```
@@ -442,19 +438,16 @@ res <- VaR_t(mean(r_d),var(r_d),p,h,V, nu)
 ```{r}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
-  mu = rep(mean(r_w), length(p)), 
-  sigma2 = rep(var(r_w), length(p)),
   Horizon_1 = sapply(res, function(x) x[1]),
   Horizon_10 = sapply(res, function(x) x[2]),
   Horizon_30 = sapply(res, function(x) x[3]), 
   V = rep(V, length(p)), 
-  nu = rep(nu, length(p))
 )
 
 kable(
   VaR_df,
-  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V", "nu"),
-  caption = "Value-at-Risk Estimates from unconditional normal DJ Daily",
+  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Daily from unconditional t-distributed moments",
   digits = 3
 )
 ```
@@ -475,19 +468,16 @@ res <- VaR_t(mean(r_w),var(r_w),p,h,V, nu)
 ```{r}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
-  mu = rep(mean(r_w), length(p)), 
-  sigma2 = rep(var(r_w), length(p)),
   Horizon_1 = sapply(res, function(x) x[1]),
   Horizon_10 = sapply(res, function(x) x[2]),
   Horizon_30 = sapply(res, function(x) x[3]), 
-  V = rep(V, length(p)),
-  nu = rep(nu, length(p))
+  V = rep(V, length(p))
 )
 
 kable(
   VaR_df,
-  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V", "nu"),
-  caption = "Value-at-Risk Estimates from unconditional normal DJ Daily",
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Weekly from unconditional t-distributed moments",
   digits = 3
 )
 ```
@@ -520,14 +510,48 @@ VaR_ARMA_GARCH <- function(model,p,h,V){
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 h <- c(1,10,30)
-VaR_ARMA_GARCH(m12,p,h,V) #daily
+res <- VaR_ARMA_GARCH(m12,p,h,V) #daily
+```
+
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3]), 
+  V = rep(V, length(p))
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Daily from Gaussian GARCH(1,1) with constant conditional mean.",
+  digits = 3
+)
 ```
 
 And for weekly with horizons 1,4,8.
 
 ```{r}
 h <- c(1,4,8)
-VaR_ARMA_GARCH(m13,p,h,V) #weekly
+res <- VaR_ARMA_GARCH(m13,p,h,V) #weekly
+```
+
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3]), 
+  V = rep(V, length(p))
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Weekly from Gaussian GARCH(1,1) with constant conditional mean.",
+  digits = 3
+)
 ```
 
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
@@ -539,18 +563,48 @@ m15 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 h <- c(1,10,30)
-m14_daily <- VaR_ARMA_GARCH(m14,p,h,V) #daily
-
-VaR_table <- data.frame(matrix(unlist(m14_daily), ncol = length(h), byrow = TRUE))
-colnames(VaR_table) <- paste("Horizon", h)
-rownames(VaR_table) <- paste("p =", p)
-kable(VaR_table, caption = "Value-at-Risk for daily data of a position V = 1 for different horizons using a GARCH(1,1) model based on the t-distribution with constant conditional mean function.")
-
-h <- c(1,4,8)
-m15_weekly <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
-VaR_table <- data.frame(matrix(unlist(m15_weekly), ncol = length(h), byrow = TRUE))
-colnames(VaR_table) <- paste("Horizon", h)
-rownames(VaR_table) <- paste("p =", p)
-kable(VaR_table, caption = "Value-at-Risk for weekly data of a position V = 1 for different horizons using a GARCH(1,1) model based on the t-distribution with constant conditional mean function.")
+res <- VaR_ARMA_GARCH(m14,p,h,V) #daily
 ```
+
+
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3]), 
+  V = rep(V, length(p))
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Daily from GARCH(1,1) model based on the t-distribution with constant conditional mean function.",
+  digits = 3
+)
+```
+
+
+```{r}
+h <- c(1,4,8)
+res <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
+```
+
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3]), 
+  V = rep(V, length(p))
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates for DJ Weekly from GARCH(1,1) model based on the t-distribution with constant conditional mean function.",
+  digits = 3
+)
+```
+
 
