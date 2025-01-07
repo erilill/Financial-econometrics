@@ -43,24 +43,28 @@ data("portfolio_m")
 
 In this exercise, you have to model the time-varying volatility in different index series. Perform the following analysis based on daily indexes of your choice.
 
-We use Daily S&P 500 index close price data from 1950 to 2015, obtained from the 'gt' package.
+We use Daily S&P 500 index close price data from 1950 to 2015, obtained from the 'gt' package. We have visualized the logged returns and squared logged returns below.
 
 ```{r}
 library(gt)
 close <- gt::sp500$close #Daily S&P 500 index close from 1950 to 2015
 r <- diff(log(close))
+par(mfrow=c(1,2))
 ts.plot(r)
 ts.plot(r^2)
+par(mfrow=c(1,1))
 ```
 
 ## 1. Analyze the dynamical properties of log returns and squared log returns. Suggest an appropriate AR-GARCH model and estimate it. Hint: you can use an R package, for example, the package ’fGarch’. Since the package ’fGarch’ allows for ARMA specification in the conditional mean, you can also fit the data by using ARMA-GARCH framework if you want.
 
 
 ```{r}
+par(mfrow=c(2,2))
 Acf(r, lag.max=20)
 Pacf(r, lag.max=20)
 Acf(r^2, lag.max=20)
 Pacf(r^2, lag.max=20)
+par(mfrow=c(1,1))
 ```
 We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. We also examine the degree of persistence in the volatility of the process, which we can see by the squared log returns. As we can see in the ACF and PACF plots, there is very much persistence. Now we need to specify an appropriate $ARMA(p,0)$ model for the conditional mean function $\mu_t$. We use the auto.arima() function to determine the appropriate $AR(p)$ model.
 
@@ -78,12 +82,14 @@ Box.test(epsilon, lag = 20, type = "Ljung-Box")
 We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$.
 
 ```{r}
+par(mfrow=c(1,2))
 Acf(epsilon^2)
 Pacf(epsilon^2)
+par(mfrow=c(1,1))
 Box.test(epsilon^2, lag = 20, type = "Ljung-Box")
 ```
 
-We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high persistence, so we would need a $ARCH(p)$ model with a large $p$. To make it more parsimonious, we can make use of a $ARMA(2,0)-GARCH(1,1)$ model.
+We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high persistence, so we would need a $ARCH(p)$ model with a large $p$. Higher order GARCH models are seldom used in practice since as they tend to be less stable. Common practice is therefore to use the simpler $GARCH(1,1)$ model, this has also proved to be an empirically effective strategy. We follow this practice and make use of a $ARMA(2,0)-GARCH(1,1)$ model.
 
 ```{r}
 m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, trace = F)
@@ -94,9 +100,11 @@ m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, trace = F)
 ### $\bullet$ plotting the original returns, the standardized residuals as well as the estimated conditional standard deviation,
 
 ```{r}
+par(mfrow=c(1,3))
 plot(m2, which = 1) #original returns
 plot(m2, which = 9) #the standardized residuals
 plot(m2, which = 2) #estimated conditional standard deviation
+par(mfrow=c(1,1))
 ```
 The standardized residuals look like white noise, which suggests a good model fit.
 
