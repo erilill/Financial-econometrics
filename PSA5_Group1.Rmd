@@ -172,7 +172,7 @@ summary(m8)
 \end{tabular}
 \end{table}
 
-Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3,3) is more suitable. But since we have p-values for all models above 0.1, this means that we do not see any GARCH effects for the standardized residuals of any model. So our conclusion is that the LM arch tests says that an ARMA(2,0)-GARCH(1,1) is enough.
+Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3,3) is more suitable. But since we have p-values for all models above 0.1, this means that we do not see any GARCH effects for the standardized residuals of any model. So our conclusion is that the LM arch tests says that an ARMA(2,0)-GARCH(1,1) is good enough.
 
 ### $\bullet$ using information criteria.
 
@@ -329,13 +329,46 @@ Pacf(z_hat, lag.max=12)
 Acf(z_hat^2, lag.max=12)
 Pacf(z_hat^2, lag.max=12)
 ```
-The ACF/PACF plots suggests there is no autocorrelation in the standardized or in the squared standardized residuals. We check this with Ljung-Box tests
+The ACF/PACF plots suggests there is no autocorrelation in the standardized or in the squared standardized residuals. Now we compute Portmanteau statistics based on the standardized residuals.
 
 ```{r}
 Box.test(z_hat, lag = 12, type = "Ljung-Box")
 Box.test(z_hat^2, lag = 12, type = "Ljung-Box")
 ```
-We do not reject the null that there is no autocorrelation in the standardized residuals, and we also do not reject the null of no autocorrelation in the squared standardized residuals.
+
+We do not reject the null that there is no autocorrelation in the standardized residuals, and we also do not reject the null of no autocorrelation in the squared standardized residuals. So we do have evidence that the model is able to capture the dynamical properties of the data. Now to determine optimal lag order. Lets not check so many different models this time. So we test for GARCH effects of higher orders
+
+```{r}
+m12 <- garchFit(r ~ garch(1, 2), data = r, trace = F)
+m13 <- garchFit(r ~ garch(2, 1), data = r, trace = F)
+m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
+```
+
+\begin{table}[]
+\begin{tabular}{|ccc|}
+\multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
+\multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
+\multicolumn{1}{|c|}{m11}    & \multicolumn{1}{c|}{5.3125715}  & 0.9467159 \\
+\multicolumn{1}{|c|}{m12}    & \multicolumn{1}{c|}{5.3197430}  & 0.946438 \\
+\multicolumn{1}{|c|}{m13}    & \multicolumn{1}{c|}{5.6930511}  & 0.9307579 \\
+\multicolumn{1}{|c|}{14}    & \multicolumn{1}{c|}{5.6930058}  & 0.9307599
+\end{tabular}
+\end{table}
+
+The p-values are all very high, so we do not reject the null of no GARCH effects for all models. This suggests that the $GARCH(1,1)$ is a good enough lag order. Let us look at the AIC/BIC values
+
+\begin{table}[]
+\begin{tabular}{|ccc|}
+\multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
+\multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
+\multicolumn{1}{|c|}{m11}    & \multicolumn{1}{c|}{-3.602803} & -3.580242 \\
+\multicolumn{1}{|c|}{m12}    & \multicolumn{1}{c|}{-3.600297} & -3.572096 \\
+\multicolumn{1}{|c|}{m13}    & \multicolumn{1}{c|}{-3.602829} & -3.574628 \\
+\multicolumn{1}{|c|}{m14}    & \multicolumn{1}{c|}{-3.600446} & -3.566604 \\
+\end{tabular}
+\end{table}
+
+For the AIC, it suggests that $GARCH(2,1)$ is slightly slightly better, with $GARCHH(1,1)$ at the second place. Although BIC suggests $GARCH(1,1)$ is the best model. This suggests that the 1,1 order for the $GARCH(1,1)$ is good enough, and if BIC decides it is actually the optimal lag order.
 
 # B. Estimating Value-at-Risk
 
