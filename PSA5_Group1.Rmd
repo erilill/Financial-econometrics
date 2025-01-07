@@ -68,14 +68,16 @@ We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant au
 m1 <- auto.arima(r, max.q=0)
 m1
 ```
-We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So now we want to test for ARCH effects. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
+We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
 
 ```{r}
 epsilon = m1$residuals
 Acf(epsilon, lag.max=20)
 Box.test(epsilon, lag = 20, type = "Ljung-Box")
 ```
-We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$.
+We can see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. So the ARMA mean function does not seem to properly remove the linear dependence in the data. Anyways we proceed.
+
+Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$ and test for ARCH effects.
 
 ```{r}
 Acf(epsilon^2)
