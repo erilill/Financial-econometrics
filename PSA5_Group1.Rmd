@@ -62,7 +62,7 @@ Pacf(r, lag.max=20)
 Acf(r^2, lag.max=20)
 Pacf(r^2, lag.max=20)
 ```
-We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. We also examine the degree of persistence in the volatility of the process, which we can see by the squared log returns. As we can see in the ACF and PACF plots, there is very much persistance. Now we need to specify an appropriate $ARMA(p,0)$ model for the conditional mean function $\mu_t$. We use the auto.arima() function to determine the appropriate $AR(p)$ model.
+We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. We also examine the degree of persistence in the volatility of the process, which we can see by the squared log returns. As we can see in the ACF and PACF plots, there is very much persistence. Now we need to specify an appropriate $ARMA(p,0)$ model for the conditional mean function $\mu_t$. We use the auto.arima() function to determine the appropriate $AR(p)$ model.
 
 ```{r}
 m1 <- auto.arima(r, max.q=0)
@@ -75,7 +75,7 @@ epsilon = m1$residuals
 Acf(epsilon, lag.max=20)
 Box.test(epsilon, lag = 20, type = "Ljung-Box")
 ```
-We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean correced returns $\epsilon_t^2$.
+We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$.
 
 ```{r}
 Acf(epsilon^2)
@@ -110,7 +110,7 @@ It is hard to tell if there is much autocorrelation or not for the standardized 
 ```{r}
 Acf(z_hat^2, lag.max=20)
 ```
-Now the ACF plot is a bit more clear, it does not indicate very strong autocorrelation, we have 2 barely significant spikes, but they are smaller this time.
+Now the ACF plot is a bit more clear, it does not indicate much autocorrelation, we have 2 barely significant spikes, but they are smaller this time.
 
 ### $\bullet$ computing Portmanteau statistics based on the standardized residuals,
 
@@ -146,7 +146,7 @@ Now we get the LM Arch Test directly from the summary function (also the previou
 ```{r}
 summary(m2)
 ```
-To not clutter, we just check the tests for each model and do not include it in the report.
+To not clutter, we just check the LM Arch tests for each model and do not include it in the report.
 
 ```{r, include=FALSE, eval=FALSE}
 summary(m2)
@@ -193,7 +193,7 @@ We also get information criteria from the summary function.
 
 Furthermore the AIC/BIC values confirm that m2, i.e. the ARMA(2,0)-GARCH(1,1) has the lowest AIC and BIC values, so the information criteria confirm that the more parsimonious model is the best/enough.
 
-Summarizing the ACF plots, the Portmanteau statistics, the ARCH-LM tests and information criteria (AIC and BIC) all point towards the conclusion that the model ARMA(2,0)-GARCH(1,1), i.e. m2, is able to capture the dynamical properties of the data. Therefore the optimal lag order would be 1 for p and q for the GARCH.
+Summarizing the ACF plots, the Portmanteau statistics, the ARCH-LM tests and information criteria (AIC and BIC) all point towards the conclusion that the model ARMA(2,0)-GARCH(1,1), i.e. m2, is able to capture the dynamical properties of the data. Therefore the optimal lag order would be 1 for p and q for the GARCH, and 2 for p and 0 for q in the ARMA part.
 
 ## 3. Compute the standardized residuals and test the series against normality using appropriate goodness-of-fit tests as well as QQ-plots. What do you find?
 
