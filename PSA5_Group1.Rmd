@@ -472,7 +472,7 @@ V <- 1
 res <- VaR_normal(mean(r_d),var(r_d),p,h,V)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -489,7 +489,7 @@ kable(
 )
 ```
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), # Select columns for Horizon values
@@ -524,7 +524,7 @@ V <- 1
 res <- VaR_normal(mean(r_w),var(r_w),p,h,V)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -542,7 +542,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), # Select columns for Horizon values
@@ -594,7 +594,7 @@ nu <- 5
 res <- VaR_t(mean(r_d),var(r_d),p,h,V, nu)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -611,7 +611,7 @@ kable(
 )
 ```
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -649,7 +649,7 @@ nu <- 5
 res <- VaR_t(mean(r_w),var(r_w),p,h,V, nu)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -667,7 +667,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -722,7 +722,7 @@ h <- c(1,10,30)
 res <- VaR_ARMA_GARCH(m12,p,h,V) #daily
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -740,7 +740,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -771,7 +771,7 @@ h <- c(1,4,8)
 res <- VaR_ARMA_GARCH(m13,p,h,V) #weekly
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -789,7 +789,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -826,7 +826,7 @@ res <- VaR_ARMA_GARCH(m14,p,h,V) #daily
 ```
 
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -843,7 +843,7 @@ kable(
 )
 ```
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -872,7 +872,7 @@ h <- c(1,4,8)
 res <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -890,7 +890,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
