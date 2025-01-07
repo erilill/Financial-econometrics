@@ -154,7 +154,7 @@ m8 <- garchFit(r ~ arma(2, 0) + garch(3, 3), data = r, trace = F)
 ```
 Now we get the LM Arch Test directly from the summary function (also the previous ljung box test) and information criteria for each model. To not clutter, we just check the LM Arch tests for each model and report the results in a Table.
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
@@ -174,7 +174,7 @@ Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3
 
 We also get information criteria from the summary function.
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
@@ -344,7 +344,7 @@ m13 <- garchFit(r ~ garch(2, 1), data = r, trace = F)
 m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
 ```
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
@@ -357,7 +357,7 @@ m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
 
 The p-values are all very high, so we do not reject the null of no GARCH effects for all models. This suggests that the $GARCH(1,1)$ is a good enough lag order. Let us look at the AIC/BIC values
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
