@@ -355,7 +355,7 @@ m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
 \multicolumn{1}{|c|}{m11}    & \multicolumn{1}{c|}{5.3125715}  & 0.9467159 \\
 \multicolumn{1}{|c|}{m12}    & \multicolumn{1}{c|}{5.3197430}  & 0.946438 \\
 \multicolumn{1}{|c|}{m13}    & \multicolumn{1}{c|}{5.6930511}  & 0.9307579 \\
-\multicolumn{1}{|c|}{14}    & \multicolumn{1}{c|}{5.6930058}  & 0.9307599
+\multicolumn{1}{|c|}{m14}    & \multicolumn{1}{c|}{5.6930058}  & 0.9307599
 \end{tabular}
 \end{table}
 
@@ -697,8 +697,8 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 ## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
 
 ```{r}
-m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
-m13 <- garchFit(r_w ~ garch(1, 1), cond.dist ="norm", data = r_w, trace = F)
+m15 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
+m16 <- garchFit(r_w ~ garch(1, 1), cond.dist ="norm", data = r_w, trace = F)
 ```
 
 First for daily data and horizons 1,10,30
@@ -722,7 +722,7 @@ VaR_ARMA_GARCH <- function(model,p,h,V){
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 h <- c(1,10,30)
-res <- VaR_ARMA_GARCH(m12,p,h,V) #daily
+res <- VaR_ARMA_GARCH(m15,p,h,V) #daily
 ```
 
 ```{r, echo=F}
@@ -771,7 +771,7 @@ And for weekly with horizons 1,4,8.
 
 ```{r}
 h <- c(1,4,8)
-res <- VaR_ARMA_GARCH(m13,p,h,V) #weekly
+res <- VaR_ARMA_GARCH(m16,p,h,V) #weekly
 ```
 
 ```{r, echo=F}
@@ -819,13 +819,13 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
 
 ```{r}
-m14 <- garchFit(r_d ~ garch(1, 1), cond.dist ="std", data = r_d, trace = F)
-m15 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
+m17 <- garchFit(r_d ~ garch(1, 1), cond.dist ="std", data = r_d, trace = F)
+m18 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
 
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 h <- c(1,10,30)
-res <- VaR_ARMA_GARCH(m14,p,h,V) #daily
+res <- VaR_ARMA_GARCH(m17,p,h,V) #daily
 ```
 
 
@@ -872,7 +872,7 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 
 ```{r}
 h <- c(1,4,8)
-res <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
+res <- VaR_ARMA_GARCH(m18,p,h,V) #weekly
 ```
 
 ```{r, echo=F}
