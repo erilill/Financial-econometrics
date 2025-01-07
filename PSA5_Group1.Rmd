@@ -72,14 +72,16 @@ We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant au
 m1 <- auto.arima(r, max.q=0)
 m1
 ```
-We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So now we want to test for ARCH effects. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
+We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
 
 ```{r}
 epsilon = m1$residuals
 Acf(epsilon, lag.max=20)
 Box.test(epsilon, lag = 20, type = "Ljung-Box")
 ```
-We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$.
+We can see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. So the ARMA mean function does not seem to properly remove the linear dependence in the data. Anyways we proceed, it is the best we could do.
+
+Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$ and test for ARCH effects.
 
 ```{r}
 par(mfrow=c(1,2))
@@ -150,23 +152,9 @@ m6 <- garchFit(r ~ arma(2, 0) + garch(2, 3), data = r, trace = F)
 m7 <- garchFit(r ~ arma(2, 0) + garch(3, 2), data = r, trace = F)
 m8 <- garchFit(r ~ arma(2, 0) + garch(3, 3), data = r, trace = F)
 ```
-Now we get the LM Arch Test directly from the summary function (also the previous ljung box test) and information criteria for each model.
+Now we get the LM Arch Test directly from the summary function (also the previous ljung box test) and information criteria for each model. To not clutter, we just check the LM Arch tests for each model and report the results in a Table.
 
-```{r}
-summary(m2)
-```
-To not clutter, we just check the LM Arch tests for each model and do not include it in the report.
-
-```{r, include=FALSE, eval=FALSE}
-summary(m2)
-summary(m3)
-summary(m4)
-summary(m5)
-summary(m6)
-summary(m7)
-summary(m8)
-```
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
@@ -186,7 +174,7 @@ Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3
 
 We also get information criteria from the summary function.
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
@@ -366,7 +354,7 @@ m13 <- garchFit(r ~ garch(2, 1), data = r, trace = F)
 m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
 ```
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
@@ -379,7 +367,7 @@ m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
 
 The p-values are all very high, so we do not reject the null of no GARCH effects for all models. This suggests that the $GARCH(1,1)$ is a good enough lag order. Let us look at the AIC/BIC values
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
