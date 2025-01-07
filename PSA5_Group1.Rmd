@@ -428,7 +428,7 @@ vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
-Still quite a high test statistic of 39, but again smaller than for the normal distribution where the test statistic was 55. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Also the histogram looks much more like the uniform distribution this time. Lets look at the qqplot.
+Still quite a high test statistic of 39, but again smaller than for the normal distribution where the test statistic was 55. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Also the histogram looks more like the uniform distribution this time. Lets look at the qqplot.
 
 ```{r}
 dataframe = data.frame(z_hat_t)
