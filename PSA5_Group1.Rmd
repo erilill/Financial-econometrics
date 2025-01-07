@@ -79,7 +79,7 @@ epsilon = m1$residuals
 Acf(epsilon, lag.max=20)
 Box.test(epsilon, lag = 20, type = "Ljung-Box")
 ```
-We can see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. So the ARMA mean function does not seem to properly remove the linear dependence in the data. Anyways we proceed.
+We can see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. So the ARMA mean function does not seem to properly remove the linear dependence in the data. Anyways we proceed, it is the best we could do.
 
 Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$ and test for ARCH effects.
 
