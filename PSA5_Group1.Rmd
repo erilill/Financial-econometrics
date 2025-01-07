@@ -950,16 +950,20 @@ Comparing daily t-GARCH with weekly t-GARCH
 These findings are very close to the previous ones for daily Gaussian GARCH and weekly Gaussian GARCH. Weekly t-GARCH seem to have more conservative estimates but daily data seems to diverge more than weekly in longer horizons. 
 
 Comparing daily normal with daily Gaussian GARCH
-In this comparison we would expect that Gaussian GARCH produces more conservative values, however, they do not. The estimates from Gaussian GARCH are significantly less negative than from the model with the unconditional mean. This could suggest that the markets experienced quite stable volatility since ??? 
+In this comparison we would expect that Gaussian GARCH produces more conservative values, however, they do not. The estimates from Gaussian GARCH are significantly less negative than from the model with the unconditional mean. 
 
 Comparing daily t with daily t-GARCH
 Once again we observe that the daily t produces much more conservative estimates than the t-GARCH. 
 
 Comparing weekly normal with weekly Gaussian GARCH
-
+Once again we observe that the weekly normal produces more conservative estimates than the Gaussian GARCH. 
 
 Comparing weekly t with weekly t-GARCH
+Lastly, we observe the same finding that the t-GARCH produces less conservatives estimates compared to the unconditional model. 
 
-
+In conclusion we find three findings in this task: 
+t-based models produce in general more conservative estimates, capturing better the presence of heavy tails in the returns. 
+GARCH models seem to yield less conservative estimates compared to unconditional mean-based models. 
+Lastly we observed that weekly data exhibits more conservative estimates than daily data.
 
 
