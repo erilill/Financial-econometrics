@@ -378,7 +378,7 @@ The p-values are all very high, so we do not reject the null of no GARCH effects
 \end{tabular}
 \end{table}
 
-For the AIC, it suggests that $GARCH(2,1)$ is slightly slightly better, with $GARCH(1,1)$ at the second place. Although BIC suggests $GARCH(1,1)$ is the best model. This suggests that the 1,1 order for the $GARCH(1,1)$ is good enough, and if BIC decides it is actually the optimal lag order.
+For the AIC, it suggests that $GARCH(2,1)$ is slightly better, with $GARCH(1,1)$ at the second place. Although BIC suggests $GARCH(1,1)$ is the best model. This suggests that the 1,1 order for the $GARCH(1,1)$ is good enough, and BIC suggests that it is actually the optimal lag order.
 
 Now we compute the standardized residuals and test the series against normality using appropriate goodness-of-fit tests as well as QQ-plots.
 
@@ -406,11 +406,12 @@ qqline(z_hat, col="red")
 
 The qqplot also confirms that the standardized residuals are not normally distributed.
 
-Now we reestimate the model based on a t-distribution and re-evaluate the distributional properties of the resulting standardized residuals.
+Now we re-estimate the model based on a t-distribution and re-evaluate the distributional properties of the resulting standardized residuals.
 
 ```{r}
 m11_tdist <- garchFit(r ~ garch(1, 1), data = r, cond.dist = "std", trace = F)
 ```
+
 If we look at the summary now, the estimated shape parameter, i.e. the estimated degrees of freedom is 7.8. So we try the standardized residuals against a t distribution with 8 degrees of freedom.
 
 ```{r}
