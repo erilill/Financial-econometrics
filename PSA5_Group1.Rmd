@@ -526,12 +526,13 @@ m14_daily <- VaR_ARMA_GARCH(m14,p,h,V) #daily
 VaR_table <- data.frame(matrix(unlist(m14_daily), ncol = length(h), byrow = TRUE))
 colnames(VaR_table) <- paste("Horizon", h)
 rownames(VaR_table) <- paste("p =", p)
-kable(VaR_table, caption = "VaR Results for Daily data. V=1.")
+kable(VaR_table, caption = "Value-at-Risk for daily data of a position V = 1 for different horizons using a GARCH(1,1) model based on the t-distribution with constant conditional mean function.")
 
 h <- c(1,4,8)
 m15_weekly <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
 VaR_table <- data.frame(matrix(unlist(m15_weekly), ncol = length(h), byrow = TRUE))
 colnames(VaR_table) <- paste("Horizon", h)
 rownames(VaR_table) <- paste("p =", p)
-kable(VaR_table, caption = "VaR Results for Daily data. V=1.")
+kable(VaR_table, caption = "Value-at-Risk for weekly data of a position V = 1 for different horizons using a GARCH(1,1) model based on the t-distribution with constant conditional mean function.")
 ```
+
