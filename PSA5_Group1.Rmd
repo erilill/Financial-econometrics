@@ -245,7 +245,7 @@ vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
-Still quite a high test statistic of 59, but much smaller than for the normal distribution where the test statistic was 323. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Lets look at the qqplot.
+Still quite a high test statistic of 59, but much smaller than for the normal distribution where the test statistic was 323. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Also the histogram looks much more like the uniform distribution this time. Lets look at the qqplot.
 
 ```{r}
 dataframe = data.frame(z_hat_t)
@@ -368,7 +368,67 @@ The p-values are all very high, so we do not reject the null of no GARCH effects
 \end{tabular}
 \end{table}
 
-For the AIC, it suggests that $GARCH(2,1)$ is slightly slightly better, with $GARCHH(1,1)$ at the second place. Although BIC suggests $GARCH(1,1)$ is the best model. This suggests that the 1,1 order for the $GARCH(1,1)$ is good enough, and if BIC decides it is actually the optimal lag order.
+For the AIC, it suggests that $GARCH(2,1)$ is slightly slightly better, with $GARCH(1,1)$ at the second place. Although BIC suggests $GARCH(1,1)$ is the best model. This suggests that the 1,1 order for the $GARCH(1,1)$ is good enough, and if BIC decides it is actually the optimal lag order.
+
+Now we compute the standardized residuals and test the series against normality using appropriate goodness-of-fit tests as well as QQ-plots.
+
+```{r}
+z_hat = residuals(m11, standardize=TRUE)
+
+vdata = z_hat
+ik = 20
+grids = 1:ik/ik
+
+vq = pnorm(vdata)
+hist(vq)
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+
+The Chi square goodness of fit test clearly rejects the null that the standardized residuals $\hat{z}_t \sim N(0,1)$. Also we can see from the histogram that it does not look like a uniform distribution, which it should look like if the null is true.
+
+```{r}
+qqnorm(z_hat)
+qqline(z_hat, col="red")
+```
+
+The qqplot also confirms that the standardized residuals are not normally distributed.
+
+Now we reestimate the model based on a t-distribution and re-evaluate the distributional properties of the resulting standardized residuals.
+
+```{r}
+m11_tdist <- garchFit(r ~ garch(1, 1), data = r, cond.dist = "std", trace = F)
+```
+If we look at the summary now, the estimated shape parameter, i.e. the estimated degrees of freedom is 7.8. So we try the standardized residuals against a t distribution with 8 degrees of freedom.
+
+```{r}
+z_hat_t = residuals(m11_tdist,standardize=TRUE)
+
+vdata = z_hat_t
+ik = 20
+grids = 1:ik/ik
+
+df = 8
+ndata = vdata*sqrt(df/(df-2))
+vq = pt(ndata,df=7); hist(vq)
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+Still quite a high test statistic of 42, but again smaller than for the normal distribution where the test statistic was 55. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Also the histogram looks much more like the uniform distribution this time. Lets look at the qqplot.
+
+```{r}
+dataframe = data.frame(z_hat_t)
+
+df = 8
+tmp = ggplot(dataframe, aes(sample=z_hat_t*sqrt(df/(df-2))))
+tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red")
+```
+Actually the qq-plot does not look substantially better than the normal qq-plot this time.
+
 
 # B. Estimating Value-at-Risk
 
