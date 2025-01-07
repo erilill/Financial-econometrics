@@ -506,6 +506,25 @@ h <- c(1,10,30)
 VaR_normal_ARMA_GARCH(m12,p,h,V) #daily
 ```
 
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  mu = rep(mean(r_w), length(p)), 
+  sigma2 = rep(var(r_w), length(p)),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3]), 
+  V = rep(V, length(p))
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  caption = "Value-at-Risk Estimates from unconditional normal DJ Daily",
+  digits = 3
+)
+```
+
 And for weekly with horizons 1,4,8.
 
 ```{r}
