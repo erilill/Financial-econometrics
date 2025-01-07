@@ -396,7 +396,30 @@ kable(
 )
 ```
 
-Tabell H V r
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), # Select columns for Horizon values
+    names_to = "Horizon",          # New column to indicate horizon type
+    values_to = "VaR"              # New column to hold the values
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + # Optionally add points
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Daily",
+    subtitle = "Unconditional moments of normal distribution",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
 For the weekly data and horizons 1, 4 and 8, V=1 and using the mentioned probabilities.
 
 ```{r}
@@ -424,6 +447,32 @@ kable(
   digits = 3
 )
 ```
+
+
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), # Select columns for Horizon values
+    names_to = "Horizon",          # New column to indicate horizon type
+    values_to = "VaR"              # New column to hold the values
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + # Optionally add points
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Weekly",
+    subtitle = "Unconditional moments of normal distribution",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
 
 
 ## $\bullet$ the unconditional moments of a t-distribution
@@ -458,16 +507,41 @@ VaR_df <- data.frame(
   Horizon_1 = sapply(res, function(x) x[1]),
   Horizon_10 = sapply(res, function(x) x[2]),
   Horizon_30 = sapply(res, function(x) x[3]), 
-  V = rep(V, length(p)), 
+  V = rep(V, length(p)) 
 )
 
 kable(
   VaR_df,
-  col.names = c("Probability", "mu", "sigma2", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)", "V"),
   caption = "Value-at-Risk Estimates for DJ Daily from unconditional t-distributed moments",
   digits = 3
 )
 ```
+
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), 
+    names_to = "Horizon",          
+    values_to = "VaR"              
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Daily",
+    subtitle = "Unconditional t-distributed moments",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
 
 
 For the weekly data and horizons 1, 4 and 8, V=1 and using the mentioned probabilities.
@@ -497,6 +571,31 @@ kable(
   caption = "Value-at-Risk Estimates for DJ Weekly from unconditional t-distributed moments",
   digits = 3
 )
+```
+
+
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), 
+    names_to = "Horizon",          
+    values_to = "VaR"              
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Weekly",
+    subtitle = "Unconditional t-distributed moments",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
 ```
 
 ## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
@@ -547,6 +646,31 @@ kable(
 )
 ```
 
+
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), 
+    names_to = "Horizon",         
+    values_to = "VaR"             
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Daily",
+    subtitle = "Gaussian GARCH(1,1) with constant conditional mean",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
 And for weekly with horizons 1,4,8.
 
 ```{r}
@@ -569,6 +693,31 @@ kable(
   caption = "Value-at-Risk Estimates for DJ Weekly from Gaussian GARCH(1,1) with constant conditional mean.",
   digits = 3
 )
+```
+
+
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), 
+    names_to = "Horizon",         
+    values_to = "VaR"             
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Weekly",
+    subtitle = "Gaussian GARCH(1,1) with constant conditional mean",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
 ```
 
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
@@ -601,6 +750,29 @@ kable(
 )
 ```
 
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), 
+    names_to = "Horizon",         
+    values_to = "VaR"             
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Daily",
+    subtitle = "GARCH(1,1) model based on the t-distribution with constant conditional mean function",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
+```
 
 ```{r}
 h <- c(1,4,8)
@@ -622,6 +794,31 @@ kable(
   caption = "Value-at-Risk Estimates for DJ Weekly from GARCH(1,1) model based on the t-distribution with constant conditional mean function.",
   digits = 3
 )
+```
+
+
+```{r}
+df_long <- VaR_df %>%
+  pivot_longer(
+    cols = starts_with("Horizon"), 
+    names_to = "Horizon",         
+    values_to = "VaR"             
+  )
+
+ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
+  geom_line(size = 1) +
+  geom_point(size = 2) + 
+  labs(
+    title = "Value-at-Risk for Different Horizons and Probabilities DJ Weekly",
+    subtitle = "GARCH(1,1) model based on the t-distribution with constant conditional mean function",
+    x = "Horizon",
+    y = "VaR",
+    color = "Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
 ```
 
 
