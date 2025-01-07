@@ -43,24 +43,28 @@ data("portfolio_m")
 
 In this exercise, you have to model the time-varying volatility in different index series. Perform the following analysis based on daily indexes of your choice.
 
-We use Daily S&P 500 index close price data from 1950 to 2015, obtained from the 'gt' package.
+We use Daily S&P 500 index close price data from 1950 to 2015, obtained from the 'gt' package. We have visualized the logged returns and squared logged returns below.
 
 ```{r}
 library(gt)
 close <- gt::sp500$close #Daily S&P 500 index close from 1950 to 2015
 r <- diff(log(close))
+par(mfrow=c(1,2))
 ts.plot(r)
 ts.plot(r^2)
+par(mfrow=c(1,1))
 ```
 
 ## 1. Analyze the dynamical properties of log returns and squared log returns. Suggest an appropriate AR-GARCH model and estimate it. Hint: you can use an R package, for example, the package ’fGarch’. Since the package ’fGarch’ allows for ARMA specification in the conditional mean, you can also fit the data by using ARMA-GARCH framework if you want.
 
 
 ```{r}
+par(mfrow=c(2,2))
 Acf(r, lag.max=20)
 Pacf(r, lag.max=20)
 Acf(r^2, lag.max=20)
 Pacf(r^2, lag.max=20)
+par(mfrow=c(1,1))
 ```
 We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant autocorrelation. We also examine the degree of persistence in the volatility of the process, which we can see by the squared log returns. As we can see in the ACF and PACF plots, there is very much persistence. Now we need to specify an appropriate $ARMA(p,0)$ model for the conditional mean function $\mu_t$. We use the auto.arima() function to determine the appropriate $AR(p)$ model.
 
@@ -68,22 +72,26 @@ We can see that the log returns series $r_t=\mu_t+\epsilon_t$ has significant au
 m1 <- auto.arima(r, max.q=0)
 m1
 ```
-We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So now we want to test for ARCH effects. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
+We see that auto.arima() suggests an $ARMA(2,0)$ i.e. $AR(2)$ with a constant for the conditional mean function $\mu_t$. So we have the residuals $\epsilon_t=r_t-\mu_t$. We first see if they are serially uncorrelated
 
 ```{r}
 epsilon = m1$residuals
 Acf(epsilon, lag.max=20)
 Box.test(epsilon, lag = 20, type = "Ljung-Box")
 ```
-We can again see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$.
+We can see that the residuals are serially correlated, since we reject the null of the first 20 autocorrelations being zero. So the ARMA mean function does not seem to properly remove the linear dependence in the data. Anyways we proceed, it is the best we could do.
+
+Now to check the time series properties of the squared mean corrected returns $\epsilon_t^2$ and test for ARCH effects.
 
 ```{r}
+par(mfrow=c(1,2))
 Acf(epsilon^2)
 Pacf(epsilon^2)
+par(mfrow=c(1,1))
 Box.test(epsilon^2, lag = 20, type = "Ljung-Box")
 ```
 
-We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high persistence, so we would need a $ARCH(p)$ model with a large $p$. To make it more parsimonious, we can make use of a $ARMA(2,0)-GARCH(1,1)$ model.
+We can see that the squared mean corrected returns are not serially uncorrelated, which suggests ARCH effects. We see that there is a very high persistence, so we would need a $ARCH(p)$ model with a large $p$. Higher order GARCH models are seldom used in practice since as they tend to be less stable. Common practice is therefore to use the simpler $GARCH(1,1)$ model, this has also proved to be an empirically effective strategy. We follow this practice and make use of a $ARMA(2,0)-GARCH(1,1)$ model.
 
 ```{r}
 m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, trace = F)
@@ -94,10 +102,13 @@ m2 <- garchFit(r ~ arma(2, 0) + garch(1, 1), data = r, trace = F)
 ### $\bullet$ plotting the original returns, the standardized residuals as well as the estimated conditional standard deviation,
 
 ```{r}
+par(mfrow=c(1,3))
 plot(m2, which = 1) #original returns
 plot(m2, which = 9) #the standardized residuals
 plot(m2, which = 2) #estimated conditional standard deviation
+par(mfrow=c(1,1))
 ```
+The standardized residuals look like white noise, which suggests a good model fit.
 
 ### $\bullet$ evaluating the autocorrelation functions of of the standardized residuals and squared standardized residuals,
 
@@ -141,23 +152,9 @@ m6 <- garchFit(r ~ arma(2, 0) + garch(2, 3), data = r, trace = F)
 m7 <- garchFit(r ~ arma(2, 0) + garch(3, 2), data = r, trace = F)
 m8 <- garchFit(r ~ arma(2, 0) + garch(3, 3), data = r, trace = F)
 ```
-Now we get the LM Arch Test directly from the summary function (also the previous ljung box test) and information criteria for each model.
+Now we get the LM Arch Test directly from the summary function (also the previous ljung box test) and information criteria for each model. To not clutter, we just check the LM Arch tests for each model and report the results in a Table.
 
-```{r}
-summary(m2)
-```
-To not clutter, we just check the LM Arch tests for each model and do not include it in the report.
-
-```{r, include=FALSE, eval=FALSE}
-summary(m2)
-summary(m3)
-summary(m4)
-summary(m5)
-summary(m6)
-summary(m7)
-summary(m8)
-```
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
@@ -171,13 +168,13 @@ summary(m8)
 \end{tabular}
 \end{table}
 
-Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3,3) is more suitable. But since we have p-values for all models above 0.1, this means that we do not see any GARCH effects for the standardized residuals of any model. So our conclusion is that the LM arch tests says that an ARMA(2,0)-GARCH(1,1) is enough.
+Indeed m8 has the highest p-value, so that would maybe imply a ARMA(2,0)-GARCH(3,3) is more suitable. But since we have p-values for all models above 0.1, this means that we do not see any GARCH effects for the standardized residuals of any model. So our conclusion is that the LM arch tests says that an ARMA(2,0)-GARCH(1,1) is good enough.
 
 ### $\bullet$ using information criteria.
 
 We also get information criteria from the summary function.
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{|ccc|}
 \multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
 \multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
@@ -244,7 +241,7 @@ vn = c(vn[1],diff(vn))
 test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
 cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
 ```
-Still quite a high test statistic of 59, but much smaller than for the normal distribution where the test statistic was 323. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Lets look at the qqplot.
+Still quite a high test statistic of 59, but much smaller than for the normal distribution where the test statistic was 323. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Also the histogram looks much more like the uniform distribution this time. Lets look at the qqplot.
 
 ```{r}
 dataframe = data.frame(z_hat_t)
@@ -264,15 +261,21 @@ library(bbdetection)
 data <- sp500m
 P <- as.vector(data$SP500) # monthly closing prices
 r <- diff(log(P))
+par(mfrow=c(1,2))
 ts.plot(r)
 ts.plot(r^2)
+par(mfrow=c(1,1))
 ```
 
+First we analyze the dynamical properties of the log returns and squared log returns.
+
 ```{r}
+par(mfrow=c(2,2))
 Acf(r, lag.max=12)
 Pacf(r, lag.max=12)
 Acf(r^2, lag.max=12)
 Pacf(r^2, lag.max=12)
+par(mfrow=c(1,1))
 ```
 We can see that there is not much persistence in the log returns, but there is persistence in the squared log returns. To specify the mean equation we use auto.arima again
 
@@ -294,6 +297,7 @@ epsilon <- r-mean(r)
 This means that we have a constant conditional mean function. Now we look at the ACF plots and do box tests for the mean corrected returns and squared mean corrected returns
 
 ```{r}
+par(mfrow=c(1,2))
 Acf(epsilon, lag.max=12)
 Pacf(epsilon, lag.max=12)
 Box.test(epsilon, lag = 12, type = "Ljung-Box")
@@ -301,24 +305,139 @@ Box.test(epsilon, lag = 12, type = "Ljung-Box")
 Acf(epsilon^2, lag.max=12)
 Pacf(epsilon^2, lag.max=12)
 Box.test(epsilon^2, lag = 12, type = "Ljung-Box")
+par(mfrow=c(1,1))
 ```
-We can see that the ACF/PACF plots suggest litte to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns. However the ACF and PACF plots for the squared mean corrected returns indicate significant autocorrelation. As well as the Ljung-Box tests which rejects the null of no autocorrelation in the squared mean corrected (log) returns, which indicates that there are ARCH effects present. Now we again consider a $GARCH(1,1)$. To fit a (gaussian by default) $GARCH(1,1)$ with a conditional mean function we simply do
+We can see that the ACF/PACF plots suggest little to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns.
+
+However the ACF and PACF plots for the squared mean corrected returns indicate significant autocorrelation. As well as the Ljung-Box tests which rejects the null of no autocorrelation in the squared mean corrected (log) returns, which indicates that there are ARCH effects present. But we can also note that now with higher aggregation, there is much less persistance in the ACF/PACF of the squared mean corrected returns, which suggests now that there is less ARCH effects for this higher aggregation, than before, which there was very very much persistance in the ACF/PACF plots. Now we again consider a $GARCH(1,1)$, but the PACF plot suggests maybe an $ARCH(3)$ would be okay also, but still we do $GARCH(1,1)$.
+
+To fit a (gaussian by default) $GARCH(1,1)$ with a constant conditional mean function we simply do
 
 ```{r}
 m11 <- garchFit(r ~ garch(1, 1), data = r, trace = F)
 ```
 
+Now we test whether the model is able to capture the dynamical properties of the data and determine the optimal lag order.
+
+First we plot the original returns, the standardized residuals, as well as the estimated conditional standard deviation.
+
 ```{r}
+par(mfrow=c(1,3))
 plot(m11, which = 1) #original returns
 plot(m11, which = 9) #the standardized residuals
 plot(m11, which = 2) #estimated conditional standard deviation
+par(mfrow=c(1,1))
+```
+It is hard to tell if the standardized residuals are white noise. More analysis is needed. So we evaluate the autocorrelation functions of the standardized residuals and squared standardized residuals.
 
+```{r}
 z_hat = residuals(m11, standardize = TRUE)
+par(mfrow=c(2,2))
 Acf(z_hat, lag.max=12)
+Pacf(z_hat, lag.max=12)
 Acf(z_hat^2, lag.max=12)
+Pacf(z_hat^2, lag.max=12)
+par(mfrow=c(1,1))
+```
+The ACF/PACF plots suggests there is no autocorrelation in the standardized or in the squared standardized residuals. Now we compute Portmanteau statistics based on the standardized residuals.
+
+```{r}
 Box.test(z_hat, lag = 12, type = "Ljung-Box")
 Box.test(z_hat^2, lag = 12, type = "Ljung-Box")
 ```
+
+We do not reject the null that there is no autocorrelation in the standardized residuals, and we also do not reject the null of no autocorrelation in the squared standardized residuals. So we do have evidence that the model is able to capture the dynamical properties of the data. Now to determine optimal lag order. Lets not check so many different models this time. So we test for GARCH effects of higher orders
+
+```{r}
+m12 <- garchFit(r ~ garch(1, 2), data = r, trace = F)
+m13 <- garchFit(r ~ garch(2, 1), data = r, trace = F)
+m14 <- garchFit(r ~ garch(2, 2), data = r, trace = F)
+```
+
+\begin{table}[h]
+\begin{tabular}{|ccc|}
+\multicolumn{3}{|c|}{LM Arch Test for standardized residuals}             \\ \hline
+\multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{Statistic} & p-Value    \\ \hline
+\multicolumn{1}{|c|}{m11}    & \multicolumn{1}{c|}{5.3125715}  & 0.9467159 \\
+\multicolumn{1}{|c|}{m12}    & \multicolumn{1}{c|}{5.3197430}  & 0.946438 \\
+\multicolumn{1}{|c|}{m13}    & \multicolumn{1}{c|}{5.6930511}  & 0.9307579 \\
+\multicolumn{1}{|c|}{m14}    & \multicolumn{1}{c|}{5.6930058}  & 0.9307599
+\end{tabular}
+\end{table}
+
+The p-values are all very high, so we do not reject the null of no GARCH effects for all models. This suggests that the $GARCH(1,1)$ is a good enough lag order. Let us look at the AIC/BIC values
+
+\begin{table}[h]
+\begin{tabular}{|ccc|}
+\multicolumn{3}{|c|}{Information Criterion Statistics}                   \\ \hline
+\multicolumn{1}{|c|}{model} & \multicolumn{1}{c|}{AIC}       & BIC       \\ \hline
+\multicolumn{1}{|c|}{m11}    & \multicolumn{1}{c|}{-3.602803} & -3.580242 \\
+\multicolumn{1}{|c|}{m12}    & \multicolumn{1}{c|}{-3.600297} & -3.572096 \\
+\multicolumn{1}{|c|}{m13}    & \multicolumn{1}{c|}{-3.602829} & -3.574628 \\
+\multicolumn{1}{|c|}{m14}    & \multicolumn{1}{c|}{-3.600446} & -3.566604 \\
+\end{tabular}
+\end{table}
+
+For the AIC, it suggests that $GARCH(2,1)$ is slightly slightly better, with $GARCH(1,1)$ at the second place. Although BIC suggests $GARCH(1,1)$ is the best model. This suggests that the 1,1 order for the $GARCH(1,1)$ is good enough, and if BIC decides it is actually the optimal lag order.
+
+Now we compute the standardized residuals and test the series against normality using appropriate goodness-of-fit tests as well as QQ-plots.
+
+```{r}
+z_hat = residuals(m11, standardize=TRUE)
+
+vdata = z_hat
+ik = 20
+grids = 1:ik/ik
+
+vq = pnorm(vdata)
+hist(vq)
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+
+The Chi square goodness of fit test clearly rejects the null that the standardized residuals $\hat{z}_t \sim N(0,1)$. Also we can see from the histogram that it does not look like a uniform distribution, which it should look like if the null is true.
+
+```{r}
+qqnorm(z_hat)
+qqline(z_hat, col="red")
+```
+
+The qqplot also confirms that the standardized residuals are not normally distributed.
+
+Now we reestimate the model based on a t-distribution and re-evaluate the distributional properties of the resulting standardized residuals.
+
+```{r}
+m11_tdist <- garchFit(r ~ garch(1, 1), data = r, cond.dist = "std", trace = F)
+```
+If we look at the summary now, the estimated shape parameter, i.e. the estimated degrees of freedom is 7.8. So we try the standardized residuals against a t distribution with 8 degrees of freedom.
+
+```{r}
+z_hat_t = residuals(m11_tdist,standardize=TRUE)
+
+vdata = z_hat_t
+ik = 20
+grids = 1:ik/ik
+
+df = 8
+ndata = vdata*sqrt(df/(df-2))
+vq = pt(ndata,df=8); hist(vq)
+vn = NULL; for(val in grids) vn = c(vn,sum(vq <= val))
+vn = c(vn[1],diff(vn))
+test = sum((vn-length(vdata)/ik)**2/(length(vdata)/ik))
+cat("test =",test," df =",ik-3," p-value =",1-pchisq(test,df=ik-3))
+```
+Still quite a high test statistic of 39, but again smaller than for the normal distribution where the test statistic was 55. So we can not accept the null this time either, but we can conclude that the test statistic suggests that the t distribution has a better goodness of fit than the normal distribution. Also the histogram looks much more like the uniform distribution this time. Lets look at the qqplot.
+
+```{r}
+dataframe = data.frame(z_hat_t)
+
+df = 8
+tmp = ggplot(dataframe, aes(sample=z_hat_t*sqrt(df/(df-2))))
+tmp + geom_qq(distribution=stats::qt, dparams=list(df=df)) + geom_abline(aes(intercept=0,slope=1),color="red")
+```
+Actually the qq-plot does not look substantially better than the normal qq-plot this time. But we conclude with that the goodness of fit test suggests that the t-distribution to be more appropriate.
 
 # B. Estimating Value-at-Risk
 
@@ -362,7 +481,7 @@ V <- 1
 res <- VaR_normal(mean(r_d),var(r_d),p,h,V)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -379,7 +498,7 @@ kable(
 )
 ```
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), # Select columns for Horizon values
@@ -414,7 +533,7 @@ V <- 1
 res <- VaR_normal(mean(r_w),var(r_w),p,h,V)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -432,7 +551,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), # Select columns for Horizon values
@@ -484,7 +603,7 @@ nu <- 5
 res <- VaR_t(mean(r_d),var(r_d),p,h,V, nu)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -501,7 +620,7 @@ kable(
 )
 ```
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -539,7 +658,7 @@ nu <- 5
 res <- VaR_t(mean(r_w),var(r_w),p,h,V, nu)
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -557,7 +676,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -584,8 +703,8 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 ## $\bullet$ a Gaussian GARCH(1,1) with constant conditional mean function,
 
 ```{r}
-m12 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
-m13 <- garchFit(r_w ~ garch(1, 1), cond.dist ="norm", data = r_w, trace = F)
+m15 <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
+m16 <- garchFit(r_w ~ garch(1, 1), cond.dist ="norm", data = r_w, trace = F)
 ```
 
 First for daily data and horizons 1,10,30
@@ -609,10 +728,10 @@ VaR_ARMA_GARCH <- function(model,p,h,V){
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 h <- c(1,10,30)
-res <- VaR_ARMA_GARCH(m12,p,h,V) #daily
+res <- VaR_ARMA_GARCH(m15,p,h,V) #daily
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -630,7 +749,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -658,10 +777,10 @@ And for weekly with horizons 1,4,8.
 
 ```{r}
 h <- c(1,4,8)
-res <- VaR_ARMA_GARCH(m13,p,h,V) #weekly
+res <- VaR_ARMA_GARCH(m16,p,h,V) #weekly
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -679,7 +798,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -706,17 +825,17 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
 
 ```{r}
-m14 <- garchFit(r_d ~ garch(1, 1), cond.dist ="std", data = r_d, trace = F)
-m15 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
+m17 <- garchFit(r_d ~ garch(1, 1), cond.dist ="std", data = r_d, trace = F)
+m18 <- garchFit(r_w ~ garch(1, 1), cond.dist ="std", data = r_w, trace = F)
 
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 V <- 1
 h <- c(1,10,30)
-res <- VaR_ARMA_GARCH(m14,p,h,V) #daily
+res <- VaR_ARMA_GARCH(m17,p,h,V) #daily
 ```
 
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -733,7 +852,7 @@ kable(
 )
 ```
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
@@ -759,10 +878,10 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 
 ```{r}
 h <- c(1,4,8)
-res <- VaR_ARMA_GARCH(m15,p,h,V) #weekly
+res <- VaR_ARMA_GARCH(m18,p,h,V) #weekly
 ```
 
-```{r}
+```{r, echo=F}
 VaR_df <- data.frame(
   Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
   Horizon_1 = sapply(res, function(x) x[1]),
@@ -780,7 +899,7 @@ kable(
 ```
 
 
-```{r}
+```{r, echo=F}
 df_long <- VaR_df %>%
   pivot_longer(
     cols = starts_with("Horizon"), 
