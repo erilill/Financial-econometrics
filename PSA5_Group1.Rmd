@@ -273,17 +273,21 @@ library(bbdetection)
 data <- sp500m
 P <- as.vector(data$SP500) # monthly closing prices
 r <- diff(log(P))
+par(mfrow=c(1,2))
 ts.plot(r)
 ts.plot(r^2)
+par(mfrow=c(1,1))
 ```
 
 First we analyze the dynamical properties of the log returns and squared log returns.
 
 ```{r}
+par(mfrow=c(2,2))
 Acf(r, lag.max=12)
 Pacf(r, lag.max=12)
 Acf(r^2, lag.max=12)
 Pacf(r^2, lag.max=12)
+par(mfrow=c(1,1))
 ```
 We can see that there is not much persistence in the log returns, but there is persistence in the squared log returns. To specify the mean equation we use auto.arima again
 
@@ -305,6 +309,7 @@ epsilon <- r-mean(r)
 This means that we have a constant conditional mean function. Now we look at the ACF plots and do box tests for the mean corrected returns and squared mean corrected returns
 
 ```{r}
+par(mfrow=c(1,2))
 Acf(epsilon, lag.max=12)
 Pacf(epsilon, lag.max=12)
 Box.test(epsilon, lag = 12, type = "Ljung-Box")
@@ -312,8 +317,9 @@ Box.test(epsilon, lag = 12, type = "Ljung-Box")
 Acf(epsilon^2, lag.max=12)
 Pacf(epsilon^2, lag.max=12)
 Box.test(epsilon^2, lag = 12, type = "Ljung-Box")
+par(mfrow=c(1,1))
 ```
-We can see that the ACF/PACF plots suggest litte to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns.
+We can see that the ACF/PACF plots suggest little to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns.
 
 However the ACF and PACF plots for the squared mean corrected returns indicate significant autocorrelation. As well as the Ljung-Box tests which rejects the null of no autocorrelation in the squared mean corrected (log) returns, which indicates that there are ARCH effects present. But we can also note that now with higher aggregation, there is much less persistance in the ACF/PACF of the squared mean corrected returns, which suggests now that there is less ARCH effects for this higher aggregation, than before, which there was very very much persistance in the ACF/PACF plots. Now we again consider a $GARCH(1,1)$, but the PACF plot suggests maybe an $ARCH(3)$ would be okay also, but still we do $GARCH(1,1)$.
 
@@ -328,18 +334,22 @@ Now we test whether the model is able to capture the dynamical properties of the
 First we plot the original returns, the standardized residuals, as well as the estimated conditional standard deviation.
 
 ```{r}
+par(mfrow=c(1,3))
 plot(m11, which = 1) #original returns
 plot(m11, which = 9) #the standardized residuals
 plot(m11, which = 2) #estimated conditional standard deviation
+par(mfrow=c(1,1))
 ```
-It is hard to tell if the standardized residuals are white noise. More analysis is needed. So we evaluate the autocorrelation functions of the standardized reisudals and squared standardized residuals.
+It is hard to tell if the standardized residuals are white noise. More analysis is needed. So we evaluate the autocorrelation functions of the standardized residuals and squared standardized residuals.
 
 ```{r}
 z_hat = residuals(m11, standardize = TRUE)
+par(mfrow=c(2,2))
 Acf(z_hat, lag.max=12)
 Pacf(z_hat, lag.max=12)
 Acf(z_hat^2, lag.max=12)
 Pacf(z_hat^2, lag.max=12)
+par(mfrow=c(1,1))
 ```
 The ACF/PACF plots suggests there is no autocorrelation in the standardized or in the squared standardized residuals. Now we compute Portmanteau statistics based on the standardized residuals.
 
