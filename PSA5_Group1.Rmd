@@ -98,6 +98,7 @@ plot(m2, which = 1) #original returns
 plot(m2, which = 9) #the standardized residuals
 plot(m2, which = 2) #estimated conditional standard deviation
 ```
+The standardized residuals look like white noise, which suggests a good model fit.
 
 ### $\bullet$ evaluating the autocorrelation functions of of the standardized residuals and squared standardized residuals,
 
@@ -268,6 +269,8 @@ ts.plot(r)
 ts.plot(r^2)
 ```
 
+First we analyze the dynamical properties of the log returns and squared log returns.
+
 ```{r}
 Acf(r, lag.max=12)
 Pacf(r, lag.max=12)
@@ -302,23 +305,37 @@ Acf(epsilon^2, lag.max=12)
 Pacf(epsilon^2, lag.max=12)
 Box.test(epsilon^2, lag = 12, type = "Ljung-Box")
 ```
-We can see that the ACF/PACF plots suggest litte to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns. However the ACF and PACF plots for the squared mean corrected returns indicate significant autocorrelation. As well as the Ljung-Box tests which rejects the null of no autocorrelation in the squared mean corrected (log) returns, which indicates that there are ARCH effects present. Now we again consider a $GARCH(1,1)$. To fit a (gaussian by default) $GARCH(1,1)$ with a conditional mean function we simply do
+We can see that the ACF/PACF plots suggest litte to no autocorrelation in the mean-corrected returns. The Ljung-Box test furthermore does not reject the null of no autocorrelation in the mean-corrected returns. However the ACF and PACF plots for the squared mean corrected returns indicate significant autocorrelation. As well as the Ljung-Box tests which rejects the null of no autocorrelation in the squared mean corrected (log) returns, which indicates that there are ARCH effects present. Now we again consider a $GARCH(1,1)$, but the PACF plot suggests maybe an $ARCH(3)$ would be okay also, but still we do $GARCH(1,1)$. To fit a (gaussian by default) $GARCH(1,1)$ with a constant conditional mean function we simply do
 
 ```{r}
 m11 <- garchFit(r ~ garch(1, 1), data = r, trace = F)
 ```
 
+Now we test whether the model is able to capture the dynamical properties of the data and determine the optimal lag order.
+
+First we plot the original returns, the standardized residuals, as well as the estimated conditional standard deviation.
+
 ```{r}
 plot(m11, which = 1) #original returns
 plot(m11, which = 9) #the standardized residuals
 plot(m11, which = 2) #estimated conditional standard deviation
+```
+It is hard to tell if the standardized residuals are white noise. More analysis is needed. So we evaluate the autocorrelation functions of the standardized reisudals and squared standardized residuals.
 
+```{r}
 z_hat = residuals(m11, standardize = TRUE)
 Acf(z_hat, lag.max=12)
+Pacf(z_hat, lag.max=12)
 Acf(z_hat^2, lag.max=12)
+Pacf(z_hat^2, lag.max=12)
+```
+The ACF/PACF plots suggests there is no autocorrelation in the standardized or in the squared standardized residuals. We check this with Ljung-Box tests
+
+```{r}
 Box.test(z_hat, lag = 12, type = "Ljung-Box")
 Box.test(z_hat^2, lag = 12, type = "Ljung-Box")
 ```
+We do not reject the null that there is no autocorrelation in the standardized residuals, and we also do not reject the null of no autocorrelation in the squared standardized residuals.
 
 # B. Estimating Value-at-Risk
 
