@@ -340,15 +340,34 @@ VaR_normal(mu=0.001,sigma2=0.016^2,p=0.01,h=c(1,10,30),V=10)
 ```
 For the daily data and horizons 1, 10 and 30, V=1 and using the mentioned probabilities.
 
+For longer horizons lead to larger VaR as expectation and uncertainty increases with time. A higher variance increases the dispersion of potential returns and thus increasing VaR. 
+
 ```{r}
 ## daily
 p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 h <- c(1,10,30)
 V <- 1
 
-VaR_normal(mean(r_d),var(r_d),p,h,V)
+res <- VaR_normal(mean(r_d),var(r_d),p,h,V)
 ```
 
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3])
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)"),
+  caption = "Value-at-Risk Estimates from unconditional normal DJ Daily",
+  digits = 3
+)
+```
+
+Tabell H V r
 For the weekly data and horizons 1, 4 and 8, V=1 and using the mentioned probabilities.
 
 ```{r}
@@ -357,8 +376,26 @@ p <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 h <- c(1,4,8)
 V <- 1
 
-VaR_normal(mean(r_w),var(r_w),p,h,V)
+res <- VaR_normal(mean(r_w),var(r_w),p,h,V)
 ```
+
+```{r}
+VaR_df <- data.frame(
+  Probability = c(0.1, 0.05, 0.01, 0.005, 0.001),
+  Horizon_1 = sapply(res, function(x) x[1]),
+  Horizon_10 = sapply(res, function(x) x[2]),
+  Horizon_30 = sapply(res, function(x) x[3])
+)
+
+kable(
+  VaR_df,
+  col.names = c("Probability", "Horizon (h=1)", "Horizon (h=10)", "Horizon (h=30)"),
+  caption = "Value-at-Risk Estimates from unconditional normal on DJ Weekly",
+  digits = 3
+)
+```
+
+
 ## $\bullet$ the unconditional moments of a t-distribution
 
 
