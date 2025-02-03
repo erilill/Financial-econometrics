@@ -751,27 +751,18 @@ kable(
 
 
 ```{r, echo=F}
-df_long <- VaR_df %>%
-  pivot_longer(
-    cols = starts_with("Horizon"), 
-    names_to = "Horizon",         
-    values_to = "VaR"             
-  )
+probs <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 
-ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
-  geom_line(size = 1) +
-  geom_point(size = 2) + 
-  labs(
-    title = "Value-at-Risk for Different Horizons and Probabilities DJ Daily",
-    subtitle = "Gaussian GARCH(1,1) with constant conditional mean",
-    x = "Horizon",
-    y = "VaR",
-    color = "Probability"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom"
-  )
+tmp <- matrix(NA, length(r_d), length(probs))
+colnames(tmp) <- probs
+
+for (i in 1:length(probs)){
+  tmp[,i] <-VaR(m15, p_loss=probs[i])
+}
+
+
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
 And for weekly with horizons 1,4,8.
@@ -800,27 +791,18 @@ kable(
 
 
 ```{r, echo=F}
-df_long <- VaR_df %>%
-  pivot_longer(
-    cols = starts_with("Horizon"), 
-    names_to = "Horizon",         
-    values_to = "VaR"             
-  )
+probs <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 
-ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
-  geom_line(size = 1) +
-  geom_point(size = 2) + 
-  labs(
-    title = "Value-at-Risk for Different Horizons and Probabilities DJ Weekly",
-    subtitle = "Gaussian GARCH(1,1) with constant conditional mean",
-    x = "Horizon",
-    y = "VaR",
-    color = "Probability"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom"
-  )
+tmp <- matrix(NA, length(r_w), length(probs))
+colnames(tmp) <- probs
+
+for (i in 1:length(probs)){
+  tmp[,i] <-VaR(m16, p_loss=probs[i])
+}
+
+
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
 ## $\bullet$ a GARCH(1,1) model based on the t-distribution with constant conditional mean function.
@@ -854,27 +836,18 @@ kable(
 ```
 
 ```{r, echo=F}
-df_long <- VaR_df %>%
-  pivot_longer(
-    cols = starts_with("Horizon"), 
-    names_to = "Horizon",         
-    values_to = "VaR"             
-  )
+probs <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 
-ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
-  geom_line(size = 1) +
-  geom_point(size = 2) + 
-  labs(
-    title = "Value-at-Risk for Different Horizons and Probabilities DJ Daily",
-    subtitle = "GARCH(1,1) model based on the t-distribution with constant conditional mean function",
-    x = "Horizon",
-    y = "VaR",
-    color = "Probability"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom"
-  )
+tmp <- matrix(NA, length(r_d), length(probs))
+colnames(tmp) <- probs
+
+for (i in 1:length(probs)){
+  tmp[,i] <-VaR(m17, p_loss=probs[i])
+}
+
+
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
 ```{r}
@@ -901,52 +874,20 @@ kable(
 
 
 ```{r, echo=F}
-df_long <- VaR_df %>%
-  pivot_longer(
-    cols = starts_with("Horizon"), 
-    names_to = "Horizon",         
-    values_to = "VaR"             
-  )
-
-ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor(Probability))) +
-  geom_line(size = 1) +
-  geom_point(size = 2) + 
-  labs(
-    title = "Value-at-Risk for Different Horizons and Probabilities DJ Weekly",
-    subtitle = "GARCH(1,1) model based on the t-distribution with constant conditional mean function",
-    x = "Horizon",
-    y = "VaR",
-    color = "Probability"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom"
-  )
-```
-
-```{r, echo=F}
-test <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
-
 probs <- c(0.1, 0.05, 0.01, 0.005, 0.001)
 
-tmp <- matrix(NA, length(r_d), length(probs))
+tmp <- matrix(NA, length(r_w), length(probs))
 colnames(tmp) <- probs
 
 for (i in 1:length(probs)){
-  tmp[,i] <-VaR(test, p_loss=probs[i])
+  tmp[,i] <-VaR(m18, p_loss=probs[i])
 }
 
 
 matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
-
 ```
 
-First for daily data and horizons 1,10,30
-
-```{r}
-pred <- fGarch::predict(model,n.ahead=tail(h,1))[h,]
-```
 
 Comparing daily normal with daily t 
 Comparing daily normal with daily t-distribution we would expect more conservative estimates(i.e. more negative estimated values) and we also observe that the t-distribution produces more conservative estimates. All of the curves are steeper. 
