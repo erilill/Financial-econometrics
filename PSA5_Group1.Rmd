@@ -846,7 +846,7 @@ for (i in 1:length(probs)){
 }
 
 
-matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (daily)")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
@@ -884,50 +884,13 @@ for (i in 1:length(probs)){
 }
 
 
-matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (weekly)")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
 
-Comparing daily normal with daily t 
-Comparing daily normal with daily t-distribution we would expect more conservative estimates(i.e. more negative estimated values) and we also observe that the t-distribution produces more conservative estimates. All of the curves are steeper. 
+Comparing daily normal with daily t-distribution we would expect more conservative estimates (i.e. more negative estimated values) and we also observe that the t-distribution produces more conservative estimates. All of the curves are steeper. We also observe more conservative estimates for a t-distribution when looking at the weekly data. This finding would indicate that the data exhibits some heavy-tails. We see clearly from the plots and the tables that the VaR increases as the horizon increases and the tail probability decreases, this is in accordance with our expectations.
 
-Comparing weekly normal with weekly t-distribution
-Once again we observe more conservative estimates for a t-distribution. This finding in addition to the previous one would indicate that the data exhibits some heavy-tails. 
+Looking at the results for the two GARCH models, we see from the tables that the results are very similar. From theory we would expect the t-GARCH to produce more conservative estimates. We see this in the results when comparing the tables for the two GARCH models, the t-GARCH produces larger VaR estimates compared to the Gaussian GARCH, at least in the weekly data. Looking at the plots we see that the estimated VaR values depends on the tail probabilities. The peaks are much larger for the curves representing the lower tail probabilities compared to thos representing the larger tail probabilities. This is expected as the VaR estimates represent the threshold loss level given a certain confidence, and with more extreme tail probabilities we expect to see more extreme VaR values. Comparing the unconditional moments-methods to the GARCH-methods we see from the tables that the unconditional moments-methods yields more conservative estimates (larger negative values). 
 
-Comparing daily normal with weekly normal 
-When comparing the daily and weekly data using the same model we would expect weekly data to be more conservative. This would be according to theory that weekly data compounds risk over larger horizons. Not even that, the slopes are steeper in weekly data. 
-
-Comparing daily t with weekly t 
-Also when comparing the different data for t-distribution we observe once again that weekly data exhibits more conservative estimates. 
-
-Comparing daily Gaussian GARCH with daily t-GARCH
-These plots would be almost identical. Here we would expect to have once again more conservative estimates for t-GARCH, however, the empirical findings in this case doesn't support this theory particularly strong. 
-
-Comparing weekly Gaussian GARCH with weekly t-GARCH 
-Once again the expectation is to have more conservative estimates for t-GARCH even for weekly data, however, we cannot find support for this theory as the Gaussian GARCH seems to produce the most conservative output. 
-
-Comparing daily Gaussian GARCH with weekly Gaussian GARCH
-We expected weekly Gaussian GARCH to provide more negatives estimates as the risk is compounded over longer periods. This is found when comparing the two different plots. IN addition, we also observe that daily data seems to diverge more than weekly for longer horizons. 
-
-Comparing daily t-GARCH with weekly t-GARCH
-These findings are very close to the previous ones for daily Gaussian GARCH and weekly Gaussian GARCH. Weekly t-GARCH seem to have more conservative estimates but daily data seems to diverge more than weekly in longer horizons. 
-
-Comparing daily normal with daily Gaussian GARCH
-In this comparison we would expect that Gaussian GARCH produces more conservative values, however, they do not. The estimates from Gaussian GARCH are significantly less negative than from the model with the unconditional mean. 
-
-Comparing daily t with daily t-GARCH
-Once again we observe that the daily t produces much more conservative estimates than the t-GARCH. 
-
-Comparing weekly normal with weekly Gaussian GARCH
-Once again we observe that the weekly normal produces more conservative estimates than the Gaussian GARCH. 
-
-Comparing weekly t with weekly t-GARCH
-Lastly, we observe the same finding that the t-GARCH produces less conservatives estimates compared to the unconditional model. 
-
-In conclusion we find three findings in this task: 
-t-based models produce in general more conservative estimates, capturing better the presence of heavy tails in the returns. 
-GARCH models seem to yield less conservative estimates compared to unconditional mean-based models. 
-Lastly we observed that weekly data exhibits more conservative estimates than daily data.
-
-
+The overall conclusion is that methods using the student's t-distribution yields more conservative estimates, and that the methods based on the unconditional moments yields more conservative estimates compared to the GARCH methods.
