@@ -761,7 +761,7 @@ for (i in 1:length(probs)){
 }
 
 
-matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (daily), normal")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
@@ -801,7 +801,7 @@ for (i in 1:length(probs)){
 }
 
 
-matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (weekly), normal")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
@@ -846,7 +846,7 @@ for (i in 1:length(probs)){
 }
 
 
-matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (daily)")
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (daily), t-dist")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
@@ -884,7 +884,7 @@ for (i in 1:length(probs)){
 }
 
 
-matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (weekly)")
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time (weekly), t-dist")
 legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
 ```
 
