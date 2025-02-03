@@ -926,7 +926,20 @@ ggplot(df_long, aes(x = Horizon, y = VaR, group = Probability, color = as.factor
 
 ```{r, echo=F}
 test <- garchFit(r_d ~ garch(1, 1), cond.dist ="norm", data = r_d, trace = F)
-plot(test, which = 14) # VaR
+
+probs <- c(0.1, 0.05, 0.01, 0.005, 0.001)
+
+tmp <- matrix(NA, length(r_d), length(probs))
+colnames(tmp) <- probs
+
+for (i in 1:length(probs)){
+  tmp[,i] <-VaR(test, p_loss=probs[i])
+}
+
+
+matplot(tmp, type = "l", lty = 1, col = 1:ncol(tmp), xlab = "Time", ylab = "VaR", main = "VaR over time")
+legend("topright", legend = colnames(tmp), col = 1:ncol(tmp), lty = 1, title = "Tail probabilities")
+
 ```
 
 First for daily data and horizons 1,10,30
